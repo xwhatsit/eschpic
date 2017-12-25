@@ -1,52 +1,9 @@
 # Use millimetres instead of inches
 scale = 25.4
 
+include(util.m4)
 
 divert(-1)
-
-`
-Removes surrounding double-quotes from a string
-
-Usage: dequote(str)
-Params:
-        str:    string to remove double quotes from
-'
-define(`dequote', `patsubst(patsubst(`$1', `^"'), `"$')')
-
-`
-For loop; from m4 example documentation.
-
-Usage: forloop(counter, from, to, text)
-Params:
-        counter:        Count variable which is incremented
-        from:           Starting value to count from
-        to:             Ending value to count to (inclusive)
-        text:           "Code" to run within loop
-'
-define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
-        `pushdef(`$1')_$0(`$1', eval(`$2'),
-                eval(`$3'), `$4')popdef(`$1')')')
-define(`_forloop',
-        `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
-                `$0(`$1', incr(`$2'), `$3', `$4')')')
-
-`
-Expands to argument n out of remaining arguments; from m4 example documentation.
-
-Usage: argn(argumentNumber, args)
-Params:
-        argumentNumber: Number specifying which argument
-        args:           Argument list to extract from; usually $@
-'
-define(`argn', `ifelse(`$1', 1, ``$2'',
-  `argn(decr(`$1'), shift(shift($@)))')')
-
-define(`a3test', `
-        forloop(`argnum', `1', `$#', `
-                ifelse(index(argn(argnum, $@), `width='), 0, `has width', `not width')
-                ')
-')
-
 
 `
 Gives a letter used for vertical-tic marks used on a3TitleBlock() below.
