@@ -131,9 +131,8 @@ Params:
 	arg{n}: Key-value arguments
 '
 define(`prefixKVArgs', `
-	foreach(`kvArg', (shift($@)),
-		`define(`$1'getKVKey(kvArg), getKVVal(kvArg))'
-		`prefix is $1, curr key is getKVKey(kvArg), curr val is getKVVal(kvArg)')')
+	foreach(`kvArg', (shift($@)), `ifelse(getKVKey(kvArg), `', ,
+		`define($1`'getKVKey(kvArg), getKVVal(kvArg))')')')
 
 
 divert(0)
