@@ -9,7 +9,7 @@ all : doc.pdf ;@echo "$@ done"
 doc.pdf: doc.tex test.tex
 	texfot --tee=/dev/null pdflatex doc.tex
 
-test.tex: test.pic
+test.tex: test.pic eschpic.m4 util.m4
 	m4 $< | dpic -g > $@
 
 %.pic: %.m4
