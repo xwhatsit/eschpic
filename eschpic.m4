@@ -23,7 +23,7 @@ A3 title block (landscape). South-west corner of inside (drawable area) will be 
 
 Usage: a3TitleBlock(sheetNum, title, ref, rev, [date = `\today', numHTics = 8, numVTics = 6, outerMargin = 10, innerMargin = 10])
 Params:
-        sheetNum:       Number for "Sheet:" box in titleblock. Font size is Latex \Huge.
+        sheet:		Number for "Sheet:" box in titleblock. Font size is Latex \Huge.
         title:          String for "Title:" box in titleblock. Font size is Latex \Huge.
         ref:            String for "Ref:" box in titleblock. Font size is Latex default.
         rev:            String for "Rev:" box in titleblock. Font size is Latex default.
@@ -50,16 +50,29 @@ Defines the following macros:
         a3NumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
 '
 define(`a3TitleBlock', `
+	# set default args
+	define(`_a3_sheet', `')
+	define(`_a3_title', `')
+	define(`_a3_ref', `')
+	define(`_a3_rev', `')
+	define(`_a3_date', `\today')
+	define(`_a3_numHTics', 8)
+	define(`_a3_numVTics', 6)
+	define(`_a3_outerMargin', 10)
+	define(`_a3_innerMargin', 10)
+
+	prefixKVArgs(`_a3_', $@)
+
         define(`a3OW', `420')
         define(`a3OH', `297')
-        define(`a3OuterMargin', `ifelse(`$8', , `10', `$8')')
-        define(`a3InnerMargin', `ifelse(`$9', , `10', `$9')')
+        define(`a3OuterMargin', _a3_outerMargin)
+        define(`a3InnerMargin', _a3_innerMargin)
         define(`a3W', `eval(a3OW - (a3OuterMargin * 2))')
         define(`a3H', `eval(a3OH  - (a3OuterMargin * 2))')
         define(`a3IW', `eval(a3W - (2 * a3InnerMargin))')
         define(`a3IH', `eval(a3H - (2 * a3InnerMargin))')
-        define(`a3NumHTics', `ifelse(`$6', , `8', `$6')')
-        define(`a3NumVTics', `ifelse(`$7', , `6', `$7')')
+        define(`a3NumHTics', _a3_numHTics)
+        define(`a3NumVTics', _a3_numVTics)
 
         maxpswid = a3W / 25.4
         maxpsht  = a3H / 25.4
@@ -124,11 +137,11 @@ define(`a3TitleBlock', `
                 line from Date.ne to Date.nw to Date.sw;
                 `"\small \textit{Date:}"' ljust below at Date.nw;
 
-                `"\Huge 'dequote(`$2')`"' at Title;
-                `"'dequote(ifelse(`$5', , `\today', `$5'))`"' at Date;
-                `"'dequote(`$3')`"' at Ref;
-                `"'dequote(`$4')`"' at Rev;
-                `"\Huge 'dequote(`$1')`"' at SheetNum;
+                `"\Huge 'dequote(_a3_title)`"' at Title;
+                `"'dequote(_a3_date)`"' at Date;
+                `"'dequote(_a3_ref)`"' at Ref;
+                `"'dequote(_a3_rev)`"' at Rev;
+                `"\Huge 'dequote(_a3_sheet)`"' at SheetNum;
         ] with .Inside.sw at 0,0;
 ')
 
