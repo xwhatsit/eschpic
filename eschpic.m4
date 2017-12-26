@@ -19,6 +19,16 @@ define(`a3VPosLetter', `translit(`$1', `0-9', `A-J')')
 
 
 `
+Does the reverse of a3VPosLetter.
+
+Usage: a3VPosNumber(letter)
+Params:
+	letter:	Letter between A and J
+'
+define(`a3VPosNumber', `translit(`$1', `A-J', `0-9')')
+
+
+`
 A3 title block (landscape). South-west corner of inside (drawable area) will be aligned with (0, 0).
 
 Usage: a3TitleBlock(sheetNum, title, ref, rev, [date = `\today', numHTics = 8, numVTics = 6, outerMargin = 10, innerMargin = 10])
@@ -61,6 +71,7 @@ define(`a3TitleBlock', `
 	define(`_a3_outerMargin', 10)
 	define(`_a3_innerMargin', 10)
 
+	# parse key-value arguments
 	prefixKVArgs(`_a3_', $@)
 
         define(`a3OW', `420')
@@ -145,6 +156,7 @@ define(`a3TitleBlock', `
         ] with .Inside.sw at 0,0;
 ')
 
+
 `
 Gives tic-number of horizontal position in millimetres. Only works if using A3 title block.
 
@@ -153,5 +165,37 @@ Params:
         hpos:   horizontal position in millimetres
 '
 define(`a3HPosOf', `floor($1 / (a3IW / a3NumHTics)) + 1')
+
+
+`
+Converts horizontal tic number to millimetres.
+
+Usage: a3HPos(htic)
+Params:
+	htic:	Tic-number (1 through a3NumHTics)
+'
+define(`a3HPos', `($1 * (a3IW / a3NumHTics) - ((a3IW / a3NumHTics) / 2))')
+
+
+`
+Converts vertical tic letter to millimetres.
+
+Usage: a3VPos(vtic)
+Params:
+	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
+'
+define(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
+
+
+`
+Converts htic/vtic letter/number pair to coordinates in millimetres.
+
+Usage: a3Pos(htic, vtic)
+Params:
+	htic:	Tic number (1 through a3NumHTics)
+	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
+Example: a3Pos(4, E)
+'
+define(`a3Pos', `(a3HPos($1), a3VPos($2))')
 
 divert(0)
