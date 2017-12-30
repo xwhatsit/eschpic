@@ -1,6 +1,6 @@
-divert(-1)
+m4_divert(-1)
 
 # Set base unit used for components
 elen = 12.7
 
-divert(0)
+m4_divert(0)

@@ -1,10 +1,10 @@
 # Use millimetres instead of inches
 scale = 25.4
 
-include(util.m4)
-include(components.m4)
+m4_include(util.m4)
+m4_include(components.m4)
 
-divert(-1)
+m4_divert(-1)
 
 `
 Gives a letter used for vertical-tic marks used on a3TitleBlock() below.
@@ -16,7 +16,7 @@ Params:
 Notes:
         Numbers over 9 will produce strange double-letters, like "BA" for 10.
 '
-define(`a3VPosLetter', `translit(`$1', `0-9', `A-J')')
+m4_define(`a3VPosLetter', `m4_translit(`$1', `0-9', `A-J')')
 
 
 `
@@ -26,7 +26,7 @@ Usage: a3VPosNumber(letter)
 Params:
 	letter:	Letter between A and J
 '
-define(`a3VPosNumber', `translit(`$1', `A-J', `0-9')')
+m4_define(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
 
 
 `
@@ -60,31 +60,31 @@ Defines the following macros:
         a3NumHTics:     Gets set to whatever numHTics was in a3TitleBlock() call
         a3NumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
 '
-define(`a3TitleBlock', `
+m4_define(`a3TitleBlock', `
 	# set default args
-	define(`_a3_sheet', `')
-	define(`_a3_title', `')
-	define(`_a3_ref', `')
-	define(`_a3_rev', `')
-	define(`_a3_date', `\today')
-	define(`_a3_numHTics', 8)
-	define(`_a3_numVTics', 6)
-	define(`_a3_outerMargin', 10)
-	define(`_a3_innerMargin', 10)
+	m4_define(`_a3_sheet', `')
+	m4_define(`_a3_title', `')
+	m4_define(`_a3_ref', `')
+	m4_define(`_a3_rev', `')
+	m4_define(`_a3_date', `\today')
+	m4_define(`_a3_numHTics', 8)
+	m4_define(`_a3_numVTics', 6)
+	m4_define(`_a3_outerMargin', 10)
+	m4_define(`_a3_innerMargin', 10)
 
 	# parse key-value arguments
-	prefixKVArgs(`_a3_', $@)
+	m4_prefixKVArgs(`_a3_', $@)
 
-        define(`a3OW', `420')
-        define(`a3OH', `297')
-        define(`a3OuterMargin', _a3_outerMargin)
-        define(`a3InnerMargin', _a3_innerMargin)
-        define(`a3W', `eval(a3OW - (a3OuterMargin * 2))')
-        define(`a3H', `eval(a3OH  - (a3OuterMargin * 2))')
-        define(`a3IW', `eval(a3W - (2 * a3InnerMargin))')
-        define(`a3IH', `eval(a3H - (2 * a3InnerMargin))')
-        define(`a3NumHTics', _a3_numHTics)
-        define(`a3NumVTics', _a3_numVTics)
+        m4_define(`a3OW', `420')
+        m4_define(`a3OH', `297')
+        m4_define(`a3OuterMargin', _a3_outerMargin)
+        m4_define(`a3InnerMargin', _a3_innerMargin)
+        m4_define(`a3W', `m4_eval(a3OW - (a3OuterMargin * 2))')
+        m4_define(`a3H', `m4_eval(a3OH  - (a3OuterMargin * 2))')
+        m4_define(`a3IW', `m4_eval(a3W - (2 * a3InnerMargin))')
+        m4_define(`a3IH', `m4_eval(a3H - (2 * a3InnerMargin))')
+        m4_define(`a3NumHTics', _a3_numHTics)
+        m4_define(`a3NumVTics', _a3_numVTics)
 
         maxpswid = a3W / 25.4
         maxpsht  = a3H / 25.4
@@ -117,9 +117,9 @@ define(`a3TitleBlock', `
                 }
 
                 # vertical tick labels
-                forloop(`count', 0, eval(a3NumVTics - 1), `
-                     `"{\Large 'a3VPosLetter(count)`}"' at (Outside.l.x + labeloffs),((eval(a3NumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
-                     `"{\Large 'a3VPosLetter(count)`}"' at (Outside.r.x - labeloffs),((eval(a3NumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
+                m4_forloop(`count', 0, m4_eval(a3NumVTics - 1), `
+                     `"{\Large 'a3VPosLetter(count)`}"' at (Outside.l.x + labeloffs),((m4_eval(a3NumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
+                     `"{\Large 'a3VPosLetter(count)`}"' at (Outside.r.x - labeloffs),((m4_eval(a3NumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
                      ')
 
                 # title block
@@ -149,11 +149,11 @@ define(`a3TitleBlock', `
                 line from Date.ne to Date.nw to Date.sw;
                 `"\small \textit{Date:}"' ljust below at Date.nw;
 
-                `"\Huge 'dequote(_a3_title)`"' at Title;
-                `"'dequote(_a3_date)`"' at Date;
-                `"'dequote(_a3_ref)`"' at Ref;
-                `"'dequote(_a3_rev)`"' at Rev;
-                `"\Huge 'dequote(_a3_sheet)`"' at SheetNum;
+                `"\Huge 'm4_dequote(_a3_title)`"' at Title;
+                `"'m4_dequote(_a3_date)`"' at Date;
+                `"'m4_dequote(_a3_ref)`"' at Ref;
+                `"'m4_dequote(_a3_rev)`"' at Rev;
+                `"\Huge 'm4_dequote(_a3_sheet)`"' at SheetNum;
         ] with .Inside.sw at 0,0;
 ')
 
@@ -165,7 +165,7 @@ Usage: a3HPosOf(hpos)
 Params:
         hpos:   horizontal position in millimetres
 '
-define(`a3HPosOf', `floor($1 / (a3IW / a3NumHTics)) + 1')
+m4_define(`a3HPosOf', `floor($1 / (a3IW / a3NumHTics)) + 1')
 
 
 `
@@ -175,7 +175,7 @@ Usage: a3HPos(htic)
 Params:
 	htic:	Tic-number (1 through a3NumHTics)
 '
-define(`a3HPos', `($1 * (a3IW / a3NumHTics) - ((a3IW / a3NumHTics) / 2))')
+m4_define(`a3HPos', `($1 * (a3IW / a3NumHTics) - ((a3IW / a3NumHTics) / 2))')
 
 
 `
@@ -185,7 +185,7 @@ Usage: a3VPos(vtic)
 Params:
 	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
 '
-define(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
+m4_define(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
 
 
 `
@@ -197,6 +197,6 @@ Params:
 	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
 Example: a3Pos(4, E)
 '
-define(`a3Pos', `(a3HPos($1), a3VPos($2))')
+m4_define(`a3Pos', `(a3HPos($1), a3VPos($2))')
 
-divert(0)
+m4_divert(0)

@@ -7,7 +7,7 @@ ifndef V
 .SILENT:
 endif
 
-M4_OPTS=
+M4_OPTS=-P # prefix builtins with "m4_"
 
 M4_DEPS=components.m4 \
 	eschpic.m4    \

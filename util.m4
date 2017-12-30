@@ -1,71 +1,71 @@
-divert(-1)
+m4_divert(-1)
 
 `
 Removes surrounding double-quotes from a string
 
-Usage: dequote(str)
+Usage: m4_dequote(str)
 Params:
         str:    string to remove double quotes from
 '
-define(`dequote', `patsubst(patsubst(`$1', `^"'), `"$')')
+m4_define(`m4_dequote', `m4_patsubst(m4_patsubst(`$1', `^"'), `"$')')
 
 
 `
 Expands to argument n out of remaining arguments; from m4 example documentation.
 
-Usage: argn(argumentNumber, args)
+Usage: m4_argn(argumentNumber, args)
 Params:
         argumentNumber: Number specifying which argument
         args:           Argument list to extract from; usually $@
 '
-define(`argn', `ifelse(`$1', 1, ``$2'',
-  `argn(decr(`$1'), shift(shift($@)))')')
+m4_define(`m4_argn', `m4_ifelse(`$1', 1, ``$2'',
+  `m4_argn(m4_decr(`$1'), m4_shift(m4_shift($@)))')')
 
 
 `
 From m4 example documentation.
-quote(args) - convert args to single-quoted string
+m4_quote(args) - convert args to single-quoted string
 '
-define(`quote', `ifelse(`$#', `0', `', ``$*'')')
+m4_define(`m4_quote', `m4_ifelse(`$#', `0', `', ``$*'')')
 
 
 `
 From m4 example documentation.
-dquote(args) - convert args to quoted list of quoted strings
+m4_dquote(args) - convert args to quoted list of quoted strings
 '
-define(`dquote', ``$@'')
+m4_define(`m4_dquote', ``$@'')
 
 
 `
 From m4 example documentation.
-dquote_elt(args) - convert args to list of double-quoted strings
+m4_dquote_elt(args) - convert args to list of double-quoted strings
 '
-define(`dquote_elt', `ifelse(`$#', `0', `', `$#', `1', ```$1''',
-                             ```$1'',$0(shift($@))')')
+m4_define(`m4_dquote_elt', `m4_ifelse(`$#', `0', `', `$#', `1', ```$1''',
+                             ```$1'',$0(m4_shift($@))')')
 
 
 `
 For loop; from m4 example documentation.
 
-Usage: forloop(counter, from, to, text)
+Usage: m4_forloop(counter, from, to, text)
 Params:
         counter:        Count variable which is incremented
         from:           Starting value to count from
         to:             Ending value to count to (inclusive)
         text:           "Code" to run within loop
 '
-define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
-        `pushdef(`$1')_$0(`$1', eval(`$2'),
-                eval(`$3'), `$4')popdef(`$1')')')
-define(`_forloop',
-        `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
-                `$0(`$1', incr(`$2'), `$3', `$4')')')
+m4_define(`m4_forloop', `m4_ifelse(m4_eval(`($2) <= ($3)'), `1',
+        `m4_pushdef(`$1')_$0(`$1', m4_eval(`$2'),
+                m4_eval(`$3'), `$4')m4_popdef(`$1')')')
+m4_define(`_m4_forloop',
+        `m4_define(`$1', `$2')$4`'m4_ifelse(`$2', `$3', `',
+                `$0(`$1', m4_incr(`$2'), `$3', `$4')')')
 
 
 `
-Modification of forloop with "step" for iterator.
+Modification of m4_forloop with "step" for iterator.
 
-Usage: forloop(counter, from, to, step, text)
+Usage: m4_forloop(counter, from, to, step, text)
 Params:
         counter:        Count variable which is incremented
         from:           Starting value to count from
@@ -73,51 +73,51 @@ Params:
 	step:		Integer to increment by when counting
         text:           "Code" to run within loop
 '
-define(`forloopn', `ifelse(eval(`($2) <= ($3)'), `1',
-        `pushdef(`$1')_$0(`$1', eval(`$2'),
-                eval(`$3'), eval(`$4'), `$5')popdef(`$1')')')
-define(`_forloopn',
-        `define(`$1', `$2')$5`'ifelse(eval((`$2' + `$4') > `$3'), `1', `',
-                `$0(`$1', eval(`$2' + `$4'), `$3', `$4', `$5')')')
+m4_define(`m4_forloopn', `m4_ifelse(m4_eval(`($2) <= ($3)'), `1',
+        `m4_pushdef(`$1')_$0(`$1', m4_eval(`$2'),
+                m4_eval(`$3'), m4_eval(`$4'), `$5')m4_popdef(`$1')')')
+m4_define(`_m4_forloopn',
+        `m4_define(`$1', `$2')$5`'m4_ifelse(m4_eval((`$2' + `$4') > `$3'), `1', `',
+                `$0(`$1', m4_eval(`$2' + `$4'), `$3', `$4', `$5')')')
 
 
 `
 From m4 example documentation.
-foreach(x, (item_1, item_2, ..., item_n), stmt)
+m4_foreach(x, (item_1, item_2, ..., item_n), stmt)
 '
-define(`foreach', `pushdef(`$1')_$0(`$1',
-	(dquote(dquote_elt$2)), `$3')popdef(`$1')')
-define(`_arg1', `$1')
-define(`_foreach', `ifelse(`$2', `(`')', `',
-	`define(`$1', _arg1$2)$3`'$0(`$1', (dquote(shift$2)), `$3')')')
+m4_define(`m4_foreach', `m4_pushdef(`$1')_$0(`$1',
+	(m4_dquote(m4_dquote_elt$2)), `$3')m4_popdef(`$1')')
+m4_define(`_arg1', `$1')
+m4_define(`_m4_foreach', `m4_ifelse(`$2', `(`')', `',
+	`m4_define(`$1', _arg1$2)$3`'$0(`$1', (m4_dquote(m4_shift$2)), `$3')')')
 
 
 `
 Deletes leading and trailing whitespace
 
-Usage: trim(str)
+Usage: m4_trim(str)
 '
-define(`trim', `patsubst(patsubst(`$1', `^\s*'), `\s*$')')
+m4_define(`m4_trim', `m4_patsubst(m4_patsubst(`$1', `^\s*'), `\s*$')')
 
 
 `
 Returns "key" part of key-value pair (separated by equals sign)
 
-Usage: getKVKey(kvArg)
+Usage: m4_getKVKey(kvArg)
 Params:
 	kvArg:	key-value argument (e.g. "width=100")
 '
-define(`getKVKey', `trim(substr(`$1', 0, index(`$1', `=')))')
+m4_define(`m4_getKVKey', `m4_trim(m4_substr(`$1', 0, m4_index(`$1', `=')))')
 
 
 `
 Returns "value" part of key-value pair (separated by equals sign)
 
-Usage: getKVVal(kvArg)
+Usage: m4_getKVVal(kvArg)
 Params:
 	kvArg:	key-value argument (e.g. "width=100")
 '
-define(`getKVVal', `trim(substr(`$1', incr(index(`$1', `='))))')
+m4_define(`m4_getKVVal', `m4_trim(m4_substr(`$1', m4_incr(m4_index(`$1', `='))))')
 
 
 
@@ -125,14 +125,14 @@ define(`getKVVal', `trim(substr(`$1', incr(index(`$1', `='))))')
 Parses key-value args (e.g. "width=100"), extracting keys and values. Defines a macro for each key
 using the prefix, with the macro's definition being the value.
 
-Usage: prefixKVArgs(prefix, arg{n}, [arg{n+1} ...])
+Usage: m4_prefixKVArgs(prefix, arg{n}, [arg{n+1} ...])
 Params:
 	prefix:	String to prepend on the front of each macro name
 	arg{n}: Key-value arguments
 '
-define(`prefixKVArgs', `
-	foreach(`kvArg', (shift($@)), `ifelse(getKVKey(kvArg), `', ,
-		`define($1`'getKVKey(kvArg), getKVVal(kvArg))')')')
+m4_define(`m4_prefixKVArgs', `
+	m4_foreach(`m4_kvArg', (m4_shift($@)), `m4_ifelse(m4_getKVKey(m4_kvArg), `', ,
+		`m4_define($1`'m4_getKVKey(m4_kvArg), m4_getKVVal(m4_kvArg))')')')
 
 
-divert(0)
+m4_divert(0)
