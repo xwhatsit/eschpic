@@ -9,15 +9,6 @@ a3TitleBlock(
 	rev="0.1",
 );
 
-move to a3Pos(3, D);
-R1: line down (10 * 1.5) invis;
-{
-line up 5;
-box wid 2 ht 5;
-line up 5;
-}
-"\rotatebox[origin=cb]{90}{R1slongtext}" at R1.start ljust
-"R1e" at R1.end ljust
 
 move to a3Pos(4, D);
 R2: line down (12.7 * 1.5) invis;
@@ -28,6 +19,33 @@ line up 6.35;
 }
 "R2s" at R2.start ljust
 "R2e" at R2.end ljust
+
+move to a3Pos(5, C);
+line right elen;
+corner;
+down;
+
+R3: [
+	pushDir();
+
+	{
+		line dirToDirection(peekDir()) elen*1.5 invis;
+		Start: last line.start;
+		End:   last line.end;
+	}
+	line dirToDirection(peekDir()) elen/2;
+	box wid elen/5 ht elen/2
+	line dirToDirection(peekDir()) elen/2;
+
+	popDir();
+]
+"R3S" at R3.Start ljust below;
+"R3E" at R3.End ljust above;
+
+corner;
+line right elen;
+corner;
+line down elen;
 
 # vim: filetype=pic
 .PE

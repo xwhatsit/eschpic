@@ -1,5 +1,5 @@
 # Use millimetres instead of inches
-scale = 25.4
+scale = 25.4;
 
 m4_include(util.m4)
 m4_include(components.m4)

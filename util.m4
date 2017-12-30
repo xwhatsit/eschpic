@@ -142,5 +142,4 @@ m4_define(`m4_prefixKVArgs', `
 	m4_foreach(`m4_kvArg', (m4_shift($@)), `m4_ifelse(m4_getKVKey(m4_kvArg), `', ,
 		`m4_define($1`'m4_getKVKey(m4_kvArg), m4_getKVVal(m4_kvArg))')')')
 
-
 m4_divert(0)
