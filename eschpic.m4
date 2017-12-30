@@ -2,6 +2,7 @@
 scale = 25.4
 
 include(util.m4)
+include(components.m4)
 
 divert(-1)
 
