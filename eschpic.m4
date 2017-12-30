@@ -16,7 +16,7 @@ Params:
 Notes:
         Numbers over 9 will produce strange double-letters, like "BA" for 10.
 '
-m4_define(`a3VPosLetter', `m4_translit(`$1', `0-9', `A-J')')
+m4_define_blind(`a3VPosLetter', `m4_translit(`$1', `0-9', `A-J')')
 
 
 `
@@ -26,7 +26,7 @@ Usage: a3VPosNumber(letter)
 Params:
 	letter:	Letter between A and J
 '
-m4_define(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
+m4_define_blind(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
 
 
 `
@@ -60,7 +60,7 @@ Defines the following macros:
         a3NumHTics:     Gets set to whatever numHTics was in a3TitleBlock() call
         a3NumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
 '
-m4_define(`a3TitleBlock', `
+m4_define_blind(`a3TitleBlock', `
 	# set default args
 	m4_define(`_a3_sheet', `')
 	m4_define(`_a3_title', `')
@@ -165,7 +165,7 @@ Usage: a3HPosOf(hpos)
 Params:
         hpos:   horizontal position in millimetres
 '
-m4_define(`a3HPosOf', `floor($1 / (a3IW / a3NumHTics)) + 1')
+m4_define_blind(`a3HPosOf', `floor($1 / (a3IW / a3NumHTics)) + 1')
 
 
 `
@@ -175,7 +175,7 @@ Usage: a3HPos(htic)
 Params:
 	htic:	Tic-number (1 through a3NumHTics)
 '
-m4_define(`a3HPos', `($1 * (a3IW / a3NumHTics) - ((a3IW / a3NumHTics) / 2))')
+m4_define_blind(`a3HPos', `($1 * (a3IW / a3NumHTics) - ((a3IW / a3NumHTics) / 2))')
 
 
 `
@@ -185,7 +185,7 @@ Usage: a3VPos(vtic)
 Params:
 	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
 '
-m4_define(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
+m4_define_blind(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
 
 
 `
@@ -197,6 +197,6 @@ Params:
 	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
 Example: a3Pos(4, E)
 '
-m4_define(`a3Pos', `(a3HPos($1), a3VPos($2))')
+m4_define_blind(`a3Pos', `(a3HPos($1), a3VPos($2))')
 
 m4_divert(0)

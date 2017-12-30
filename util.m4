@@ -1,6 +1,14 @@
 m4_divert(-1)
 
 `
+Allows defining macros that won't substitute if no parameters are supplied.
+From m4 example documentation.
+'
+m4_define(`m4_define_blind', `m4_ifelse(`$#', `0', ``$0'', `_$0(`$1', `$2', `$'`#', `$'`0')')')
+m4_define(`_m4_define_blind', `m4_define(`$1', `m4_ifelse(`$3', `0', ``$4'', `$2')')')
+
+
+`
 Removes surrounding double-quotes from a string
 
 Usage: m4_dequote(str)
