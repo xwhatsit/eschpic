@@ -22,8 +22,6 @@ line up 6.35;
 
 move to a3Pos(5, C);
 line right elen;
-corner;
-down;
 
 R3: [
 	pushDir();
@@ -34,13 +32,17 @@ R3: [
 		End:   last line.end;
 	}
 	line dirToDirection(peekDir()) elen/2;
-	box wid elen/5 ht elen/2
+	if dirIsVertical(peekDir()) then {
+		box wid elen/5 ht elen/2
+	} else {
+		box wid elen/2 ht elen/5
+	}
 	line dirToDirection(peekDir()) elen/2;
 
 	popDir();
 ]
-"R3S" at R3.Start ljust below;
-"R3E" at R3.End ljust above;
+"R3S" at R3.Start above;
+"R3E" at R3.End above;
 
 corner;
 line right elen;
