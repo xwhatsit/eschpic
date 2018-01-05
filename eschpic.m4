@@ -1,9 +1,12 @@
 # Use millimetres instead of inches
 scale = 25.4;
 
+# Order of includes is important
 m4_include(util.m4)
 m4_include(direction.m4)
+m4_include(text.m4)
 m4_include(components.m4)
+m4_include(wires.m4)
 
 m4_divert(-1)
 
@@ -33,9 +36,9 @@ m4_define_blind(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
 `
 A3 title block (landscape). South-west corner of inside (drawable area) will be aligned with (0, 0).
 
-Usage: a3TitleBlock(sheetNum, title, ref, rev, [date = `\today', numHTics = 8, numVTics = 6, outerMargin = 10, innerMargin = 10])
+Usage: a3TitleBlock([comma-separated key-value parameters])
 Params:
-        sheet:		Number for "Sheet:" box in titleblock. Font size is Latex \Huge.
+        sheet:		Number for "Sheet:" box in titleblock. Font size is Latex \Huge. Required.
         title:          String for "Title:" box in titleblock. Font size is Latex \Huge.
         ref:            String for "Ref:" box in titleblock. Font size is Latex default.
         rev:            String for "Rev:" box in titleblock. Font size is Latex default.
@@ -50,6 +53,7 @@ Sets these pic variables:
         maxpsht:        As per maxpswid.
 
 Defines the following macros:
+	a3SheetNum:	The sheet number specified in the "sheet" parameter
         a3OW:           Overall width of A3 landscape paper (420mm)
         a3OH:           Overall height of A3 landscape paper (297mm)
         a3OuterMargin:  Gets set to whatever outerMargin was in a3TitleBlock() call
@@ -76,6 +80,10 @@ m4_define_blind(`a3TitleBlock', `
 	# parse key-value arguments
 	m4_prefixKVArgs(`_a3_', $@)
 
+	m4_ifelse(_a3_sheet, `', `m4_errprint(`error: a3TitleBlock: "sheet" parameter required'
+		) m4_m4exit(1)')
+
+	m4_define(`a3SheetNum', _a3_sheet)
         m4_define(`a3OW', `420')
         m4_define(`a3OH', `297')
         m4_define(`a3OuterMargin', _a3_outerMargin)

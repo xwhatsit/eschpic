@@ -10,44 +10,26 @@ a3TitleBlock(
 );
 
 
-move to a3Pos(4, D);
-R2: line down (12.7 * 1.5) invis;
-{
-line up 6.35;
-box wid 2.54 ht 6.35;
-line up 6.35;
-}
-"R2s" at R2.start ljust
-"R2e" at R2.end ljust
-
 move to a3Pos(5, C);
-line right elen;
+line right;
+J1: dot;
+line down;
+"\scriptsize \texttt{\rotatebox{90}{R3E}}" at last line.c rjust below; move to last line.end;
 
-R3: [
-	pushDir();
+resistor(
+	ref=R3,
+	val="textOhms(120)",
+	description="Braking Resistor"
+);
 
-	{
-		line dirToDirection(peekDir()) elen*1.5 invis;
-		Start: last line.start;
-		End:   last line.end;
-	}
-	line dirToDirection(peekDir()) elen/2;
-	if dirIsVertical(peekDir()) then {
-		box wid elen/5 ht elen/2
-	} else {
-		box wid elen/2 ht elen/5
-	}
-	line dirToDirection(peekDir()) elen/2;
-
-	popDir();
-]
-"R3S" at R3.Start above;
-"R3E" at R3.End above;
-
+line down;
+"\scriptsize \texttt{\rotatebox{90}{R3S}}" at last line.c rjust; move to last line.end;
 corner;
 line right elen;
 corner;
 line down elen;
+
+line right elen/2 from J1.c then down;
 
 # vim: filetype=pic
 .PE

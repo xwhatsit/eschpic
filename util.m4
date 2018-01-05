@@ -73,7 +73,7 @@ m4_define(`_m4_forloop',
 `
 Modification of m4_forloop with "step" for iterator.
 
-Usage: m4_forloop(counter, from, to, step, text)
+Usage: m4_forloopn(counter, from, to, step, text)
 Params:
         counter:        Count variable which is incremented
         from:           Starting value to count from
@@ -141,5 +141,18 @@ Params:
 m4_define(`m4_prefixKVArgs', `
 	m4_foreach(`m4_kvArg', (m4_shift($@)), `m4_ifelse(m4_getKVKey(m4_kvArg), `', ,
 		`m4_define($1`'m4_getKVKey(m4_kvArg), m4_getKVVal(m4_kvArg))')')')
+
+
+
+`
+Substitutes to simple newline; makes writing neatly-formatted macros easier.
+'
+m4_define(`m4_newline', `
+')
+
+`
+Converts pts to mm.
+'
+m4_define_blind(`pointsToMillimetres', `($1 * 25.4 / 72)')
 
 m4_divert(0)
