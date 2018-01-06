@@ -25,12 +25,19 @@ resistor(
 line down;
 "\scriptsize \texttt{\rotatebox{90}{R3S}}" at last line.c rjust; move to last line.end;
 corner;
-line right elen;
+line right;
 corner;
-line down elen;
+line down;
 PE();
 
-line right elen/2 from J1.c then down;
+line right elen*2 from J1 then down;
+chassisEarth();
+J2: junction;
+line left;
+earth();
+line right from J2;
+Foo: noiselessEarth();
+"textMultiLine(Connections, to earth)" at Foo.e ljust;
 
 # vim: filetype=pic
 .PE

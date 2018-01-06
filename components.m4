@@ -144,6 +144,7 @@ m4_define_blind(`earth',
 
 		popDir();
 	] with .Start at _earth_pos;
+	move to last [].Start;
 ')
 
 
