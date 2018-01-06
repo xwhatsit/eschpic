@@ -155,4 +155,29 @@ Converts pts to mm.
 '
 m4_define_blind(`pointsToMillimetres', `($1 * 25.4 / 72)')
 
+
+`
+Converts degrees to radians
+'
+m4_define_blind(`degreesToRadians',`($1 * 0.017453292519943295)')
+
+
+`
+Trig functions in degrees (pic's builtins use radians)
+'
+m4_define_blind(`cosd', `cos(degreesToRadians($1))')
+m4_define_blind(`sind', `sin(degreesToRadians($1))')
+
+
+`
+Converts polar coords to cartesian.
+
+Usage: polarCoord(startPos, distance, angle)
+Params:
+	startPos:	cartesian coordinate to reference from
+	distance:	distance from startPos to travel
+	angle:		angle (in degrees) from 0° (horizontal right in pic)
+'
+m4_define_blind(`polarCoord', `($1 + ($2 * cosd($3), $2 * sind($3)))')
+
 m4_divert(0)

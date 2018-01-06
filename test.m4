@@ -28,6 +28,7 @@ corner;
 line right elen;
 corner;
 line down elen;
+PE();
 
 line right elen/2 from J1.c then down;
 
