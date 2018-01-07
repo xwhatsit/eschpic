@@ -23,7 +23,7 @@ contactNO(
 	pos=K1.Start + (elen/2, 0),
 	set=2
 );
-contactNO(
+contactNC(
 	pos=K1.Start + (elen, 0),
 	set=3
 );
@@ -41,6 +41,18 @@ line up elen/2
 coil(ref=KC,
 	val="24VDC",
 	description="Relay Coil")
+
+down;
+contactNC(ref=K8,
+	  val="REL-PR1-24DC/NC",
+	  decription="Aux",
+	  pos=a3Pos(3,D))
+
+right;
+contactNC(ref=K8,
+	  val="REL-PR1-24DC/NC",
+	  decription="Aux",
+	  pos=a3Pos(3,E))
 
 line right elen*5 from J0;
 J1: dot;

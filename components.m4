@@ -333,6 +333,91 @@ m4_define_blind(`contactNO', `
 	move to last [].End
 ')
 
+
+`
+Normally-closed contact. Draws in current direction.
+
+Usage: contactNC([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
+	startLabel:	Starting terminal label. Defaults to "1".
+	endLabel:	Ending terminal label. Defaults to "2".
+'
+m4_define_blind(`contactNC', `
+	componentParseKVArgs(`_contactNC_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `set', `1',
+		 `startLabel', `1',
+		 `endLabel', `2'), $@)
+
+	# if a ref was defined, prefix it with the sheet number
+	m4_ifelse(_contactNC_ref, `', `', m4_define(`_contactNC_ref_prefixed', a3SheetNum`'_contactNC_ref))
+
+	# if ref was defined and is a valid pic label, then add a label
+	m4_ifelse(m4_regexp(_contactNC_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
+		_contactNC_ref`:', `m4_errprint(
+		`warning: could not define place name for ref "'_contactNC_ref`": invalid pic label' m4_newline())')
+	
+	# assemble terminal labels
+	m4_define(`_contactNC_fullStartLabel', _contactNC_set`'_contactNC_startLabel)
+	m4_define(`_contactNC_fullEndLabel', _contactNC_set`'_contactNC_endLabel)
+
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+		if dirIsConventional(peekDir()) then {
+			AO: Start;
+			BO: End;
+		} else {
+			AO: End;
+			BO: Start;
+		}
+
+		AM: 1/2.9 of the way between AO and BO;
+		BM: 5/16 of the way between BO and AO;
+
+		if dirIsVertical(peekDir()) then {
+			topAngle = 0;
+			bottomAngle = 72;
+		} else {
+			topAngle = 270;
+			bottomAngle = 198;
+		}
+		line from AO to AM then to polarCoord(AM, elen*(5/32), topAngle);
+		line from BO to BM then to polarCoord(BM, elen*0.42, bottomAngle);
+		MidContact: polarCoord(BM, elen*(3/16) / sind(bottomAngle), bottomAngle);
+
+		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
+		m4_ifelse(_contactNC_fullStartLabel, `', `', `T_'_contactNC_fullStartLabel`: AO')
+		m4_ifelse(_contactNC_fullEndLabel,   `', `', `T_'_contactNC_fullEndLabel`:   BO')
+
+		popDir();
+	] with .Start at _contactNC_pos;
+
+	# display terminal labels
+	m4_define(`_contactNC_label_alignment', `m4_ifelse(dirIsVertical(getDir()), `1', `rjust', `above')')
+	"textTerminalLabel(_contactNC_set`'_contactNC_startLabel)" at last [].AO _contactNC_label_alignment;
+	"textTerminalLabel(_contactNC_set`'_contactNC_endLabel)" at last [].BO _contactNC_label_alignment;
+
+	componentDrawLabels(_contactNC_)
+
+	move to last [].End
+')
+
+
 m4_divert(0)
 
 # vim: filetype=pic
