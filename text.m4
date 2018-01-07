@@ -27,7 +27,7 @@ m4_define_blind(`textComponentDescription', `{\scriptsize $1}')
 `
 Produces (unquoted) text in terminal label style.
 '
-m4_define_blind(`textTerminalLabel', `{\scriptsize \ttfamily $1}')
+m4_define_blind(`textTerminalLabel', `{\scriptsize \ttfamily \textit{$1}}')
 
 
 `

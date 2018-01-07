@@ -14,19 +14,52 @@ move to a3Pos(3, C);
 line right;
 J0: dot;
 line down;
-coil(
+contactNO(
 	ref=K1,
 	val="REL-PR1-24DC/1/MB",
 	description="Power Relay"
 );
-line down then right;
-coil(
+contactNO(
+	pos=K1.Start + (elen/2, 0),
+	set=2
+);
+contactNO(
+	pos=K1.Start + (elen, 0),
+	set=3
+);
+
+move to K1.End;
+
+line down then left 3*elen then up;
+contactNO(
 	ref=K2,
 	val="REL-PR1-24DC/1/MB",
-	description="Aux. Power Relay"
+	description="Power Relay"
 );
-line right then down;
-earth();
+
+right;
+move to a3Pos(3, E);
+contactNO(
+	ref=KR,
+	val="REL-PR1-24DC/1/MB",
+	description="Power Relay"
+);
+
+left;
+move to a3Pos(3, F);
+contactNO(
+	ref=KL,
+	val="REL-PR1-24DC/1/MB",
+	description="Power Relay"
+);
+
+#coil(
+#	ref=K3,
+#	val="REL-PR1-24DC/1/MB",
+#	description="Aux. Power Relay"
+#);
+#line right then down;
+#earth();
 
 line right elen*5 from J0;
 J1: dot;

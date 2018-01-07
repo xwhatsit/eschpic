@@ -64,18 +64,20 @@ m4_define_blind(`popDir',  `
 			) m4_m4exit(1)')
 		')')')',
 		`right')')
-m4_define_blind(`peekDir', `
-	m4_pushdef(`tmpdir', getDir())
-	m4_popdef(`getDir')
-	getDir()
-	m4_pushdef(`getDir', tmpdir)
-	m4_popdef(`tmpdir')
-	')
+m4_define_blind(`peekDir', ` m4_dnl
+	m4_pushdef(`tmpdir', getDir()) m4_dnl
+	m4_popdef(`getDir') m4_dnl
+	getDir() m4_dnl
+	m4_pushdef(`getDir', tmpdir) m4_dnl
+	m4_popdef(`tmpdir') m4_dnl
+	') m4_dnl
 
 m4_define_blind(`dirIsVertical',
 	`m4_ifelse(m4_trim(`$1'), dirUp, 1, `m4_ifelse(m4_trim(`$1'), dirDown, 1, 0)')')
 m4_define_blind(`dirIsHorizontal',
 	`m4_ifelse(m4_trim(`$1'), dirLeft, 1, `m4_ifelse(m4_trim(`$1'), dirRight, 1, 0)')')
+m4_define_blind(`dirIsConventional',
+	`m4_ifelse(m4_trim(`$1'), dirDown, 1, `m4_ifelse(m4_trim(`$1'), dirRight, 1, 0)')')
 
 m4_divert(0)
 

@@ -160,6 +160,7 @@ Coil. Draws in current direction.
 
 Usage: coil([comma-separated key-value parameters])
 Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
 	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
@@ -170,6 +171,7 @@ Params:
 '
 m4_define_blind(`coil', `
 	# set default args
+	m4_define(`_coil_pos', `Here')
 	m4_define(`_coil_ref', `')
 	m4_define(`_coil_val', `')
 	m4_define(`_coil_description', `')
@@ -181,6 +183,7 @@ m4_define_blind(`coil', `
 	m4_prefixKVArgs(`_coil_', $@)
 
 	# remove double quotes from those args
+	m4_define(`_coil_pos', m4_dequote(_coil_pos))
 	m4_define(`_coil_ref', m4_dequote(_coil_ref))
 	m4_define(`_coil_val', m4_dequote(_coil_val))
 	m4_define(`_coil_description', m4_dequote(_coil_description))
@@ -198,33 +201,40 @@ m4_define_blind(`coil', `
 	[
 		pushDir();
 
-		{
-			line dirToDirection(peekDir()) elen invis;
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+		if dirIsConventional(peekDir()) then {
+			AO: Start;
+			BO: End;
+		} else {
+			AO: End;
+			BO: Start;
 		}
+		AM: 3/8 of the way between AO and BO;
+		BM: 3/8 of the way between BO and AO;
+		Centre: 1/2 of the way between AO and BO;
 
-		line dirToDirection(peekDir()) elen*(3/8);
-		Start: last line.start;
+		line from BO to BM;
+		line from AO to AM;
 
 		if dirIsVertical(peekDir()) then {
-			box wid elen*(3/8) ht elen/4;
+			box wid elen*(3/8) ht elen/4 with .c at Centre;
 		} else {
-			box wid elen/4 ht elen*(3/8);
+			box wid elen/4 ht elen*(3/8) with .c at Centre;
 		}
 
-		line dirToDirection(peekDir()) elen*(3/8);
-		End: last line.end;
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A1")
+		m4_ifelse(_coil_fullStartLabel, `', `', `T_'_coil_startLabel`: AO')
+		m4_ifelse(_coil_fullEndLabel,   `', `', `T_'_coil_endLabel`:   BO')
 
 		popDir();
-	]
+	] with .Start at _coil_pos;
 
 	# display terminal labels
-	if dirIsVertical(getDir()) then {
-		"textTerminalLabel(_coil_startLabel)" at last [].Start rjust;
-		"textTerminalLabel(_coil_endLabel)" at last [].End rjust;
-	} else {
-		"textTerminalLabel(_coil_startLabel)" at last [].Start above;
-		"textTerminalLabel(_coil_endLabel)" at last [].End above;
-	}
+	m4_define(`_coil_label_alignment', `m4_ifelse(dirIsVertical(getDir()), `1', `rjust', `above')')
+	"textTerminalLabel(_coil_startLabel)" at last [].AO _coil_label_alignment;
+	"textTerminalLabel(_coil_endLabel)" at last [].BO _coil_label_alignment;
 
 	# compose label(s)
 	m4_define(`_coil_labels', `')
@@ -244,6 +254,118 @@ m4_define_blind(`coil', `
 			"textMultiLine(_coil_labels)" at last [].w rjust;
 		} else {
 			"textMultiLine(_coil_labels)" at last [].n above;
+		}
+	')
+
+	move to last [].End
+')
+
+
+`
+Normally-open contact. Draws in current direction.
+
+Usage: contactNO([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
+	startLabel:	Starting terminal label. Defaults to "3".
+	endLabel:	Ending terminal label. Defaults to "4".
+'
+m4_define_blind(`contactNO', `
+	# set default args
+	m4_define(`_contactNO_pos', `Here')
+	m4_define(`_contactNO_ref', `')
+	m4_define(`_contactNO_val', `')
+	m4_define(`_contactNO_description', `')
+	m4_define(`_contactNO_part', `')
+	m4_define(`_contactNO_set', `1')
+	m4_define(`_contactNO_startLabel', `3')
+	m4_define(`_contactNO_endLabel', `4')
+
+	# parse key-value arguments
+	m4_prefixKVArgs(`_contactNO_', $@)
+
+	# remove double quotes from those args
+	m4_define(`_contactNO_pos', m4_dequote(_contactNO_pos))
+	m4_define(`_contactNO_ref', m4_dequote(_contactNO_ref))
+	m4_define(`_contactNO_val', m4_dequote(_contactNO_val))
+	m4_define(`_contactNO_description', m4_dequote(_contactNO_description))
+	m4_define(`_contactNO_part', m4_dequote(_contactNO_part))
+	m4_define(`_contactNO_set', m4_dequote(_contactNO_set))
+	m4_define(`_contactNO_startLabel', m4_dequote(_contactNO_startLabel))
+	m4_define(`_contactNO_endLabel', m4_dequote(_contactNO_endLabel))
+
+	# if a ref was defined, prefix it with the sheet number
+	m4_ifelse(_contactNO_ref, `', `', m4_define(`_contactNO_ref_prefixed', a3SheetNum`'_contactNO_ref))
+
+	# if ref was defined and is a valid pic label, then add a label
+	m4_ifelse(m4_regexp(_contactNO_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
+		_contactNO_ref`:', `m4_errprint(
+		`warning: could not define place name for ref "'_contactNO_ref`": invalid pic label' m4_newline())')
+	
+	# assemble terminal labels
+	m4_define(`_contactNO_fullStartLabel', _contactNO_set`'_contactNO_startLabel)
+	m4_define(`_contactNO_fullEndLabel', _contactNO_set`'_contactNO_endLabel)
+
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+		if dirIsConventional(peekDir()) then {
+			AO: Start;
+			BO: End;
+		} else {
+			AO: End;
+			BO: Start;
+		}
+
+		AM: 5/16 of the way between AO and BO;
+		BM: 5/16 of the way between BO and AO;
+
+		line from AO to AM;
+		if dirIsVertical(peekDir()) then {
+			line from BO to BM then to BM + (-elen/8, elen*(3/8));
+		} else {
+			line from BO to BM then to BM + (-elen*(3/8), elen/8);
+		}
+
+		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
+		m4_ifelse(_contactNO_fullStartLabel, `', `', `T_'_contactNO_fullStartLabel`: AO')
+		m4_ifelse(_contactNO_fullEndLabel,   `', `', `T_'_contactNO_fullEndLabel`:   BO')
+
+		popDir();
+	] with .Start at _contactNO_pos;
+
+	# display terminal labels
+	m4_define(`_contactNO_label_alignment', `m4_ifelse(dirIsVertical(getDir()), `1', `rjust', `above')')
+	"textTerminalLabel(_contactNO_set`'_contactNO_startLabel)" at last [].AO _contactNO_label_alignment;
+	"textTerminalLabel(_contactNO_set`'_contactNO_endLabel)" at last [].BO _contactNO_label_alignment;
+
+	# compose label(s)
+	m4_define(`_contactNO_labels', `')
+	m4_ifelse(_contactNO_ref, `', `',
+		`m4_define(`_contactNO_labels',
+			m4_ifdef(`_contactNO_labels', _contactNO_labels` \\') textComponentRef(_contactNO_ref_prefixed))')
+	m4_ifelse(_contactNO_val, `', `',
+		`m4_define(`_contactNO_labels',
+			m4_ifdef(`_contactNO_labels', _contactNO_labels` \\') textComponentVal(_contactNO_val))')
+	m4_ifelse(_contactNO_description, `', `',
+		`m4_define(`_contactNO_labels',
+			m4_ifdef(`_contactNO_labels', _contactNO_labels` \\') textComponentDescription(_contactNO_description))')
+	
+	# display label(s), if present 
+	m4_ifelse(_contactNO_labels, `', `', `
+		if dirIsVertical(getDir()) then {
+			"textMultiLine(_contactNO_labels)" at last [].w rjust;
+		} else {
+			"textMultiLine(_contactNO_labels)" at last [].n above;
 		}
 	')
 
