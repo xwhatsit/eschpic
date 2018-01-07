@@ -10,8 +10,25 @@ a3TitleBlock(
 );
 
 
-move to a3Pos(5, C);
+move to a3Pos(3, C);
 line right;
+J0: dot;
+line down;
+coil(
+	ref=K1,
+	val="REL-PR1-24DC/1/MB",
+	description="Power Relay"
+);
+line down then right;
+coil(
+	ref=K2,
+	val="REL-PR1-24DC/1/MB",
+	description="Aux. Power Relay"
+);
+line right then down;
+earth();
+
+line right elen*5 from J0;
 J1: dot;
 line down;
 "\scriptsize \texttt{\rotatebox{90}{R3E}}" at last line.c rjust below; move to last line.end;
@@ -34,10 +51,12 @@ line right elen*2 from J1 then down;
 chassisEarth();
 J2: junction;
 line left;
+corner;
 earth();
 line right from J2;
-Foo: noiselessEarth();
-"textMultiLine(Connections, to earth)" at Foo.e ljust;
+corner;
+NEarth: noiselessEarth();
+"textMultiLine(Connections, to earth)" at NEarth.e ljust;
 
 # vim: filetype=pic
 .PE

@@ -14,13 +14,12 @@ Params:
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 '
-m4_define_blind(`resistor',
-`
+m4_define_blind(`resistor', `
 	# set default args
 	m4_define(`_resistor_ref', `')
 	m4_define(`_resistor_val', `')
-	m4_define(`_resistor_part', `')
 	m4_define(`_resistor_description', `')
+	m4_define(`_resistor_part', `')
 
 	# parse key-value arguments
 	m4_prefixKVArgs(`_resistor_', $@)
@@ -28,8 +27,8 @@ m4_define_blind(`resistor',
 	# remove double quotes from those args
 	m4_define(`_resistor_ref', m4_dequote(_resistor_ref))
 	m4_define(`_resistor_val', m4_dequote(_resistor_val))
-	m4_define(`_resistor_part', m4_dequote(_resistor_part))
 	m4_define(`_resistor_description', m4_dequote(_resistor_description))
+	m4_define(`_resistor_part', m4_dequote(_resistor_part))
 
 	# if a ref was defined, prefix it with the sheet number
 	m4_ifelse(_resistor_ref, `', `', m4_define(`_resistor_ref_prefixed', a3SheetNum`'_resistor_ref))
@@ -41,23 +40,23 @@ m4_define_blind(`resistor',
 	[
 		pushDir();
 
-		{
-			line dirToDirection(peekDir()) elen*1.5 invis;
-			Start: last line.start;
-			End:   last line.end;
-		}
-		line dirToDirection(peekDir()) elen/2;
+		line dirToDirection(peekDir()) elen/4;
+		Start: last line.start;
+
 		if dirIsVertical(peekDir()) then {
 			box wid elen/5 ht elen/2
 		} else {
 			box wid elen/2 ht elen/5
 		}
-		line dirToDirection(peekDir()) elen/2;
+
+		line dirToDirection(peekDir()) elen/4;
+		End: last line.end;
 
 		popDir();
 	]
 
 	# compose label(s)
+	m4_define(`_resistor_labels', `')
 	m4_ifelse(_resistor_ref, `', `',
 		`m4_define(`_resistor_labels',
 			m4_ifdef(`_resistor_labels', _resistor_labels` \\') textComponentRef(_resistor_ref_prefixed))')
@@ -89,8 +88,7 @@ Params:
 	pos:	Position to place ".Start" at. Defaults to "Here".
 	type:	Earth type (plain, noiseless, protective, chassis). Default is "plain".
 '
-m4_define_blind(`earth',
-`
+m4_define_blind(`earth', `
 	# set default args
 	m4_define(`_earth_pos', `Here')
 	m4_define(`_earth_type', `plain')
@@ -155,6 +153,102 @@ m4_define_blind(`noiselessEarth', `earth(type=noiseless, $@)')
 m4_define_blind(`chassisEarth', `earth(type=chassis, $@)')
 m4_define_blind(`protectiveEarth', `earth(type=protective, $@)')
 m4_define(`PE', m4_defn(`protectiveEarth'))
+
+
+`
+Coil. Draws in current direction.
+
+Usage: coil([comma-separated key-value parameters])
+Params:
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	startLabel:	Starting terminal label. Defaults to "A1".
+	endLabel:	Ending terminal label. Defaults to "A2".
+'
+m4_define_blind(`coil', `
+	# set default args
+	m4_define(`_coil_ref', `')
+	m4_define(`_coil_val', `')
+	m4_define(`_coil_description', `')
+	m4_define(`_coil_part', `')
+	m4_define(`_coil_startLabel', `A1')
+	m4_define(`_coil_endLabel', `A2')
+
+	# parse key-value arguments
+	m4_prefixKVArgs(`_coil_', $@)
+
+	# remove double quotes from those args
+	m4_define(`_coil_ref', m4_dequote(_coil_ref))
+	m4_define(`_coil_val', m4_dequote(_coil_val))
+	m4_define(`_coil_description', m4_dequote(_coil_description))
+	m4_define(`_coil_part', m4_dequote(_coil_part))
+	m4_define(`_coil_startLabel', m4_dequote(_coil_startLabel))
+	m4_define(`_coil_endLabel', m4_dequote(_coil_endLabel))
+
+	# if a ref was defined, prefix it with the sheet number
+	m4_ifelse(_coil_ref, `', `', m4_define(`_coil_ref_prefixed', a3SheetNum`'_coil_ref))
+
+	# if ref was defined and is a valid pic label, then add a label
+	m4_ifelse(m4_regexp(_coil_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
+		_coil_ref`:', `m4_errprint(
+		`warning: could not define place name for ref "'_coil_ref`": invalid pic label' m4_newline())')
+	[
+		pushDir();
+
+		{
+			line dirToDirection(peekDir()) elen invis;
+		}
+
+		line dirToDirection(peekDir()) elen*(3/8);
+		Start: last line.start;
+
+		if dirIsVertical(peekDir()) then {
+			box wid elen*(3/8) ht elen/4;
+		} else {
+			box wid elen/4 ht elen*(3/8);
+		}
+
+		line dirToDirection(peekDir()) elen*(3/8);
+		End: last line.end;
+
+		popDir();
+	]
+
+	# display terminal labels
+	if dirIsVertical(getDir()) then {
+		"textTerminalLabel(_coil_startLabel)" at last [].Start rjust;
+		"textTerminalLabel(_coil_endLabel)" at last [].End rjust;
+	} else {
+		"textTerminalLabel(_coil_startLabel)" at last [].Start above;
+		"textTerminalLabel(_coil_endLabel)" at last [].End above;
+	}
+
+	# compose label(s)
+	m4_define(`_coil_labels', `')
+	m4_ifelse(_coil_ref, `', `',
+		`m4_define(`_coil_labels',
+			m4_ifdef(`_coil_labels', _coil_labels` \\') textComponentRef(_coil_ref_prefixed))')
+	m4_ifelse(_coil_val, `', `',
+		`m4_define(`_coil_labels',
+			m4_ifdef(`_coil_labels', _coil_labels` \\') textComponentVal(_coil_val))')
+	m4_ifelse(_coil_description, `', `',
+		`m4_define(`_coil_labels',
+			m4_ifdef(`_coil_labels', _coil_labels` \\') textComponentDescription(_coil_description))')
+	
+	# display label(s), if present 
+	m4_ifelse(_coil_labels, `', `', `
+		if dirIsVertical(getDir()) then {
+			"textMultiLine(_coil_labels)" at last [].w rjust;
+		} else {
+			"textMultiLine(_coil_labels)" at last [].n above;
+		}
+	')
+
+	move to last [].End
+')
 
 m4_divert(0)
 

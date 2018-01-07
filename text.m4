@@ -25,6 +25,12 @@ m4_define_blind(`textComponentDescription', `{\scriptsize $1}')
 
 
 `
+Produces (unquoted) text in terminal label style.
+'
+m4_define_blind(`textTerminalLabel', `{\scriptsize \ttfamily $1}')
+
+
+`
 Creates (unquoted) multi-line text using the tabular environment (lines as arguments, so comma-separated; alternatively,
 can just use Latex \\ line separates directly in text).
 '
