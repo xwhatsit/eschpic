@@ -4,10 +4,66 @@ elen = 12.7;
 m4_divert(-1)
 
 `
+Macro to parse and set defaults for components which take key-value params.
+
+Usage: componentParseKVArgs(prefix, (argname_1, argdefault_1, [argname_n, argdefault_n]), originalArgs)
+'
+m4_define_blind(`componentParseKVArgs', `
+	m4_pushdef(`componentPrefix', $1)
+	_$0_setDefault$2
+	m4_prefixKVArgs(componentPrefix, m4_shift(m4_shift($@)))
+	_$0_removeDoubleQuotes$2
+	m4_popdef(`componentPrefix')
+')
+m4_define_blind(`_componentParseKVArgs_setDefault', `
+	m4_forloopn(`argI', 1, $#, 2, `m4_define(componentPrefix`'m4_argn(argI, $@),
+		m4_argn(m4_eval(argI + 1), $@))')
+')
+m4_define_blind(`_componentParseKVArgs_removeDoubleQuotes', `
+	m4_forloopn(`argI', 1, $#, 2, `
+		m4_define(componentPrefix`'m4_argn(argI, $@),
+			m4_dequote(m4_indir(componentPrefix`'m4_argn(argI, $@))))')
+')
+
+
+`
+Macro to assist drawing main component labels (ref/val/description etc.)
+
+Usage: componentDrawLabels(prefix)
+'
+m4_define_blind(`componentDrawLabels', `
+	m4_ifelse($1, `', `', `
+		m4_pushdef($1`labels', `')
+
+		m4_ifelse(m4_indir($1`ref'), `', `',
+			`m4_define($1`labels',
+				m4_ifdef($1`labels', m4_indir($1`labels')` \\') 
+					textComponentRef(m4_indir($1`ref_prefixed')))')
+		m4_ifelse(m4_indir($1`val'), `', `',
+			`m4_define($1`labels',
+				m4_ifdef($1`labels', m4_indir($1`labels')` \\')
+					textComponentVal(m4_indir($1`val')))')
+		m4_ifelse(m4_indir($1`description'), `', `',
+			`m4_define($1`labels',
+				m4_ifdef($1`labels', m4_indir($1`labels')` \\')
+					textComponentDescription(m4_indir($1`description')))')
+
+		if dirIsVertical(getDir()) then {
+			"textMultiLine(m4_indir($1`labels'))" at last [].w - (elen/4, 0) rjust;
+		} else {
+			"textMultiLine(m4_indir($1`labels'))" at last [].n + (0, elen/8) above;
+		}
+
+		m4_popdef($1`labels')
+	')
+')
+
+`
 Resistor. Draws in current direction.
 
 Usage: resistor([comma-separated key-value parameters])
 Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
 	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
@@ -15,20 +71,12 @@ Params:
 	part:		Part number. If this is supplied, it is added to the BOM.
 '
 m4_define_blind(`resistor', `
-	# set default args
-	m4_define(`_resistor_ref', `')
-	m4_define(`_resistor_val', `')
-	m4_define(`_resistor_description', `')
-	m4_define(`_resistor_part', `')
-
-	# parse key-value arguments
-	m4_prefixKVArgs(`_resistor_', $@)
-
-	# remove double quotes from those args
-	m4_define(`_resistor_ref', m4_dequote(_resistor_ref))
-	m4_define(`_resistor_val', m4_dequote(_resistor_val))
-	m4_define(`_resistor_description', m4_dequote(_resistor_description))
-	m4_define(`_resistor_part', m4_dequote(_resistor_part))
+	componentParseKVArgs(`_resistor_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `'), $@)
 
 	# if a ref was defined, prefix it with the sheet number
 	m4_ifelse(_resistor_ref, `', `', m4_define(`_resistor_ref_prefixed', a3SheetNum`'_resistor_ref))
@@ -53,28 +101,9 @@ m4_define_blind(`resistor', `
 		End: last line.end;
 
 		popDir();
-	]
+	] with .Start at _resistor_pos;
 
-	# compose label(s)
-	m4_define(`_resistor_labels', `')
-	m4_ifelse(_resistor_ref, `', `',
-		`m4_define(`_resistor_labels',
-			m4_ifdef(`_resistor_labels', _resistor_labels` \\') textComponentRef(_resistor_ref_prefixed))')
-	m4_ifelse(_resistor_val, `', `',
-		`m4_define(`_resistor_labels',
-			m4_ifdef(`_resistor_labels', _resistor_labels` \\') textComponentVal(_resistor_val))')
-	m4_ifelse(_resistor_description, `', `',
-		`m4_define(`_resistor_labels',
-			m4_ifdef(`_resistor_labels', _resistor_labels` \\') textComponentDescription(_resistor_description))')
-	
-	# display label(s), if present 
-	m4_ifelse(_resistor_labels, `', `', `
-		if dirIsVertical(getDir()) then {
-			"textMultiLine(_resistor_labels)" at last [].w rjust;
-		} else {
-			"textMultiLine(_resistor_labels)" at last [].n above;
-		}
-	')
+	componentDrawLabels(_resistor_)
 
 	move to last [].End
 ')
@@ -89,16 +118,9 @@ Params:
 	type:	Earth type (plain, noiseless, protective, chassis). Default is "plain".
 '
 m4_define_blind(`earth', `
-	# set default args
-	m4_define(`_earth_pos', `Here')
-	m4_define(`_earth_type', `plain')
-
-	# parse key-value arguments
-	m4_prefixKVArgs(`_earth_', $@)
-
-	# remove double-quotes from those args
-	m4_define(`_earth_pos', m4_dequote(_earth_pos))
-	m4_define(`_earth_type', m4_dequote(_earth_type))
+	componentParseKVArgs(`_earth_',
+		(`pos', `Here',
+		 `type', `plain'), $@)
 
 	[
 		pushDir();
@@ -170,26 +192,14 @@ Params:
 	endLabel:	Ending terminal label. Defaults to "A2".
 '
 m4_define_blind(`coil', `
-	# set default args
-	m4_define(`_coil_pos', `Here')
-	m4_define(`_coil_ref', `')
-	m4_define(`_coil_val', `')
-	m4_define(`_coil_description', `')
-	m4_define(`_coil_part', `')
-	m4_define(`_coil_startLabel', `A1')
-	m4_define(`_coil_endLabel', `A2')
-
-	# parse key-value arguments
-	m4_prefixKVArgs(`_coil_', $@)
-
-	# remove double quotes from those args
-	m4_define(`_coil_pos', m4_dequote(_coil_pos))
-	m4_define(`_coil_ref', m4_dequote(_coil_ref))
-	m4_define(`_coil_val', m4_dequote(_coil_val))
-	m4_define(`_coil_description', m4_dequote(_coil_description))
-	m4_define(`_coil_part', m4_dequote(_coil_part))
-	m4_define(`_coil_startLabel', m4_dequote(_coil_startLabel))
-	m4_define(`_coil_endLabel', m4_dequote(_coil_endLabel))
+	componentParseKVArgs(`_coil_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `startLabel', `A1',
+		 `endLabel', `A2'), $@)
 
 	# if a ref was defined, prefix it with the sheet number
 	m4_ifelse(_coil_ref, `', `', m4_define(`_coil_ref_prefixed', a3SheetNum`'_coil_ref))
@@ -236,26 +246,7 @@ m4_define_blind(`coil', `
 	"textTerminalLabel(_coil_startLabel)" at last [].AO _coil_label_alignment;
 	"textTerminalLabel(_coil_endLabel)" at last [].BO _coil_label_alignment;
 
-	# compose label(s)
-	m4_define(`_coil_labels', `')
-	m4_ifelse(_coil_ref, `', `',
-		`m4_define(`_coil_labels',
-			m4_ifdef(`_coil_labels', _coil_labels` \\') textComponentRef(_coil_ref_prefixed))')
-	m4_ifelse(_coil_val, `', `',
-		`m4_define(`_coil_labels',
-			m4_ifdef(`_coil_labels', _coil_labels` \\') textComponentVal(_coil_val))')
-	m4_ifelse(_coil_description, `', `',
-		`m4_define(`_coil_labels',
-			m4_ifdef(`_coil_labels', _coil_labels` \\') textComponentDescription(_coil_description))')
-	
-	# display label(s), if present 
-	m4_ifelse(_coil_labels, `', `', `
-		if dirIsVertical(getDir()) then {
-			"textMultiLine(_coil_labels)" at last [].w rjust;
-		} else {
-			"textMultiLine(_coil_labels)" at last [].n above;
-		}
-	')
+	componentDrawLabels(_coil_)
 
 	move to last [].End
 ')
@@ -277,28 +268,15 @@ Params:
 	endLabel:	Ending terminal label. Defaults to "4".
 '
 m4_define_blind(`contactNO', `
-	# set default args
-	m4_define(`_contactNO_pos', `Here')
-	m4_define(`_contactNO_ref', `')
-	m4_define(`_contactNO_val', `')
-	m4_define(`_contactNO_description', `')
-	m4_define(`_contactNO_part', `')
-	m4_define(`_contactNO_set', `1')
-	m4_define(`_contactNO_startLabel', `3')
-	m4_define(`_contactNO_endLabel', `4')
-
-	# parse key-value arguments
-	m4_prefixKVArgs(`_contactNO_', $@)
-
-	# remove double quotes from those args
-	m4_define(`_contactNO_pos', m4_dequote(_contactNO_pos))
-	m4_define(`_contactNO_ref', m4_dequote(_contactNO_ref))
-	m4_define(`_contactNO_val', m4_dequote(_contactNO_val))
-	m4_define(`_contactNO_description', m4_dequote(_contactNO_description))
-	m4_define(`_contactNO_part', m4_dequote(_contactNO_part))
-	m4_define(`_contactNO_set', m4_dequote(_contactNO_set))
-	m4_define(`_contactNO_startLabel', m4_dequote(_contactNO_startLabel))
-	m4_define(`_contactNO_endLabel', m4_dequote(_contactNO_endLabel))
+	componentParseKVArgs(`_contactNO_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `set', `1',
+		 `startLabel', `3',
+		 `endLabel', `4'), $@)
 
 	# if a ref was defined, prefix it with the sheet number
 	m4_ifelse(_contactNO_ref, `', `', m4_define(`_contactNO_ref_prefixed', a3SheetNum`'_contactNO_ref))
@@ -330,11 +308,13 @@ m4_define_blind(`contactNO', `
 		BM: 5/16 of the way between BO and AO;
 
 		line from AO to AM;
+		line from BO to BM;
 		if dirIsVertical(peekDir()) then {
-			line from BO to BM then to BM + (-elen/8, elen*(3/8));
+			continue to BM + (-elen/8, elen*(3/8));
 		} else {
-			line from BO to BM then to BM + (-elen*(3/8), elen/8);
+			continue to BM + (-elen*(3/8), elen/8);
 		}
+		MidContact: 1/2 of the way between Here and BM;
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNO_fullStartLabel, `', `', `T_'_contactNO_fullStartLabel`: AO')
@@ -348,26 +328,7 @@ m4_define_blind(`contactNO', `
 	"textTerminalLabel(_contactNO_set`'_contactNO_startLabel)" at last [].AO _contactNO_label_alignment;
 	"textTerminalLabel(_contactNO_set`'_contactNO_endLabel)" at last [].BO _contactNO_label_alignment;
 
-	# compose label(s)
-	m4_define(`_contactNO_labels', `')
-	m4_ifelse(_contactNO_ref, `', `',
-		`m4_define(`_contactNO_labels',
-			m4_ifdef(`_contactNO_labels', _contactNO_labels` \\') textComponentRef(_contactNO_ref_prefixed))')
-	m4_ifelse(_contactNO_val, `', `',
-		`m4_define(`_contactNO_labels',
-			m4_ifdef(`_contactNO_labels', _contactNO_labels` \\') textComponentVal(_contactNO_val))')
-	m4_ifelse(_contactNO_description, `', `',
-		`m4_define(`_contactNO_labels',
-			m4_ifdef(`_contactNO_labels', _contactNO_labels` \\') textComponentDescription(_contactNO_description))')
-	
-	# display label(s), if present 
-	m4_ifelse(_contactNO_labels, `', `', `
-		if dirIsVertical(getDir()) then {
-			"textMultiLine(_contactNO_labels)" at last [].w rjust;
-		} else {
-			"textMultiLine(_contactNO_labels)" at last [].n above;
-		}
-	')
+	componentDrawLabels(_contactNO_)
 
 	move to last [].End
 ')

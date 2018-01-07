@@ -27,6 +27,7 @@ contactNO(
 	pos=K1.Start + (elen, 0),
 	set=3
 );
+line dashed elen/15 from 3rd last [].MidContact to last [].MidContact;
 
 move to K1.End;
 
@@ -34,32 +35,12 @@ line down then left 3*elen then up;
 contactNO(
 	ref=K2,
 	val="REL-PR1-24DC/1/MB",
-	description="Power Relay"
+	description="Auxiliary Power Relay"
 );
-
-right;
-move to a3Pos(3, E);
-contactNO(
-	ref=KR,
-	val="REL-PR1-24DC/1/MB",
-	description="Power Relay"
-);
-
-left;
-move to a3Pos(3, F);
-contactNO(
-	ref=KL,
-	val="REL-PR1-24DC/1/MB",
-	description="Power Relay"
-);
-
-#coil(
-#	ref=K3,
-#	val="REL-PR1-24DC/1/MB",
-#	description="Aux. Power Relay"
-#);
-#line right then down;
-#earth();
+line up elen/2
+coil(ref=KC,
+	val="24VDC",
+	description="Relay Coil")
 
 line right elen*5 from J0;
 J1: dot;
