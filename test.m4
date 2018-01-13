@@ -11,6 +11,7 @@ a3TitleBlock(
 
 
 move to a3Pos(3, C);
+wireWithSideLabel(right, 24VDC, start);
 line right;
 J0: dot;
 line down;
@@ -19,45 +20,27 @@ contactNO(
 	val="REL-PR1-24DC/1/MB",
 	description="Power Relay"
 );
-contactNO(
+K1B: contactNO(
 	pos=K1.Start + (elen/2, 0),
 	set=2
 );
-contactNC(
+K1C: contactNC(
 	pos=K1.Start + (elen, 0),
 	set=3
 );
 line dashed elen/15 from 3rd last [].MidContact to last [].MidContact;
-
+line up from 2nd last [].T_23;
+junction;
 line up from last [].T_31;
 junction;
 
-line down ((2*elen) - 10.456058)/2 from last [].T_32 
-line down 10.456058 invis;
-"\scriptsize\texttt{\rotatebox{90}{(1K1:32)}}" at last line.c;
-line down ((2*elen) - 10.456058)/2  from last line.end;
-continue left;
-junction;
+wireWithSideLabel(from K1.End down 4*elen, 1K1:14, start);
+#line down elen then right 3*elen then down;
 
-wireWithSideLabel(from 2nd last [].T_24 down elen*2, 1K1:24);
-junction;
-
-move to K1.End;
-
-#line down 2*elen;
-#"\scriptsize\texttt{\rotatebox{90}{1K1:14}}" at last line.c rjust;
-wireWithSideLabel(down 2*elen, 1K1:14);
-continue left 3*elen then up;
-
-contactNO(
-	ref=K2,
-	val="REL-PR1-24DC/1/MB",
-	description="Auxiliary Power Relay"
-);
-line up elen/2
-coil(ref=KC,
-	val="24VDC",
-	description="Relay Coil")
+wireWithInlineLabel(from K1B.T_24 down 1.5*elen, 1:24, start);
+line down elen/2 then right 3*elen then down 1.5*elen;
+wireWithSideLabel(from K1C.T_32 down 1.5*elen, 1K1:32, start);
+#continue right elen*3 then down 2*elen;
 
 down;
 contactNC(ref=K8,
@@ -70,7 +53,7 @@ contactNO(ref=K8,
 	  val="REL-PR1-24DC/NC",
 	  decription="Aux",
 	  pos=a3Pos(3,F));
-wireWithInlineLabel(right elen*2, 1K8:14);
+wireWithSideLabel(right elen*2, 1K8:14, end);
 
 line right elen*5 from J0;
 J1: dot;
@@ -86,7 +69,7 @@ resistor(
 line down;
 "\scriptsize \texttt{\rotatebox{90}{R3S}}" at last line.c rjust; move to last line.end;
 corner;
-wireWithInlineLabel(right elen*2, R3S)
+wireWithSideLabel(right elen*2, R3S, mid)
 corner;
 line down;
 PE();

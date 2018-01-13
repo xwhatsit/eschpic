@@ -185,7 +185,7 @@ Params:
 	distance:	distance from startPos to travel
 	angle:		angle (in degrees) from 0° (horizontal right in pic)
 '
-m4_define_blind(`polarCoord', `($1 + ($2 * cosd($3), $2 * sind($3)))')
+m4_define_blind(`polarCoord', `(($1) + (($2) * cosd($3), ($2) * sind($3)))')
 
 
 `
@@ -201,6 +201,6 @@ Calculates distance between two points.
 
 Usage: distanceBetweenPoints(startPos, endPos)
 '
-m4_define_blind(`distanceBetweenPoints',`sqrt((($2).y-($1).y)*(($2).y-($1).y)+(($2).x-($1).x)*(($2).x-($1).x))')
+m4_define_blind(`distanceBetweenPoints',`sqrt((($2).y-($1).y)^2 +(($2).x-($1).x)^2)')
 
 m4_divert(0)
