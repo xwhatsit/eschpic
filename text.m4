@@ -29,6 +29,17 @@ Produces (unquoted) text in terminal label style.
 '
 m4_define_blind(`textTerminalLabel', `{\scriptsize\ttfamily\itshape\strut{}$1}')
 
+`
+Produces (unquoted) text in wire label style.
+'
+m4_define_blind(`textWireLabel', `{\scriptsize\ttfamily{}$1}')
+
+
+`
+Calculates length of wire label style text in millimetres
+'
+m4_define_blind(`textWireLabelLength', `(m4_len($1) * 1.3070073)')
+
 
 `
 Creates (unquoted) multi-line text using the tabular environment (lines as arguments, so comma-separated; alternatively,

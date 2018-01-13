@@ -58,6 +58,17 @@ m4_define_blind(`componentDrawLabels', `
 	')
 ')
 
+
+`
+Macro to assist drawing terminal labels
+
+Usage: componentDrawTerminalLabel(position, label)
+'
+m4_define_blind(`componentDrawTerminalLabel', `
+	"textTerminalLabel($2)" at $1 m4_ifelse(dirIsVertical(getDir()), `1', `+(elen/32,0) rjust', `-(0,elen/16) above')
+')
+
+
 `
 Resistor. Draws in current direction.
 
@@ -242,9 +253,8 @@ m4_define_blind(`coil', `
 	] with .Start at _coil_pos;
 
 	# display terminal labels
-	m4_define(`_coil_label_alignment', `m4_ifelse(dirIsVertical(getDir()), `1', `rjust', `above')')
-	"textTerminalLabel(_coil_startLabel)" at last [].AO _coil_label_alignment;
-	"textTerminalLabel(_coil_endLabel)" at last [].BO _coil_label_alignment;
+	componentDrawTerminalLabel(last [].AO, textTerminalLabel(_coil_startLabel))
+	componentDrawTerminalLabel(last [].BO, textTerminalLabel(_coil_endLabel))
 
 	componentDrawLabels(_coil_)
 
@@ -324,9 +334,8 @@ m4_define_blind(`contactNO', `
 	] with .Start at _contactNO_pos;
 
 	# display terminal labels
-	m4_define(`_contactNO_label_alignment', `m4_ifelse(dirIsVertical(getDir()), `1', `rjust', `above')')
-	"textTerminalLabel(_contactNO_set`'_contactNO_startLabel)" at last [].AO _contactNO_label_alignment;
-	"textTerminalLabel(_contactNO_set`'_contactNO_endLabel)" at last [].BO _contactNO_label_alignment;
+	componentDrawTerminalLabel(last [].AO, _contactNO_set`'_contactNO_startLabel);
+	componentDrawTerminalLabel(last [].BO, _contactNO_set`'_contactNO_endLabel);
 
 	componentDrawLabels(_contactNO_)
 
@@ -408,9 +417,8 @@ m4_define_blind(`contactNC', `
 	] with .Start at _contactNC_pos;
 
 	# display terminal labels
-	m4_define(`_contactNC_label_alignment', `m4_ifelse(dirIsVertical(getDir()), `1', `rjust', `above')')
-	"textTerminalLabel(_contactNC_set`'_contactNC_startLabel)" at last [].AO _contactNC_label_alignment;
-	"textTerminalLabel(_contactNC_set`'_contactNC_endLabel)" at last [].BO _contactNC_label_alignment;
+	componentDrawTerminalLabel(last [].AO, textTerminalLabel(_contactNC_set`'_contactNC_startLabel));
+	componentDrawTerminalLabel(last [].BO, textTerminalLabel(_contactNC_set`'_contactNC_endLabel));
 
 	componentDrawLabels(_contactNC_)
 

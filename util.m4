@@ -163,10 +163,17 @@ m4_define_blind(`degreesToRadians',`($1 * 0.017453292519943295)')
 
 
 `
+Converts radians to degrees
+'
+m4_define_blind(`radiansToDegrees',`($1 / 0.017453292519943295)')
+
+
+`
 Trig functions in degrees (pic's builtins use radians)
 '
 m4_define_blind(`cosd', `cos(degreesToRadians($1))')
 m4_define_blind(`sind', `sin(degreesToRadians($1))')
+m4_define_blind(`atan2d', `radiansToDegrees(atan2($1, $2))')
 
 
 `
@@ -179,5 +186,21 @@ Params:
 	angle:		angle (in degrees) from 0° (horizontal right in pic)
 '
 m4_define_blind(`polarCoord', `($1 + ($2 * cosd($3), $2 * sind($3)))')
+
+
+`
+Calculates angle in degrees between two points.
+
+Usage: angleBetweenPoints(startPos, endPos)
+'
+m4_define_blind(`angleBetweenPoints', `atan2d(($2).y - ($1).y, ($2).x - ($1).x)')
+
+
+`
+Calculates distance between two points.
+
+Usage: distanceBetweenPoints(startPos, endPos)
+'
+m4_define_blind(`distanceBetweenPoints',`sqrt((($2).y-($1).y)*(($2).y-($1).y)+(($2).x-($1).x)*(($2).x-($1).x))')
 
 m4_divert(0)

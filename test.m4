@@ -29,9 +29,26 @@ contactNC(
 );
 line dashed elen/15 from 3rd last [].MidContact to last [].MidContact;
 
+line up from last [].T_31;
+junction;
+
+line down ((2*elen) - 10.456058)/2 from last [].T_32 
+line down 10.456058 invis;
+"\scriptsize\texttt{\rotatebox{90}{(1K1:32)}}" at last line.c;
+line down ((2*elen) - 10.456058)/2  from last line.end;
+continue left;
+junction;
+
+wireWithSideLabel(from 2nd last [].T_24 down elen*2, 1K1:24);
+junction;
+
 move to K1.End;
 
-line down then left 3*elen then up;
+#line down 2*elen;
+#"\scriptsize\texttt{\rotatebox{90}{1K1:14}}" at last line.c rjust;
+wireWithSideLabel(down 2*elen, 1K1:14);
+continue left 3*elen then up;
+
 contactNO(
 	ref=K2,
 	val="REL-PR1-24DC/1/MB",
@@ -46,13 +63,14 @@ down;
 contactNC(ref=K8,
 	  val="REL-PR1-24DC/NC",
 	  decription="Aux",
-	  pos=a3Pos(3,D))
+	  pos=a3Pos(3,E));
 
 right;
-contactNC(ref=K8,
+contactNO(ref=K8,
 	  val="REL-PR1-24DC/NC",
 	  decription="Aux",
-	  pos=a3Pos(3,E))
+	  pos=a3Pos(3,F));
+wireWithInlineLabel(right elen*2, 1K8:14);
 
 line right elen*5 from J0;
 J1: dot;
@@ -68,7 +86,7 @@ resistor(
 line down;
 "\scriptsize \texttt{\rotatebox{90}{R3S}}" at last line.c rjust; move to last line.end;
 corner;
-line right;
+wireWithInlineLabel(right elen*2, R3S)
 corner;
 line down;
 PE();
@@ -82,7 +100,6 @@ earth();
 line right from J2;
 corner;
 NEarth: noiselessEarth();
-"textMultiLine(Connections, to earth)" at NEarth.e ljust;
 
 # vim: filetype=pic
 .PE
