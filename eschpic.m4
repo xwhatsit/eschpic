@@ -6,6 +6,7 @@ m4_include(util.m4)
 m4_include(direction.m4)
 m4_include(text.m4)
 m4_include(components.m4)
+m4_include(connectors.m4)
 m4_include(wires.m4)
 
 m4_divert(-1)
