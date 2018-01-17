@@ -153,19 +153,19 @@ m4_define(`m4_newline', `
 `
 Converts pts to mm.
 '
-m4_define_blind(`pointsToMillimetres', `($1 * 25.4 / 72)')
+m4_define_blind(`pointsToMillimetres', `(($1) * 25.4 / 72)')
 
 
 `
 Converts degrees to radians
 '
-m4_define_blind(`degreesToRadians',`($1 * 0.017453292519943295)')
+m4_define_blind(`degreesToRadians',`(($1) * 0.017453292519943295)')
 
 
 `
 Converts radians to degrees
 '
-m4_define_blind(`radiansToDegrees',`($1 / 0.017453292519943295)')
+m4_define_blind(`radiansToDegrees',`(($1) / 0.017453292519943295)')
 
 
 `
