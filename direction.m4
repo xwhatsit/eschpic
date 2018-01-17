@@ -92,6 +92,24 @@ m4_define_blind(`dirToAngle',
 		) m4_m4exit(1)')')')')')
 
 
+`
+Finds next cw/ccw direction
+'
+m4_define_blind(`dirCW',
+	`m4_ifelse(m4_trim(`$1'), dirUp,    dirRight,
+	`m4_ifelse(m4_trim(`$1'), dirDown,  dirLeft,
+	`m4_ifelse(m4_trim(`$1'), dirLeft,  dirUp,
+	`m4_ifelse(m4_trim(`$1'), dirRight, dirDown,
+	`m4_errprint(`error: dirCW: invalid direction parameter:' m4_trim(`$1')
+		) m4_m4exit(1)')')')')')
+m4_define_blind(`dirCCW',
+	`m4_ifelse(m4_trim(`$1'), dirUp,    dirLeft,
+	`m4_ifelse(m4_trim(`$1'), dirDown,  dirRight,
+	`m4_ifelse(m4_trim(`$1'), dirLeft,  dirDown,
+	`m4_ifelse(m4_trim(`$1'), dirRight, dirUp,
+	`m4_errprint(`error: dirCCW: invalid direction parameter:' m4_trim(`$1')
+		) m4_m4exit(1)')')')')')
+
 m4_divert(0)
 
 # set default direction
