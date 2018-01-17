@@ -35,24 +35,26 @@ m4_define_blind(`componentDrawLabels', `
 	m4_ifelse($1, `', `', `
 		m4_pushdef($1`labels', `')
 
-		m4_ifelse(m4_indir($1`ref'), `', `',
+		m4_ifelse(m4_trim(m4_indir($1`ref')), `', `',
 			`m4_define($1`labels',
-				m4_ifdef($1`labels', m4_indir($1`labels')` \\') 
-					textComponentRef(m4_indir($1`ref_prefixed')))')
-		m4_ifelse(m4_indir($1`val'), `', `',
+				m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
+				)\normalsize{}textComponentRef(m4_indir($1`ref_prefixed')))')
+		m4_ifelse(m4_trim(m4_indir($1`val')), `', `',
 			`m4_define($1`labels',
-				m4_ifdef($1`labels', m4_indir($1`labels')` \\')
-					textComponentVal(m4_indir($1`val')))')
-		m4_ifelse(m4_indir($1`description'), `', `',
+				m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
+				)\normalsize{}textComponentVal(m4_indir($1`val')))')
+		m4_ifelse(m4_trim(m4_indir($1`description')), `', `',
 			`m4_define($1`labels',
-				m4_ifdef($1`labels', m4_indir($1`labels')` \\')
-					textComponentDescription(m4_indir($1`description')))')
+				m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
+				)\normalsize{}textComponentDescription(m4_indir($1`description')))')
 
-		if dirIsVertical(getDir()) then {
-			"textMultiLine(m4_indir($1`labels'))" at last [].w - (elen/4, 0) rjust;
-		} else {
-			"textMultiLine(m4_indir($1`labels'))" at last [].n + (0, elen/8) above;
-		}
+		m4_ifelse(m4_trim(m4_indir($1`labels')), `', `', `
+			if dirIsVertical(getDir()) then {
+				"textMultiLine(m4_indir($1`labels'))" at last [].w - (elen/4, 0) rjust;
+			} else {
+				"textMultiLine(m4_indir($1`labels'))" at last [].n + (0, elen/8) above;
+			}
+		')
 
 		m4_popdef($1`labels')
 	')
