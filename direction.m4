@@ -79,6 +79,19 @@ m4_define_blind(`dirIsHorizontal',
 m4_define_blind(`dirIsConventional',
 	`m4_ifelse(m4_trim(`$1'), dirDown, 1, `m4_ifelse(m4_trim(`$1'), dirRight, 1, 0)')')
 
+
+`
+Converts direction to angle (degrees)
+'
+m4_define_blind(`dirToAngle',
+	`m4_ifelse(m4_trim(`$1'), dirUp,     90,
+	`m4_ifelse(m4_trim(`$1'), dirDown,  270,
+	`m4_ifelse(m4_trim(`$1'), dirLeft,  180,
+	`m4_ifelse(m4_trim(`$1'), dirRight,   0,
+	`m4_errprint(`error: dirToAngle: invalid direction parameter:' m4_trim(`$1')
+		) m4_m4exit(1)')')')')')
+
+
 m4_divert(0)
 
 # set default direction
