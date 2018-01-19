@@ -21,15 +21,7 @@ m4_define_blind(`connectorMale', `
 		 `description', `',
 		 `part', `',
 		 `pin', `'), $@)
-
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_connectorMale_ref, `', `', m4_define(`_connectorMale_ref_prefixed', a3SheetNum`'_connectorMale_ref))
-
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_connectorMale_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_connectorMale_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_connectorMale_ref`": invalid pic label' m4_newline())')
-
+	componentHandleRef(_connectorMale_)
 	[
 		pushDir();
 
@@ -79,15 +71,7 @@ m4_define_blind(`connectorFemale', `
 		 `description', `',
 		 `part', `',
 		 `pin', `'), $@)
-
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_connectorFemale_ref, `', `', m4_define(`_connectorFemale_ref_prefixed', a3SheetNum`'_connectorFemale_ref))
-
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_connectorFemale_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_connectorFemale_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_connectorFemale_ref`": invalid pic label' m4_newline())')
-
+	componentHandleRef(_connectorFemale_)
 	[
 		pushDir();
 
@@ -137,14 +121,7 @@ m4_define_blind(`connector', `
 		 `part', `',
 		 `pincount', `1',
 		 `gender', `female'), $@)
-
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_connector_ref, `', `', m4_define(`_connector_ref_prefixed', a3SheetNum`'_connector_ref))
-	
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_connector_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_connector_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_connector_ref`": invalid pic label' m4_newline())')
+	componentHandleRef(_connector_)
 	
 	# determine gender
 	m4_define(`_connector_gender_orig', m4_defn(`_connector_gender'))

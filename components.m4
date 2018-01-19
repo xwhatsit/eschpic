@@ -4,6 +4,24 @@ elen = 12.7;
 m4_divert(-1)
 
 `
+Macro to assist handling of component references. Prefixes the ref with the sheet number (if applicable), and
+places a pic label if it's valid.
+
+Usage: componentHandleRef(prefix)
+'
+m4_define_blind(`componentHandleRef', `
+	# if a ref was defined and we have enabled it, prefix it with the sheet number
+	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(m4_dequote(a3PrefixRefs), `true', a3SheetNum, `')`'$1ref))
+
+	# if ref was defined and is a valid pic label, then add a label
+	m4_ifelse($1ref, `', `', `
+		m4_ifelse(m4_regexp($1ref, `^[A-Z][A-Za-z0-9]*$'), 0,
+			$1ref`:', `m4_errprint(
+			`warning: could not define place name for ref "'$1ref`": invalid pic label' m4_newline())')')
+')
+
+
+`
 Macro to parse and set defaults for components which take key-value params.
 
 Usage: componentParseKVArgs(prefix, (argname_1, argdefault_1, [argname_n, argdefault_n]), originalArgs)
@@ -90,14 +108,7 @@ m4_define_blind(`resistor', `
 		 `val', `',
 		 `description', `',
 		 `part', `'), $@)
-
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_resistor_ref, `', `', m4_define(`_resistor_ref_prefixed', a3SheetNum`'_resistor_ref))
-
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_resistor_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_resistor_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_resistor_ref`": invalid pic label' m4_newline())')
+	componentHandleRef(_resistor_)
 	[
 		pushDir();
 
@@ -213,14 +224,8 @@ m4_define_blind(`coil', `
 		 `part', `',
 		 `startLabel', `A1',
 		 `endLabel', `A2'), $@)
+	componentHandleRef(_coil_)
 
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_coil_ref, `', `', m4_define(`_coil_ref_prefixed', a3SheetNum`'_coil_ref))
-
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_coil_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_coil_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_coil_ref`": invalid pic label' m4_newline())')
 	[
 		pushDir();
 
@@ -263,6 +268,92 @@ m4_define_blind(`coil', `
 	move to last [].End
 ')
 
+`
+Helper macro for drawing contact modifiers (e.g. see "type" parameter in contactNO). Should be called within
+contact macro block itself (i.e. within "[", "]" brackets).
+
+Usage: componentAddContactModifiers(typeString)
+Params:
+	typeString: Space-separated string of contact modifiers. Can be composed of "switch",
+	            "disconnect", "fuse", "contactor", "thermal", "magnetic", "breaker".
+'
+m4_define_blind(`componentAddContactModifiers', `
+	m4_ifelse(m4_index($1, `switch'), -1, `', `
+		circle rad 0.4 with \
+		m4_ifelse(dirIsVertical(peekDir()), 1,
+			`.n at AM',
+			`.w at AM')
+	')
+	m4_ifelse(m4_index($1, `disconnect'), -1, `', `
+		m4_ifelse(dirIsVertical(peekDir()), 1,
+			`line from AM-(0.6,0) to AM+(0.6,0)',
+			`line from AM-(0,0.6) to AM+(0,0.6)')
+	')
+	m4_ifelse(m4_index($1, `fuse'), -1, `', `
+		m4_ifelse(dirIsVertical(peekDir()), 1, `
+			FuseN:  polarCoord(MidContact, 1.25, 108);
+			FuseS:  polarCoord(MidContact, 1.25, 288);
+			FuseNE: polarCoord(FuseN, 0.53,  18);
+			FuseSE: polarCoord(FuseS, 0.53,  18);
+			FuseNW: polarCoord(FuseN, 0.53, 198);
+			FuseSW: polarCoord(FuseS, 0.53, 198);
+			', `
+			FuseN:  polarCoord(MidContact, 1.25, 162);
+			FuseS:  polarCoord(MidContact, 1.25, 342);
+			FuseNE: polarCoord(FuseN, 0.53,  72);
+			FuseSE: polarCoord(FuseS, 0.53,  72);
+			FuseNW: polarCoord(FuseN, 0.53, 252);
+			FuseSW: polarCoord(FuseS, 0.53, 252);
+		')
+		line from FuseNE to FuseSE then to FuseSW then to FuseNW then to FuseNE then to FuseSE;
+	')
+	m4_ifelse(m4_index($1, `contactor'), -1, `', `
+		_contactorLineAdjust = pointsToMillimetres(linethick/2);
+		m4_ifelse(dirIsVertical(peekDir()), 1,
+			`arc cw from AM+(0,_contactorLineAdjust) to AM+(0,1.2+_contactorLineAdjust) with .c at AM+(0,0.6+_contactorLineAdjust)',
+			`arc cw from AM-(1.2+_contactorLineAdjust,0) to AM-(_contactorLineAdjust,0) with .c at AM-(0.6+_contactorLineAdjust,0)')
+	')
+	m4_ifelse(m4_index($1, `thermal'), -1, `', `
+		m4_ifelse(dirIsVertical(peekDir()), 1, `
+			Thermal1: polarCoord(MidContact, 0.63, 108);
+			Thermal2: polarCoord(Thermal1,   0.94, 198);
+			Thermal3: polarCoord(Thermal2,   0.94, 108);
+			Thermal4: polarCoord(Thermal3,   0.94, 198);
+			Thermal5: polarCoord(Thermal4,   0.94, 288);
+			Thermal6: polarCoord(Thermal5,   0.63, 198);
+			', `
+			Thermal1: polarCoord(MidContact, 0.63, 162);
+			Thermal2: polarCoord(Thermal1,   0.94,  72);
+			Thermal3: polarCoord(Thermal2,   0.94, 162);
+			Thermal4: polarCoord(Thermal3,   0.94,  72);
+			Thermal5: polarCoord(Thermal4,   0.94, 342);
+			Thermal6: polarCoord(Thermal5,   0.63,  72);
+		')
+		line from Thermal1 to Thermal2 then to Thermal3 then to Thermal4 then to Thermal5 then to Thermal6;
+	')
+	m4_ifelse(m4_index($1, `magnetic'), -1, `', `
+		m4_ifelse(dirIsVertical(peekDir()), 1, `
+			Magnetic1: polarCoord(MidContact, 0.63, 288);
+			Magnetic2: polarCoord(Magnetic1,  1.00, 198);
+			Magnetic3: polarCoord(Magnetic2,  0.50, 108);
+			Magnetic4: polarCoord(Magnetic2,  0.50, 288);
+			Magnetic5: polarCoord(Magnetic1,  2.30, 198);
+			', `
+			Magnetic1: polarCoord(MidContact, 0.63, 342);
+			Magnetic2: polarCoord(Magnetic1,  1.12,  72);
+			Magnetic3: polarCoord(Magnetic2,  0.50, 162);
+			Magnetic4: polarCoord(Magnetic2,  0.50, 342);
+			Magnetic5: polarCoord(Magnetic1,  2.40,  72);
+		')
+		line from Magnetic1 to Magnetic2;
+		line from Magnetic2 to Magnetic3 then to Magnetic5 then to Magnetic4 then to Magnetic2 shaded "black";
+	')
+	m4_ifelse(m4_index($1, `breaker'), -1, `', `
+		line from AM-(0.6,0.6) to AM+(0.6,0.6);
+		line from AM-(0.6,-0.6) to AM+(0.6,-0.6);
+	')
+')
+
 
 `
 Normally-open contact. Draws in current direction.
@@ -278,6 +369,8 @@ Params:
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	startLabel:	Starting terminal label. Defaults to "3".
 	endLabel:	Ending terminal label. Defaults to "4".
+	type:		Contact type. Can specify more than one. See "typeString" parameter in contactModifiers
+			for valid values.
 '
 m4_define_blind(`contactNO', `
 	componentParseKVArgs(`_contactNO_',
@@ -288,15 +381,10 @@ m4_define_blind(`contactNO', `
 		 `part', `',
 		 `set', `1',
 		 `startLabel', `3',
-		 `endLabel', `4'), $@)
+		 `endLabel', `4',
+		 `type', `'), $@)
 
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_contactNO_ref, `', `', m4_define(`_contactNO_ref_prefixed', a3SheetNum`'_contactNO_ref))
-
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_contactNO_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_contactNO_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_contactNO_ref`": invalid pic label' m4_newline())')
+	componentHandleRef(_contactNO_)
 	
 	# assemble terminal labels
 	m4_define(`_contactNO_fullStartLabel', _contactNO_set`'_contactNO_startLabel)
@@ -327,6 +415,8 @@ m4_define_blind(`contactNO', `
 			continue to BM + (-elen*(3/8), elen/8);
 		}
 		MidContact: 1/2 of the way between Here and BM;
+
+		componentAddContactModifiers(_contactNO_type)
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNO_fullStartLabel, `', `', `T_'_contactNO_fullStartLabel`: AO')
@@ -370,14 +460,7 @@ m4_define_blind(`contactNC', `
 		 `set', `1',
 		 `startLabel', `1',
 		 `endLabel', `2'), $@)
-
-	# if a ref was defined, prefix it with the sheet number
-	m4_ifelse(_contactNC_ref, `', `', m4_define(`_contactNC_ref_prefixed', a3SheetNum`'_contactNC_ref))
-
-	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse(m4_regexp(_contactNC_ref, `^[A-Z][A-Za-z0-9]*$'), 0,
-		_contactNC_ref`:', `m4_errprint(
-		`warning: could not define place name for ref "'_contactNC_ref`": invalid pic label' m4_newline())')
+	componentHandleRef(_contactNC_)
 	
 	# assemble terminal labels
 	m4_define(`_contactNC_fullStartLabel', _contactNC_set`'_contactNC_startLabel)
