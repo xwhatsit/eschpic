@@ -48,6 +48,7 @@ Params:
         numVTics:       How many vertical tic-mark divisions down sheet. Optional, defaults to 6.
         outerMargin:    How many millimetres margin around all four sides from sheet size to outer border. Optional, defaults to 10.
         innerMargin:    How many millimetres margin from outside border to inside border. Optional, defaults to 10.
+	prefixRefs:	Whether or not to prefix component references with the sheet number (e.g. "K1" becomes "3K1" on sheet 3). "true" or "false", defaults to "true"
 
 Sets these pic variables:
         maxpswid:       Gets set to appropriate value for A3 landscape output.
@@ -65,6 +66,7 @@ Defines the following macros:
         a3IH:           Actual drawable area height inside titleblock
         a3NumHTics:     Gets set to whatever numHTics was in a3TitleBlock() call
         a3NumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
+	a3PrefixRefs:	Gets set to whatever prefixRefs was in a3TitleBlock() call
 '
 m4_define_blind(`a3TitleBlock', `
 	# set default args
@@ -77,6 +79,7 @@ m4_define_blind(`a3TitleBlock', `
 	m4_define(`_a3_numVTics', 6)
 	m4_define(`_a3_outerMargin', 10)
 	m4_define(`_a3_innerMargin', 10)
+	m4_define(`_a3_prefixRefs', true)
 
 	# parse key-value arguments
 	m4_prefixKVArgs(`_a3_', $@)
@@ -95,6 +98,7 @@ m4_define_blind(`a3TitleBlock', `
         m4_define(`a3IH', `m4_eval(a3H - (2 * a3InnerMargin))')
         m4_define(`a3NumHTics', _a3_numHTics)
         m4_define(`a3NumVTics', _a3_numVTics)
+	m4_define(`a3PrefixRefs', m4_dequote(_a3_prefixRefs))
 
         maxpswid = a3W / 25.4
         maxpsht  = a3H / 25.4
