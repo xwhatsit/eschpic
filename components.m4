@@ -269,6 +269,123 @@ m4_define_blind(`coil', `
 ')
 
 `
+Helper macro for drawing button heads. Uses current direction.
+
+Usage: componentDrawButtonHead(type, pos, operationAngle, reversed)
+Params:
+	type:	Head type. One of "selector", "push", "pull", "mushroom", "foot", "key".
+	pos:	Location to draw it at.
+	operationAngle:	The direction of the operator, i.e. 180 if horizontal, 90 if vertical
+	reversed:	Set to 1 if normal, -1 if flipped
+'
+m4_define_blind(`componentDrawButtonHead', `
+	m4_ifelse($1, `manual', `
+		line from polarCoord($2, 1.2, $3 - 90) to polarCoord($2, 1.2, $3 + 90);
+	', $1, `selector', `
+		OperatorSelectorT: polarCoord($2, 1.2, $3 - $4*90);
+		OperatorSelectorB: polarCoord($2, 1.2, $3 + $4*90);
+		line from polarCoord(OperatorSelectorB, 0.8, $3) to OperatorSelectorB \
+			then to OperatorSelectorT \
+			then to polarCoord(OperatorSelectorT, 0.8, $3 - 180);
+	', $1, `push', `
+		OperatorPushT: polarCoord($2, 1.2, $3 - 90);
+		OperatorPushB: polarCoord($2, 1.2, $3 + 90);
+		line from polarCoord(OperatorPushB, 0.8, $3 - 180) to OperatorPushB \
+			then to OperatorPushT \
+			then to polarCoord(OperatorPushT, 0.8, $3 - 180);
+	', $1, `pull', `
+		OperatorPullT: polarCoord($2, 1.2, $3 - 90);
+		OperatorPullB: polarCoord($2, 1.2, $3 + 90);
+		line from polarCoord(OperatorPullB, 0.8, $3) to OperatorPullB \
+			then to OperatorPullT \
+			then to polarCoord(OperatorPullT, 0.8, $3);
+	', $1, `mushroom', `
+		OperatorEStopT: polarCoord($2, 1.2, $3 - 90);
+		OperatorEStopB: polarCoord($2, 1.2, $3 + 90);
+		arc cw from OperatorEStopB to OperatorEStopT with .c at $2;
+		line from OperatorEStopB to \
+			polarCoord(OperatorEStopB, pointsToMillimetres(linethick/2), $3 - 180);
+		line from OperatorEStopT to \
+			polarCoord(OperatorEStopT, pointsToMillimetres(linethick/2), $3 - 180);
+		line from OperatorEStopB to OperatorEStopT;
+	', $1, `foot', `
+		OperatorFootT: polarCoord($2,   1.33, $3 - $4*117);
+		OperatorFootB: polarCoord($2,   1.33, $3 + $4*63);
+		OperatorFootL: polarCoord(OperatorFootB, 0.89, $3 - $4*27);
+		line from OperatorFootL to OperatorFootB to OperatorFootT;
+	', $1, `key', `
+		OperatorKeyTT: polarCoord($2,            1.33, $3 - $4*76);
+		OperatorKeyTC: polarCoord(OperatorKeyTT, 0.50, $3 + $4*90);
+		OperatorKeyBM: polarCoord(OperatorKeyTT, 2.48, $3 + $4*90);
+		OperatorKeyBL: polarCoord(OperatorKeyBM, 0.50, $3);
+		OperatorKeyBR: polarCoord(OperatorKeyBM, 0.50, $3 - 180);
+		circle rad 0.5 at OperatorKeyTC;
+		line from polarCoord(OperatorKeyTT, 1.0, $3 + $4*76) \
+			to polarCoord(OperatorKeyBL, 0.5, $3 - $4*90) \
+			to OperatorKeyBL \
+			to OperatorKeyBR \
+			to polarCoord(OperatorKeyBR, 0.5, $3 - $4*90) \
+			to polarCoord(OperatorKeyTT, 1.0, $3 - $4*256);
+	')
+')
+
+
+`
+Helper macro for drawing contact operators (e.g. see "operation" parameter in contactNO). Should be called
+within contact macro block itself (i.e. with "[", "]" brackets). Tries to combine multiple things in an
+intelligent way.
+
+Usage: componentAddContactOperators(operatorString, [isNCContact])
+Params:
+	operatorString: Space-separated string of operator modifiers. Can be composed of following:
+			heads:  "manual", "selector", "turn", "twist" "push", "pull", "estop", "mushroom",
+			        "foot", "key"
+			action: "maintained", "3-pos", "mid-off", "left-return", "right-return"
+			reset:  any head listed above followed by "-reset" (e.g. "pull-reset")
+'
+m4_define_blind(`componentAddContactOperators', `
+	m4_pushdef(`operatorString', ` '$1` ')
+
+	m4_ifelse(dirIsVertical(peekDir()), 1, `
+		operatorAngle = 180;
+		operatorRev = 1;
+	', `
+		operatorAngle = 90;
+		operatorRev = -1;
+	');
+	OperatorPos: polarCoord(MidContact, 4, operatorAngle);
+
+	# draw reset action
+	#m4_ifelse(m4_eval(m4_index(operatorString, ` pull-reset '
+
+	# draw operator head
+	m4_ifelse(m4_eval(m4_index(operatorString, ` manual ') != -1), 1, `
+		m4_pushdef(`operatorHead', manual)
+	', m4_eval(m4_index(operatorString, ` selector ') != -1 ||
+	           m4_index(operatorString, ` turn ')     != -1 ||
+		   m4_index(operatorString, ` twist ')    != -1), 1, `
+		m4_pushdef(`operatorHead', selector)
+	', m4_eval(m4_index(operatorString, ` push ') != -1), 1, `
+		m4_pushdef(`operatorHead', push)
+	', m4_eval(m4_index(operatorString, ` pull ') != -1), 1, `
+		OperatorPos: polarCoord(OperatorPos, 0.825, operatorAngle - 180);
+		m4_pushdef(`operatorHead', pull)
+	', m4_eval(m4_index(operatorString, ` estop ') != -1 ||
+	                  m4_index(operatorString, ` mushroom ') != -1), 1, `
+		m4_pushdef(`operatorHead', mushroom)
+	', m4_eval(m4_index(operatorString, ` foot ') != -1), 1, `
+		OperatorPos: polarCoord(OperatorPos, 0.63, operatorAngle - 180);
+		m4_pushdef(`operatorHead', foot)
+	', m4_eval(m4_index(operatorString, ` key ') != -1), 1, `
+		m4_pushdef(`operatorHead', key)
+	')
+	componentDrawButtonHead(operatorHead, OperatorPos, operatorAngle, operatorRev)
+	m4_popdef(`operatorHead')
+
+	m4_popdef(`operatorString')
+')
+
+`
 Helper macro for drawing contact modifiers (e.g. see "type" parameter in contactNO). Should be called within
 contact macro block itself (i.e. within "[", "]" brackets).
 
@@ -378,8 +495,10 @@ Params:
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	startLabel:	Starting terminal label. Defaults to "3".
 	endLabel:	Ending terminal label. Defaults to "4".
-	type:		Contact type. Can specify more than one. See "typeString" parameter in contactModifiers
-			for valid values.
+	type:		Contact type. Can specify more than one. See "typeString" parameter in
+	                componentAddContactModifiers for valid values.
+	operation:	Means of contact operation. Can specify more than one. See "operationString" parameter
+	                in componentAddContactOperators for valid values.
 '
 m4_define_blind(`contactNO', `
 	componentParseKVArgs(`_contactNO_',
@@ -391,7 +510,8 @@ m4_define_blind(`contactNO', `
 		 `set', `1',
 		 `startLabel', `3',
 		 `endLabel', `4',
-		 `type', `'), $@)
+		 `type', `',
+		 `operation', `'), $@)
 
 	componentHandleRef(_contactNO_)
 	
@@ -426,6 +546,7 @@ m4_define_blind(`contactNO', `
 		MidContact: polarCoord(BM, 2.51, contactAngle);
 
 		componentAddContactModifiers(_contactNO_type)
+		componentAddContactOperators(_contactNO_operation)
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNO_fullStartLabel, `', `', `T_'_contactNO_fullStartLabel`: AO')
@@ -471,7 +592,8 @@ m4_define_blind(`contactNC', `
 		 `set', `1',
 		 `startLabel', `1',
 		 `endLabel', `2',
-		 `type', `'), $@)
+		 `type', `',
+		 `operation', `'), $@)
 	componentHandleRef(_contactNC_)
 	
 	# assemble terminal labels
@@ -507,6 +629,7 @@ m4_define_blind(`contactNC', `
 		MidContact: polarCoord(BM, 2.51, contactAngle);
 
 		componentAddContactModifiers(_contactNC_type, true)
+		componentAddContactOperators(_contactNC_operation, true)
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNC_fullStartLabel, `', `', `T_'_contactNC_fullStartLabel`: AO')
