@@ -272,10 +272,11 @@ m4_define_blind(`coil', `
 Helper macro for drawing contact modifiers (e.g. see "type" parameter in contactNO). Should be called within
 contact macro block itself (i.e. within "[", "]" brackets).
 
-Usage: componentAddContactModifiers(typeString)
+Usage: componentAddContactModifiers(typeString, [isNCContact])
 Params:
 	typeString: Space-separated string of contact modifiers. Can be composed of "switch",
-	            "disconnect", "fuse", "contactor", "thermal", "magnetic", "breaker".
+	            "disconnect", "fuse", "contactor", "thermal", "magnetic", "breaker", "limit".
+	isNCContact: Optional. Should be set to "true" if this is a normally-closed contact.
 '
 m4_define_blind(`componentAddContactModifiers', `
 	m4_ifelse(m4_index($1, `switch'), -1, `', `
@@ -352,6 +353,14 @@ m4_define_blind(`componentAddContactModifiers', `
 		line from AM-(0.6,0.6) to AM+(0.6,0.6);
 		line from AM-(0.6,-0.6) to AM+(0.6,-0.6);
 	')
+	m4_ifelse(m4_index($1, `limit'), -1, `', `
+		m4_ifelse(dirIsVertical(peekDir()), 1, `_limitRev = 1', `_limitRev = -1');
+		m4_ifelse(m4_dequote($2), `true', `_limitAdjust = 0.83', `_limitAdjust = 0');
+		LimitT: polarCoord(MidContact, 1.40 - _limitAdjust, contactAngle);
+		LimitB: polarCoord(MidContact, 0.98 + _limitAdjust, contactAngle + _limitRev*180);
+		LimitL: polarCoord(LimitT,     1.19, contactAngle + _limitRev*90);
+		line from LimitB to LimitL then to LimitT;
+	')
 ')
 
 
@@ -407,14 +416,14 @@ m4_define_blind(`contactNO', `
 		AM: 5/16 of the way between AO and BO;
 		BM: 5/16 of the way between BO and AO;
 
-		line from AO to AM;
-		line from BO to BM;
 		if dirIsVertical(peekDir()) then {
-			continue to BM + (-elen/8, elen*(3/8));
+			contactAngle = 108;
 		} else {
-			continue to BM + (-elen*(3/8), elen/8);
+			contactAngle = 162;
 		}
-		MidContact: 1/2 of the way between Here and BM;
+		line from AO to AM;
+		line from BO to BM then to polarCoord(BM, 5.02, contactAngle);
+		MidContact: polarCoord(BM, 2.51, contactAngle);
 
 		componentAddContactModifiers(_contactNO_type)
 
@@ -449,6 +458,8 @@ Params:
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	startLabel:	Starting terminal label. Defaults to "1".
 	endLabel:	Ending terminal label. Defaults to "2".
+	type:		Contact type. Can specify more than one. See "typeString" parameter in contactModifiers
+			for valid values. Not all will work properly with NC contact.
 '
 m4_define_blind(`contactNC', `
 	componentParseKVArgs(`_contactNC_',
@@ -459,7 +470,8 @@ m4_define_blind(`contactNC', `
 		 `part', `',
 		 `set', `1',
 		 `startLabel', `1',
-		 `endLabel', `2'), $@)
+		 `endLabel', `2',
+		 `type', `'), $@)
 	componentHandleRef(_contactNC_)
 	
 	# assemble terminal labels
@@ -485,14 +497,16 @@ m4_define_blind(`contactNC', `
 
 		if dirIsVertical(peekDir()) then {
 			topAngle = 0;
-			bottomAngle = 72;
+			contactAngle = 72;
 		} else {
 			topAngle = 270;
-			bottomAngle = 198;
+			contactAngle = 198;
 		}
 		line from AO to AM then to polarCoord(AM, elen*(5/32), topAngle);
-		line from BO to BM then to polarCoord(BM, elen*0.42, bottomAngle);
-		MidContact: polarCoord(BM, elen*(3/16) / sind(bottomAngle), bottomAngle);
+		line from BO to BM then to polarCoord(BM, elen*0.42, contactAngle);
+		MidContact: polarCoord(BM, 2.51, contactAngle);
+
+		componentAddContactModifiers(_contactNC_type, true)
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNC_fullStartLabel, `', `', `T_'_contactNC_fullStartLabel`: AO')
