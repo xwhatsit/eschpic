@@ -326,6 +326,9 @@ m4_define_blind(`componentDrawButtonHead', `
 			to OperatorKeyBR \
 			to polarCoord(OperatorKeyBR, 0.5, $3 - $4*90) \
 			to polarCoord(OperatorKeyTT, 1.0, $3 - $4*256);
+	', $1, `turn',  `componentDrawButtonHead(selector, $2, $3, $4)
+	', $1, `twist', `componentDrawButtonHead(selector, $2, $3, $4)
+	', $1, `estop', `componentDrawButtonHead(mushroom, $2, $3, $4)
 	')
 ')
 
@@ -356,32 +359,71 @@ m4_define_blind(`componentAddContactOperators', `
 	OperatorPos: polarCoord(MidContact, 4, operatorAngle);
 
 	# draw reset action
-	#m4_ifelse(m4_eval(m4_index(operatorString, ` pull-reset '
+	m4_pushdef(`operatorReset', m4_regexp(operatorString, `[ \t]\([A-Za-z]+\)-reset[ \t]', `\1'))
+	m4_ifelse(operatorReset, `', `', `
+		OperatorResetB: polarCoord(MidContact,     elen/8, operatorAngle);
+		OperatorResetT: polarCoord(OperatorResetB, elen/4, operatorAngle - operatorRev*90);
+		OperatorResetL: polarCoord(OperatorResetT, 2.4,    operatorAngle);
+		line dashed elen/18 from OperatorResetB to OperatorResetT to OperatorResetL;
+		componentDrawButtonHead(operatorReset, OperatorResetL, operatorAngle, operatorRev);
+	')
 
-	# draw operator head
+	# determine operator head, modify OperatorPos if necessary
+	m4_pushdef(`operatorHead', `')
 	m4_ifelse(m4_eval(m4_index(operatorString, ` manual ') != -1), 1, `
-		m4_pushdef(`operatorHead', manual)
+		m4_define(`operatorHead', manual)
 	', m4_eval(m4_index(operatorString, ` selector ') != -1 ||
 	           m4_index(operatorString, ` turn ')     != -1 ||
 		   m4_index(operatorString, ` twist ')    != -1), 1, `
-		m4_pushdef(`operatorHead', selector)
+		m4_define(`operatorHead', selector)
 	', m4_eval(m4_index(operatorString, ` push ') != -1), 1, `
-		m4_pushdef(`operatorHead', push)
+		m4_define(`operatorHead', push)
 	', m4_eval(m4_index(operatorString, ` pull ') != -1), 1, `
 		OperatorPos: polarCoord(OperatorPos, 0.825, operatorAngle - 180);
-		m4_pushdef(`operatorHead', pull)
+		m4_define(`operatorHead', pull)
 	', m4_eval(m4_index(operatorString, ` estop ') != -1 ||
 	                  m4_index(operatorString, ` mushroom ') != -1), 1, `
-		m4_pushdef(`operatorHead', mushroom)
+		m4_define(`operatorHead', mushroom)
 	', m4_eval(m4_index(operatorString, ` foot ') != -1), 1, `
 		OperatorPos: polarCoord(OperatorPos, 0.63, operatorAngle - 180);
-		m4_pushdef(`operatorHead', foot)
+		m4_define(`operatorHead', foot)
 	', m4_eval(m4_index(operatorString, ` key ') != -1), 1, `
-		m4_pushdef(`operatorHead', key)
+		m4_define(`operatorHead', key)
 	')
-	componentDrawButtonHead(operatorHead, OperatorPos, operatorAngle, operatorRev)
-	m4_popdef(`operatorHead')
 
+	# draw action
+	m4_ifelse(m4_index(operatorString, ` 3-pos '), -1, `
+		m4_ifelse(m4_eval(m4_index(operatorString, ` maintained ') != -1), 1, `
+			OperatorPos: polarCoord(OperatorPos, 1.5, operatorAngle);
+			OperatorActM: 1/2 between MidContact and OperatorPos;
+
+			# drawn differently if we have a reset action
+			m4_ifelse(operatorReset, `', `
+				OperatorActB: polarCoord(OperatorActM, 1.2, operatorAngle + operatorRev*90);
+				OperatorActL: polarCoord(OperatorActM, 0.4, operatorAngle);
+				OperatorActR: polarCoord(OperatorActM, 0.4, operatorAngle - 180);
+				line from polarCoord(OperatorActL, pointsToMillimetres(linethick/2), operatorAngle) \
+					to OperatorActL to OperatorActB to OperatorActR \
+					to polarCoord(OperatorActR, pointsToMillimetres(linethick/2), operatorAngle - 180);
+				line dashed elen/18 from OperatorPos to OperatorActL;
+				line dashed elen/18 from MidContact to OperatorActR;
+			', `
+				OperatorActL: polarCoord(OperatorActM, 1.20, operatorAngle);
+				OperatorActR: polarCoord(OperatorActM, 0.46, operatorAngle - 180);
+				OperatorActT: polarCoord(OperatorActL, 0.77, operatorAngle - 90*operatorRev);
+				line from OperatorActL to OperatorActT to OperatorActR;
+				line dashed elen/18 from OperatorPos to MidContact;
+			')
+		', `
+			m4_ifelse(operatorHead, `', `', `line dashed elen/18 from OperatorPos to MidContact')
+		')
+	')
+
+	# finally draw button head
+	componentDrawButtonHead(operatorHead, OperatorPos, operatorAngle, operatorRev)
+
+	m4_popdef(`operatorReset')
+	m4_popdef(`operatorHead')
 	m4_popdef(`operatorString')
 ')
 
