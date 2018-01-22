@@ -273,10 +273,10 @@ Helper macro for drawing button heads. Uses current direction.
 
 Usage: componentDrawButtonHead(type, pos, operationAngle, reversed)
 Params:
-	type:	Head type. One of "selector", "push", "pull", "mushroom", "foot", "key".
-	pos:	Location to draw it at.
-	operationAngle:	The direction of the operator, i.e. 180 if horizontal, 90 if vertical
-	reversed:	Set to 1 if normal, -1 if flipped
+	type:	        Head type. One of "selector", "push", "pull", "mushroom", "foot", "key".
+	pos:	        Location to draw it at.
+	operationAngle:	The direction of the operator, i.e. 180 if horizontal, 90 if vertical.
+	reversed:	Set to 1 if normal, -1 if flipped.
 '
 m4_define_blind(`componentDrawButtonHead', `
 	m4_ifelse($1, `manual', `
@@ -334,6 +334,53 @@ m4_define_blind(`componentDrawButtonHead', `
 
 
 `
+Helper macro for drawing button actions. Uses current direction. Defines at the very least
+two positions, OperatorActL and OperatorActR, which are the connection points on either side.
+
+Usage: componentDrawButtonAction(type, pos, operationAngle, reversed)
+Params:
+	type:           Action type. One of "maintained", "maintained-reset", "off",
+	                "spring-return-l", "spring-return-r".
+	pos:            Location to draw it at.
+	operationAngle: The direction of the operator, i.e. 180 if horizontal, 90 if vertical.
+	reversed:       Set to 1 if normal, -1 if flipped.
+'
+m4_define_blind(`componentDrawButtonAction', `
+	m4_ifelse($1, `maintained', `
+		OperatorActB: polarCoord($2, 1.2, operatorAngle + operatorRev*90);
+		OperatorActL: polarCoord($2, 0.4, operatorAngle);
+		OperatorActR: polarCoord($2, 0.4, operatorAngle - 180);
+		line from polarCoord(OperatorActL, pointsToMillimetres(linethick/2), operatorAngle) \
+			to OperatorActL to OperatorActB to OperatorActR \
+			to polarCoord(OperatorActR, pointsToMillimetres(linethick/2), operatorAngle - 180);
+	', $1, `maintained-reset', `
+		OperatorActL: polarCoord($2,           1.20, operatorAngle);
+		OperatorActR: polarCoord($2,           0.46, operatorAngle - 180);
+		OperatorActT: polarCoord(OperatorActL, 0.77, operatorAngle - 90*operatorRev);
+		line from OperatorActL to OperatorActT to OperatorActR;
+	', $1, `off', `
+		OperatorActL: $2;
+		OperatorActR: $2;
+		line dashed elen/25 \
+			from polarCoord($2, pointsToMillimetres(linethick/2), operatorAngle + 90*operatorRev) \
+			to polarCoord($2, 1.6, operatorAngle - 90*operatorRev);
+	', $1, `spring-return-l', `
+		OperatorActL: polarCoord($2,           0.4, operatorAngle);
+		OperatorActR: polarCoord($2,           1.2, operatorAngle - 180);
+		OperatorActT: polarCoord(OperatorActL, 0.8, operatorAngle - 90*operatorRev);
+		OperatorActB: polarCoord(OperatorActL, 0.8, operatorAngle + 90*operatorRev);
+		line from OperatorActR to OperatorActB to OperatorActL to OperatorActT to OperatorActR;
+	', $1, `spring-return-r', `
+		OperatorActL: polarCoord($2,           1.2, operatorAngle);
+		OperatorActR: polarCoord($2,           0.4, operatorAngle - 180);
+		OperatorActT: polarCoord(OperatorActR, 0.8, operatorAngle - 90*operatorRev);
+		OperatorActB: polarCoord(OperatorActR, 0.8, operatorAngle + 90*operatorRev);
+		line from OperatorActR to OperatorActB to OperatorActL to OperatorActT to OperatorActR;
+	')
+')
+
+
+`
 Helper macro for drawing contact operators (e.g. see "operation" parameter in contactNO). Should be called
 within contact macro block itself (i.e. with "[", "]" brackets). Tries to combine multiple things in an
 intelligent way.
@@ -343,7 +390,7 @@ Params:
 	operatorString: Space-separated string of operator modifiers. Can be composed of following:
 			heads:  "manual", "selector", "turn", "twist" "push", "pull", "estop", "mushroom",
 			        "foot", "key"
-			action: "maintained", "3-pos", "mid-off", "left-return", "right-return"
+			action: "maintained", "3-pos", "mid-off", "spring-return", "spring-return-l", "spring-return-r"
 			reset:  any head listed above followed by "-reset" (e.g. "pull-reset")
 '
 m4_define_blind(`componentAddContactOperators', `
@@ -399,24 +446,49 @@ m4_define_blind(`componentAddContactOperators', `
 
 			# drawn differently if we have a reset action
 			m4_ifelse(operatorReset, `', `
-				OperatorActB: polarCoord(OperatorActM, 1.2, operatorAngle + operatorRev*90);
-				OperatorActL: polarCoord(OperatorActM, 0.4, operatorAngle);
-				OperatorActR: polarCoord(OperatorActM, 0.4, operatorAngle - 180);
-				line from polarCoord(OperatorActL, pointsToMillimetres(linethick/2), operatorAngle) \
-					to OperatorActL to OperatorActB to OperatorActR \
-					to polarCoord(OperatorActR, pointsToMillimetres(linethick/2), operatorAngle - 180);
+				componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev);
 				line dashed elen/18 from OperatorPos to OperatorActL;
 				line dashed elen/18 from MidContact to OperatorActR;
 			', `
-				OperatorActL: polarCoord(OperatorActM, 1.20, operatorAngle);
-				OperatorActR: polarCoord(OperatorActM, 0.46, operatorAngle - 180);
-				OperatorActT: polarCoord(OperatorActL, 0.77, operatorAngle - 90*operatorRev);
-				line from OperatorActL to OperatorActT to OperatorActR;
+				componentDrawButtonAction(maintained-reset, OperatorActM, operatorAngle, operatorRev);
 				line dashed elen/18 from OperatorPos to MidContact;
 			')
 		', `
 			m4_ifelse(operatorHead, `', `', `line dashed elen/18 from OperatorPos to MidContact')
 		')
+	', `
+		OperatorPos: polarCoord(OperatorPos, 4.73, operatorAngle);
+		operatorPosActSpacing = (8.73 - 1.6) / 3;
+		operatorPosEndOffset = (8.73 - (2 * operatorPosActSpacing)) / 2;
+
+		OperatorActM: polarCoord(MidContact, operatorPosEndOffset, operatorAngle);
+		m4_ifelse(m4_eval(m4_index(operatorString, ` spring-return ') != -1 ||
+		                  m4_index(operatorString, ` spring-return-r ') != -1), 1, `
+			componentDrawButtonAction(spring-return-r, OperatorActM, operatorAngle, operatorRev)
+		', `
+			componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev)
+		')
+		line dashed elen/25 from MidContact to OperatorActR;
+		PrevOperatorActL: OperatorActL;
+
+		OperatorActM: polarCoord(OperatorActM, operatorPosActSpacing, operatorAngle);
+		m4_ifelse(m4_eval(m4_index(operatorString, ` mid-off ') != -1), 1, `
+			componentDrawButtonAction(off, OperatorActM, operatorAngle, operatorRev);
+		', `
+			componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev);
+		')
+		line dashed elen/25 from PrevOperatorActL to OperatorActR;
+		PrevOperatorActL: OperatorActL;
+
+		OperatorActM: polarCoord(OperatorActM, operatorPosActSpacing, operatorAngle);
+		m4_ifelse(m4_eval(m4_index(operatorString, ` spring-return ') != -1 ||
+		                  m4_index(operatorString, ` spring-return-l ') != -1), 1, `
+			componentDrawButtonAction(spring-return-l, OperatorActM, operatorAngle, operatorRev);
+		', `
+			componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev);
+		')
+		line dashed elen/25 from PrevOperatorActL to OperatorActR;
+		line dashed elen/25 from OperatorPos to OperatorActL;
 	')
 
 	# finally draw button head
