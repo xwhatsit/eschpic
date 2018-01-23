@@ -269,6 +269,22 @@ m4_define_blind(`coil', `
 ')
 
 
+`
+3-phase contactor.
+
+Usage: contactor3ph([comma-separated key-value parameters])
+Params:
+	pos:		Position to place first contact's (or the coil's) ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	startLabel:	Starting terminal label. Defaults to "A1".
+	endLabel:	Ending terminal label. Defaults to "A2".
+'
+
+
 m4_divert(0)
 
 # vim: filetype=pic

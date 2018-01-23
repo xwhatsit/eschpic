@@ -362,7 +362,7 @@ m4_define_blind(`contactNO', `
 		 `operation', `'), $@)
 
 	componentHandleRef(_contactNO_)
-	
+
 	# assemble terminal labels
 	m4_define(`_contactNO_fullStartLabel', _contactNO_set`'_contactNO_startLabel)
 	m4_define(`_contactNO_fullEndLabel', _contactNO_set`'_contactNO_endLabel)
@@ -593,8 +593,104 @@ m4_define_blind(`contactCO', `
 ')
 
 
-#`
-#Multi-contact group. Useful for contactors, relays, 
+`
+Multi-contact group. Useful for contactors, relays etc.
+
+Usage contactGroup([comma-separated key-value parameters])
+Params:
+	pos:		Position to place first contact ".Start" at. Defaults to "Here".
+	flipped:	Whether contacts are flipped. Either "true" or "false". Defaults to "false".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	type:		See contactNO, contactNC.
+	operation:	See contactNO, contactNC.
+	contacts:	Description of what contacts, in the syntax "NO(startLabel, endLabel) NC(startLabel, endLabel)...".
+			If startLabel or endLabel are omitted (e.g. "NO" or "NO()"), they will be autonumbered using the default
+			labels and by incrementing the set number. If contact is in lowercase (e.g. "no" or "nc"), then the
+			contact "type" will not be applied.
+'
+m4_define_blind(`contactGroup', `
+	componentParseKVArgs(`_contactGroup_',
+		(`pos', `Here',
+		 `flipped', `false',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `type', `',
+		 `operation', `',
+		 `contacts', `'), $@)
+	
+	[
+		pushDir();
+		dirToDirection(peekDir())
+		m4_define(`_contactGroup_set', 1)
+		m4_define(`_contactGroup_first', 1)
+		_contactGroupParseContacts(_contactGroup_contacts)
+		line dashed elen/18 from 1st [].MidContact to last [].MidContact;
+		popDir();
+	] with . 1st [].Start at _contactGroup_pos;
+')
+m4_define_blind(`_contactGroupParseContacts', `
+	m4_pushdef(`_regexp', `\(NO\|NC\|no\|nc\)\( *(\w* *, *\w* *)\)?')
+
+	m4_pushdef(`_index', m4_regexp($1, _regexp))
+	m4_ifelse(_index, -1, `', `
+		m4_pushdef(`length', m4_regexp($1, _regexp, `m4_len(\&)'))
+
+		m4_regexp($1, _regexp, `m4_pushdef(`_type', `\1') m4_pushdef(`_args', `\2')')
+
+		m4_regexp(_args, `( *\(\w*\) *, *\(\w*\) *)', `m4_pushdef(`_firstArg', `\1') m4_pushdef(`_secondArg', `\2')')
+
+		m4_ifelse(_args, `', `
+			m4_pushdef(`_set', _contactGroup_set)
+			m4_define(`_contactGroup_set', m4_eval(_contactGroup_set + 1))
+			m4_pushdef(`_labelParams', `')
+		', `
+			m4_pushdef(`_set', `')
+			m4_pushdef(`_labelParams', `startLabel=_firstArg, endLabel=_secondArg')
+		')
+
+		m4_pushdef(`_operation', m4_ifelse(_contactGroup_first, 1, _contactGroup_operation, `'))
+		m4_define(`_contactGroup_first', 0)
+
+		m4_pushdef(`_contactType', _contactGroup_type)
+		m4_ifelse(_type, `no', `
+			m4_define(_type, NO)
+			m4_define(_contactType, `')
+		')
+		m4_ifelse(_type, `nc', `
+			m4_define(_type, NC)
+			m4_define(_contactType, `')
+		')
+
+		m4_ifelse(_type, `NO', `contactNO', _type, `NC', `contactNC')(
+			set=_set,
+			_labelParams,
+			type=_contactType,
+			operation=_operation,
+			flipped=_contactGroup_flipped,
+		)
+		move to last [].Start;
+		m4_ifelse(dirIsVertical(peekDir()), 1, `move `right' elen/2', `move `down' elen/2');
+
+		m4_popdef(`_contactType')
+		m4_popdef(`_operation')
+		m4_popdef(`_labelParams')
+		m4_popdef(`_set')
+		m4_popdef(`_secondArg')
+		m4_popdef(`_firstArg')
+		m4_popdef(`_type')
+		m4_popdef(`_args')
+
+		_contactGroupParseContacts(m4_substr($1, m4_eval(_index + length)))
+	')
+	m4_popdef(`_index')
+	m4_popdef(`_regexp')
+')
 
 m4_divert(0)
 
