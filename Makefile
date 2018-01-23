@@ -11,6 +11,7 @@ M4_OPTS=-P # prefix builtins with "m4_"
 
 M4_DEPS=components.m4 \
 	connectors.m4 \
+	contacts.m4   \
 	direction.m4  \
 	eschpic.m4    \
 	text.m4       \
