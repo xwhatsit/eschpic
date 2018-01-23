@@ -424,6 +424,7 @@ Normally-closed contact. Draws in current direction.
 Usage: contactNC([comma-separated key-value parameters])
 Params:
 	pos:		Position to place ".Start" at. Defaults to "Here".
+	flipped:	Whether contact is flipped. Either "true" or "false". Defaults to "false".
 	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
@@ -440,6 +441,7 @@ Params:
 m4_define_blind(`contactNC', `
 	componentParseKVArgs(`_contactNC_',
 		(`pos', `Here',
+		 `flipped', `false',
 		 `ref', `',
 		 `val', `',
 		 `description', `',
@@ -461,13 +463,15 @@ m4_define_blind(`contactNC', `
 		Start: Here;
 		move dirToDirection(peekDir()) elen;
 		End: Here;
-		if dirIsConventional(peekDir()) then {
+
+		m4_define(`_contactNC_flipped', m4_eval(m4_index(_contactNC_flipped, `true') != -1))
+		m4_ifelse(m4_eval(_contactNC_flipped ^ dirIsConventional(peekDir())), 1, `
 			AO: Start;
 			BO: End;
-		} else {
+		', `
 			AO: End;
 			BO: Start;
-		}
+		')
 
 		AM: 1/2.9 of the way between AO and BO;
 		BM: 5/16 of the way between BO and AO;
@@ -475,9 +479,11 @@ m4_define_blind(`contactNC', `
 		if dirIsVertical(peekDir()) then {
 			topAngle = 0;
 			contactAngle = 72;
+			m4_ifelse(_contactNC_flipped, 1, `contactAngle = 360 - contactAngle');
 		} else {
 			topAngle = 270;
 			contactAngle = 198;
+			m4_ifelse(_contactNC_flipped, 1, `contactAngle = 180 - contactAngle');
 		}
 		line from AO to AM then to polarCoord(AM, elen*(5/32), topAngle);
 		line from BO to BM then to polarCoord(BM, elen*0.42, contactAngle);
@@ -494,8 +500,8 @@ m4_define_blind(`contactNC', `
 	] with .Start at _contactNC_pos;
 
 	# display terminal labels
-	componentDrawTerminalLabel(last [].AO, textTerminalLabel(_contactNC_set`'_contactNC_fullStartLabel));
-	componentDrawTerminalLabel(last [].BO, textTerminalLabel(_contactNC_set`'_contactNC_fullEndLabel));
+	componentDrawTerminalLabel(last [].AO, _contactNC_fullStartLabel);
+	componentDrawTerminalLabel(last [].BO, _contactNC_fullEndLabel);
 
 	componentDrawLabels(_contactNC_)
 
@@ -579,7 +585,7 @@ m4_define_blind(`contactCO', `
 	] with .Start at _contactCO_pos;
 
 	# display terminal labels (these will already be drawn for NO contact)
-	componentDrawTerminalLabel(last [].NC, textTerminalLabel(_contactCO_fullNCLabel));
+	componentDrawTerminalLabel(last [].NC, _contactCO_fullNCLabel);
 
 	componentDrawLabels(_contactCO_)
 
