@@ -611,6 +611,9 @@ Params:
 			If startLabel or endLabel are omitted (e.g. "NO" or "NO()"), they will be autonumbered using the default
 			labels and by incrementing the set number. If contact is in lowercase (e.g. "no" or "nc"), then the
 			contact "type" will not be applied.
+	linked:		Whether to draw dashed linking line on the contacts. Defaults to "true".
+	preDraw:	Any drawing commands to include before drawing the contacts
+	postDraw:	Any drawing commands to include after drawing the contacts
 '
 m4_define_blind(`contactGroup', `
 	componentParseKVArgs(`_contactGroup_',
@@ -622,17 +625,35 @@ m4_define_blind(`contactGroup', `
 		 `part', `',
 		 `type', `',
 		 `operation', `',
-		 `contacts', `'), $@)
-	
+		 `contacts', `',
+		 `linked', `true',
+		 `preDraw', `',
+		 `postDraw', `'), $@)
+	componentHandleRef(_contactGroup_)
 	[
 		pushDir();
 		dirToDirection(peekDir())
+
+		_contactGroup_preDraw
+
 		m4_define(`_contactGroup_set', 1)
-		m4_define(`_contactGroup_first', 1)
+		m4_define(`_contactGroup_contactNum', 0)
 		_contactGroupParseContacts(_contactGroup_contacts)
-		line dashed elen/18 from 1st [].MidContact to last [].MidContact;
+
+		FirstContactStart:      _contactGroup_contactNum`'th last [].Start;
+		FirstContactMidContact: _contactGroup_contactNum`'th last [].MidContact;
+		FirstContactEnd:        _contactGroup_contactNum`'th last [].End;
+		m4_ifelse(_contactGroup_linked, `true',
+			`line dashed elen/18 from FirstContactMidContact to last [].MidContact');
+
+		_contactGroup_postDraw
+
 		popDir();
-	] with . 1st [].Start at _contactGroup_pos;
+	] with .FirstContactStart at _contactGroup_pos;
+
+	componentDrawLabels(_contactGroup_)
+
+	move to last [].FirstContactEnd;
 ')
 m4_define_blind(`_contactGroupParseContacts', `
 	m4_pushdef(`_regexp', `\(NO\|NC\|no\|nc\)\( *(\w* *, *\w* *)\)?')
@@ -654,8 +675,8 @@ m4_define_blind(`_contactGroupParseContacts', `
 			m4_pushdef(`_labelParams', `startLabel=_firstArg, endLabel=_secondArg')
 		')
 
-		m4_pushdef(`_operation', m4_ifelse(_contactGroup_first, 1, _contactGroup_operation, `'))
-		m4_define(`_contactGroup_first', 0)
+		m4_pushdef(`_operation', m4_ifelse(_contactGroup_contactNum, 0, _contactGroup_operation, `'))
+		m4_define(`_contactGroup_contactNum', m4_eval(_contactGroup_contactNum + 1))
 
 		m4_pushdef(`_contactType', _contactGroup_type)
 		m4_ifelse(_type, `no', `
@@ -674,6 +695,13 @@ m4_define_blind(`_contactGroupParseContacts', `
 			operation=_operation,
 			flipped=_contactGroup_flipped,
 		)
+
+		# redefine terminal labels if they exist
+		m4_ifelse(m4_indir(_contact`'_type`'_fullStartLabel), `', `',
+			`T_'m4_indir(_contact`'_type`'_fullStartLabel)`: last [].T_'m4_indir(_contact`'_type`'_fullStartLabel))
+		m4_ifelse(m4_indir(_contact`'_type`'_fullEndLabel), `', `',
+			`T_'m4_indir(_contact`'_type`'_fullEndLabel)`: last [].T_'m4_indir(_contact`'_type`'_fullEndLabel))
+
 		move to last [].Start;
 		m4_ifelse(dirIsVertical(peekDir()), 1, `move `right' elen/2', `move `down' elen/2');
 

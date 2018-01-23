@@ -280,9 +280,21 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
-	startLabel:	Starting terminal label. Defaults to "A1".
-	endLabel:	Ending terminal label. Defaults to "A2".
+	coil:		Whether or not to draw the coil. Either "true" or "false". Defaults to "false".
+	aux:		Description of auxiliary contact(s). In same syntax as "contacts" parameter in contactGroup
+			macro, e.g. "no(13, 14) nc(21, 22)", or simply "no, nc".
 '
+m4_define_blind(`contactor3ph', `
+	componentParseKVArgs(`_contactor3ph_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `coil', `false',
+		 `endLabel', `A2'), $@)
+	#contactGroup(pos=
+')
 
 
 m4_divert(0)
