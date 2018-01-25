@@ -318,7 +318,7 @@ m4_define_blind(`componentAddContactModifiers', `
 	')
 	m4_ifelse(m4_index($1, `limit'), -1, `', `
 		m4_ifelse(dirIsVertical(peekDir()), 1, `_limitRev = 1', `_limitRev = -1');
-		m4_ifelse(m4_dequote($2), `true', `_limitAdjust = 0.83', `_limitAdjust = 0');
+		m4_ifelse($2, `true', `_limitAdjust = 0.83', `_limitAdjust = 0');
 		LimitT: polarCoord(MidContact, 1.40 - _limitAdjust, contactAngle);
 		LimitB: polarCoord(MidContact, 0.98 + _limitAdjust, contactAngle + _limitRev*180);
 		LimitL: polarCoord(LimitT,     1.19, contactAngle + _limitRev*90);
@@ -360,7 +360,6 @@ m4_define_blind(`contactNO', `
 		 `endLabel', `4',
 		 `type', `',
 		 `operation', `'), $@)
-
 	componentHandleRef(_contactNO_)
 
 	# assemble terminal labels
@@ -452,7 +451,7 @@ m4_define_blind(`contactNC', `
 		 `type', `',
 		 `operation', `'), $@)
 	componentHandleRef(_contactNC_)
-	
+
 	# assemble terminal labels
 	m4_define(`_contactNC_fullStartLabel', _contactNC_set`'_contactNC_startLabel)
 	m4_define(`_contactNC_fullEndLabel', _contactNC_set`'_contactNC_endLabel)

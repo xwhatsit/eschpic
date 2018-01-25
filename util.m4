@@ -9,7 +9,7 @@ m4_define(`_m4_define_blind', `m4_define(`$1', `m4_ifelse(`$3', `0', ``$4'', `$2
 
 
 `
-Removes surrounding double-quotes from a string
+Removes surrounding double-quotes from a string. Only works properly on single-line strings.
 
 Usage: m4_dequote(str)
 Params:

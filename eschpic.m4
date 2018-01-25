@@ -99,7 +99,7 @@ m4_define_blind(`a3TitleBlock', `
         m4_define(`a3IH', `m4_eval(a3H - (2 * a3InnerMargin))')
         m4_define(`a3NumHTics', _a3_numHTics)
         m4_define(`a3NumVTics', _a3_numVTics)
-	m4_define(`a3PrefixRefs', m4_dequote(_a3_prefixRefs))
+	m4_define(`a3PrefixRefs', _a3_prefixRefs)
 
         maxpswid = a3W / 25.4
         maxpsht  = a3H / 25.4
@@ -164,11 +164,11 @@ m4_define_blind(`a3TitleBlock', `
                 line from Date.ne to Date.nw to Date.sw;
                 `"\small \textit{Date:}"' ljust below at Date.nw;
 
-                `"\Huge 'm4_dequote(_a3_title)`"' at Title;
-                `"'m4_dequote(_a3_date)`"' at Date;
-                `"'m4_dequote(_a3_ref)`"' at Ref;
-                `"'m4_dequote(_a3_rev)`"' at Rev;
-                `"\Huge 'm4_dequote(_a3_sheet)`"' at SheetNum;
+                `"\Huge '_a3_title`"' at Title;
+                `"'_a3_date`"' at Date;
+                `"'_a3_ref`"' at Ref;
+                `"'_a3_rev`"' at Rev;
+                `"\Huge '_a3_sheet`"' at SheetNum;
         ] with .Inside.sw at 0,0;
 ')
 

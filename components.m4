@@ -11,7 +11,7 @@ Usage: componentHandleRef(prefix)
 '
 m4_define_blind(`componentHandleRef', `
 	# if a ref was defined and we have enabled it, prefix it with the sheet number
-	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(m4_dequote(a3PrefixRefs), `true', a3SheetNum, `')`'$1ref))
+	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(a3PrefixRefs, `true', a3SheetNum, `')`'$1ref))
 
 	# if ref was defined and is a valid pic label, then add a label
 	m4_ifelse($1ref, `', `', `
@@ -30,17 +30,11 @@ m4_define_blind(`componentParseKVArgs', `
 	m4_pushdef(`componentPrefix', $1)
 	_$0_setDefault$2
 	m4_prefixKVArgs(componentPrefix, m4_shift(m4_shift($@)))
-	_$0_removeDoubleQuotes$2
 	m4_popdef(`componentPrefix')
 ')
 m4_define_blind(`_componentParseKVArgs_setDefault', `
 	m4_forloopn(`argI', 1, $#, 2, `m4_define(componentPrefix`'m4_argn(argI, $@),
 		m4_argn(m4_eval(argI + 1), $@))')
-')
-m4_define_blind(`_componentParseKVArgs_removeDoubleQuotes', `
-	m4_forloopn(`argI', 1, $#, 2, `
-		m4_define(componentPrefix`'m4_argn(argI, $@),
-			m4_dequote(m4_indir(componentPrefix`'m4_argn(argI, $@))))')
 ')
 
 
@@ -293,7 +287,33 @@ m4_define_blind(`contactor3ph', `
 		 `part', `',
 		 `coil', `false',
 		 `endLabel', `A2'), $@)
-	#contactGroup(pos=
+	componentHandleRef(_contactor3ph_)
+
+	m4_define(`_contactor3ph_preDraw', `')
+	m4_define(`_contactor3ph_groupOffset', `(0, 0)')
+	m4_ifelse(_contactor3ph_coil, `true', `
+		m4_define(`_contactor3ph_groupOffset', `m4_ifelse(dirIsVertical(getDir()), 1, `(elen/2, 0)', `(0, -elen/2)')')
+		m4_define(`_contactor3ph_preDraw', `
+			Coil: coil();
+			move to last [].Start;
+			move to Here + _contactor3ph_groupOffset;
+		')
+	')
+	contactGroup(
+		linked=false,
+		pos=_contactor3ph_pos + _contactor3ph_groupOffset,
+		preDraw=_contactor3ph_preDraw,
+		contacts=NO(1,2) NO(3,4) NO(5,6) _contactor3ph_aux,
+		type=contactor
+	);
+	componentDrawLabels(_contactor3ph_)
+	m4_ifelse(_contactor3ph_coil, `true', `
+		line dashed elen/18 from last [].Coil.e to last []. last [].MidContact;
+		move to last [].Coil.End;
+	', `
+		line dashed elen/18 from last [].FirstContactMidContact to last[]. last [].MidContact;
+		move to last [].FirstContactEnd;
+	')
 ')
 
 
