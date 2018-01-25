@@ -331,7 +331,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
-	actuation:	Type of mechanical control to turn on/off. See componentDrawButtonHead for options.
+	actuation:	Type of mechanical control to turn on/off. See componentDrawActuator for options.
 			Defaults to "manual".
 	aux:		Description of auxiliary contact(s). In same syntax as "contacts" parameter in contactGroup
 			macro, e.g. "no(13, 14) nc(21, 22)", or simply "no, nc".
@@ -354,7 +354,7 @@ m4_define_blind(`motorStarter', `
 		Box: box wid elen*3/8 ht elen*3/8 at BoxC;
 		line from Box.n to Box.s;
 		line from Box.e to Box.w;
-		componentDrawButtonHead(
+		componentDrawActuator(
 			_motorStarter_actuation,
 			HandlePos,
 			_motorStarter_actuationAngle, 

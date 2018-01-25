@@ -1,9 +1,9 @@
 m4_divert(-1)
 
 `
-Helper macro for drawing button heads. Uses current direction.
+Helper macro for drawing contact actuators. Uses current direction.
 
-Usage: componentDrawButtonHead(type, pos, actuationAngle, reversed)
+Usage: componentDrawActuator(type, pos, actuationAngle, reversed)
 Params:
 	type:	        Head type. One of "manual", "selector" (also "turn" and "twist"), "push",
 			"pull", "mushroom" (also "estop"), "foot", or "key".
@@ -11,7 +11,7 @@ Params:
 	actuationAngle:	The direction of the actuator, i.e. 180 if horizontal, 90 if vertical.
 	reversed:	Set to 1 if normal, -1 if flipped.
 '
-m4_define_blind(`componentDrawButtonHead', `
+m4_define_blind(`componentDrawActuator', `
 	m4_ifelse($1, `manual', `
 		line from polarCoord($2, 1.2, $3 - 90) to polarCoord($2, 1.2, $3 + 90);
 	', $1, `selector', `
@@ -59,18 +59,18 @@ m4_define_blind(`componentDrawButtonHead', `
 			to ActuatorKeyBR \
 			to polarCoord(ActuatorKeyBR, 0.5, $3 - $4*90) \
 			to polarCoord(ActuatorKeyTT, 1.0, $3 - $4*256);
-	', $1, `turn',  `componentDrawButtonHead(selector, $2, $3, $4)
-	', $1, `twist', `componentDrawButtonHead(selector, $2, $3, $4)
-	', $1, `estop', `componentDrawButtonHead(mushroom, $2, $3, $4)
+	', $1, `turn',  `componentDrawActuator(selector, $2, $3, $4)
+	', $1, `twist', `componentDrawActuator(selector, $2, $3, $4)
+	', $1, `estop', `componentDrawActuator(mushroom, $2, $3, $4)
 	')
 ')
 
 
 `
-Helper macro for drawing button actions. Uses current direction. Defines at the very least
+Helper macro for drawing actuator actions. Uses current direction. Defines at the very least
 two positions, ActuatorActL and ActuatorActR, which are the connection points on either side.
 
-Usage: componentDrawButtonAction(type, pos, actuationAngle, reversed)
+Usage: componentDrawActuatorAction(type, pos, actuationAngle, reversed)
 Params:
 	type:           Action type. One of "maintained", "maintained-reset", "off",
 	                "spring-return-l", "spring-return-r".
@@ -78,7 +78,7 @@ Params:
 	actuationAngle: The direction of the actuator, i.e. 180 if horizontal, 90 if vertical.
 	reversed:       Set to 1 if normal, -1 if flipped.
 '
-m4_define_blind(`componentDrawButtonAction', `
+m4_define_blind(`componentDrawActuatorAction', `
 	m4_ifelse($1, `maintained', `
 		ActuatorActB: polarCoord($2, 1.2, actuatorAngle + actuatorRev*90);
 		ActuatorActL: polarCoord($2, 0.4, actuatorAngle);
@@ -145,7 +145,7 @@ m4_define_blind(`componentAddContactActuators', `
 		ActuatorResetT: polarCoord(ActuatorResetB, elen/4, actuatorAngle - actuatorRev*90);
 		ActuatorResetL: polarCoord(ActuatorResetT, 2.4,    actuatorAngle);
 		line dashed elen/18 from ActuatorResetB to ActuatorResetT to ActuatorResetL;
-		componentDrawButtonHead(actuatorReset, ActuatorResetL, actuatorAngle, actuatorRev);
+		componentDrawActuator(actuatorReset, ActuatorResetL, actuatorAngle, actuatorRev);
 	')
 
 	# determine actuator head, modify ActuatorPos if necessary
@@ -179,11 +179,11 @@ m4_define_blind(`componentAddContactActuators', `
 
 			# drawn differently if we have a reset action
 			m4_ifelse(actuatorReset, `', `
-				componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
+				componentDrawActuatorAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
 				line dashed elen/18 from ActuatorPos to ActuatorActL;
 				line dashed elen/18 from MidContact to ActuatorActR;
 			', `
-				componentDrawButtonAction(maintained-reset, ActuatorActM, actuatorAngle, actuatorRev);
+				componentDrawActuatorAction(maintained-reset, ActuatorActM, actuatorAngle, actuatorRev);
 				line dashed elen/18 from ActuatorPos to MidContact;
 			')
 		', `
@@ -197,18 +197,18 @@ m4_define_blind(`componentAddContactActuators', `
 		ActuatorActM: polarCoord(MidContact, actuatorPosEndOffset, actuatorAngle);
 		m4_ifelse(m4_eval(m4_index(actuatorString, ` spring-return ') != -1 ||
 		                  m4_index(actuatorString, ` spring-return-r ') != -1), 1, `
-			componentDrawButtonAction(spring-return-r, ActuatorActM, actuatorAngle, actuatorRev)
+			componentDrawActuatorAction(spring-return-r, ActuatorActM, actuatorAngle, actuatorRev)
 		', `
-			componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev)
+			componentDrawActuatorAction(maintained, ActuatorActM, actuatorAngle, actuatorRev)
 		')
 		line dashed elen/25 from MidContact to ActuatorActR;
 		PrevActuatorActL: ActuatorActL;
 
 		ActuatorActM: polarCoord(ActuatorActM, actuatorPosActSpacing, actuatorAngle);
 		m4_ifelse(m4_eval(m4_index(actuatorString, ` mid-off ') != -1), 1, `
-			componentDrawButtonAction(off, ActuatorActM, actuatorAngle, actuatorRev);
+			componentDrawActuatorAction(off, ActuatorActM, actuatorAngle, actuatorRev);
 		', `
-			componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
+			componentDrawActuatorAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
 		')
 		line dashed elen/25 from PrevActuatorActL to ActuatorActR;
 		PrevActuatorActL: ActuatorActL;
@@ -216,16 +216,16 @@ m4_define_blind(`componentAddContactActuators', `
 		ActuatorActM: polarCoord(ActuatorActM, actuatorPosActSpacing, actuatorAngle);
 		m4_ifelse(m4_eval(m4_index(actuatorString, ` spring-return ') != -1 ||
 		                  m4_index(actuatorString, ` spring-return-l ') != -1), 1, `
-			componentDrawButtonAction(spring-return-l, ActuatorActM, actuatorAngle, actuatorRev);
+			componentDrawActuatorAction(spring-return-l, ActuatorActM, actuatorAngle, actuatorRev);
 		', `
-			componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
+			componentDrawActuatorAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
 		')
 		line dashed elen/25 from PrevActuatorActL to ActuatorActR;
 		line dashed elen/25 from ActuatorPos to ActuatorActL;
 	')
 
 	# finally draw button head
-	componentDrawButtonHead(actuatorHead, ActuatorPos, actuatorAngle, actuatorRev)
+	componentDrawActuator(actuatorHead, ActuatorPos, actuatorAngle, actuatorRev)
 
 	m4_popdef(`actuatorReset')
 	m4_popdef(`actuatorHead')
