@@ -286,7 +286,7 @@ m4_define_blind(`contactor3ph', `
 		 `description', `',
 		 `part', `',
 		 `coil', `false',
-		 `endLabel', `A2'), $@)
+		 `aux', `'), $@)
 	componentHandleRef(_contactor3ph_)
 
 	m4_define(`_contactor3ph_preDraw', `')
@@ -295,6 +295,8 @@ m4_define_blind(`contactor3ph', `
 		m4_define(`_contactor3ph_groupOffset', `m4_ifelse(dirIsVertical(getDir()), 1, `(elen/2, 0)', `(0, -elen/2)')')
 		m4_define(`_contactor3ph_preDraw', `
 			Coil: coil();
+			T_A1: last [].T_A1;
+			T_A2: last [].T_A2;
 			move to last [].Start;
 			move to Here + _contactor3ph_groupOffset;
 		')
@@ -306,6 +308,7 @@ m4_define_blind(`contactor3ph', `
 		contacts=NO(1,2) NO(3,4) NO(5,6) _contactor3ph_aux,
 		type=contactor
 	);
+
 	componentDrawLabels(_contactor3ph_)
 	m4_ifelse(_contactor3ph_coil, `true', `
 		line dashed elen/18 from last [].Coil.e to last []. last [].MidContact;
@@ -314,6 +317,61 @@ m4_define_blind(`contactor3ph', `
 		line dashed elen/18 from last [].FirstContactMidContact to last[]. last [].MidContact;
 		move to last [].FirstContactEnd;
 	')
+')
+
+
+`
+3-phase thermal-magnetic overload with manual control (e.g. motor starter)
+
+Usage: motorStarter([comma-separated key-value parameters])
+Params:
+	pos:		Position to place first contact's ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	operation:	Type of mechanical control to turn on/off. See componentDrawButtonHead for options.
+			Defaults to "manual".
+	aux:		Description of auxiliary contact(s). In same syntax as "contacts" parameter in contactGroup
+			macro, e.g. "no(13, 14) nc(21, 22)", or simply "no, nc".
+'
+m4_define_blind(`motorStarter', `
+	componentParseKVArgs(`_motorStarter_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `operation', `manual',
+		 `aux', `'), $@)
+	componentHandleRef(_motorStarter_)
+
+	m4_define(`_motorStarter_operationAngle', m4_ifelse(dirIsVertical(getDir()), 1, 180, 90))
+	m4_define(`_motorStarter_postDraw', `
+		BoxC: polarCoord(FirstContactMidContact, elen*5/8, _motorStarter_operationAngle);
+		HandlePos: polarCoord(BoxC, elen*1/2, _motorStarter_operationAngle);
+		Box: box wid elen*3/8 ht elen*3/8 at BoxC;
+		line from Box.n to Box.s;
+		line from Box.e to Box.w;
+		componentDrawButtonHead(
+			_motorStarter_operation,
+			HandlePos,
+			_motorStarter_operationAngle, 
+			m4_ifelse(dirIsVertical(getDir()), 1, 1, -1));
+		line dashed elen/18 from HandlePos to Box.w;
+	')
+	contactGroup(
+		linked=false,
+		pos=_motorStarter_pos,
+		postDraw=_motorStarter_postDraw,
+		contacts=NO(1,2) NO(3,4) NO(5,6) _motorStarter_aux,
+		type=breaker disconnector
+	);
+
+	componentDrawLabels(_motorStarter_)
+	line dashed elen/18 from last [].Box.e to last[]. last [].MidContact;
+	move to last [].FirstContactEnd;
 ')
 
 

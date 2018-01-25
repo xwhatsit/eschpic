@@ -5,7 +5,8 @@ Helper macro for drawing button heads. Uses current direction.
 
 Usage: componentDrawButtonHead(type, pos, operationAngle, reversed)
 Params:
-	type:	        Head type. One of "selector", "push", "pull", "mushroom", "foot", "key".
+	type:	        Head type. One of "manual", "selector" (also "turn" and "twist"), "push",
+			"pull", "mushroom" (also "estop"), "foot", or "key".
 	pos:	        Location to draw it at.
 	operationAngle:	The direction of the operator, i.e. 180 if horizontal, 90 if vertical.
 	reversed:	Set to 1 if normal, -1 if flipped.
@@ -237,8 +238,8 @@ contact macro block itself (i.e. within "[", "]" brackets).
 
 Usage: componentAddContactModifiers(typeString, [isNCContact])
 Params:
-	typeString: Space-separated string of contact modifiers. Can be composed of "switch",
-	            "disconnect", "fuse", "contactor", "thermal", "magnetic", "breaker", "limit".
+	typeString:  Space-separated string of contact modifiers. Can be composed of "switch",
+	             "disconnect", "fuse", "contactor", "thermal", "magnetic", "breaker", "limit".
 	isNCContact: Optional. Should be set to "true" if this is a normally-closed contact.
 '
 m4_define_blind(`componentAddContactModifiers', `
@@ -313,8 +314,11 @@ m4_define_blind(`componentAddContactModifiers', `
 		line from Magnetic2 to Magnetic3 then to Magnetic5 then to Magnetic4 then to Magnetic2 shaded "black";
 	')
 	m4_ifelse(m4_index($1, `breaker'), -1, `', `
-		line from AM-(0.6,0.6) to AM+(0.6,0.6);
-		line from AM-(0.6,-0.6) to AM+(0.6,-0.6);
+		m4_pushdef(`offset', `m4_ifelse(m4_index($1, `disconnector'), -1, `0', `elen/10')')
+		BreakerC: polarCoord(AM, offset, m4_ifelse(dirIsVertical(peekDir()), 1, 90, 180));
+		line from BreakerC-(0.6,0.6) to BreakerC+(0.6,0.6);
+		line from BreakerC-(0.6,-0.6) to BreakerC+(0.6,-0.6);
+		m4_popdef(`offset')
 	')
 	m4_ifelse(m4_index($1, `limit'), -1, `', `
 		m4_ifelse(dirIsVertical(peekDir()), 1, `_limitRev = 1', `_limitRev = -1');
