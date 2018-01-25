@@ -3,62 +3,62 @@ m4_divert(-1)
 `
 Helper macro for drawing button heads. Uses current direction.
 
-Usage: componentDrawButtonHead(type, pos, operationAngle, reversed)
+Usage: componentDrawButtonHead(type, pos, actuationAngle, reversed)
 Params:
 	type:	        Head type. One of "manual", "selector" (also "turn" and "twist"), "push",
 			"pull", "mushroom" (also "estop"), "foot", or "key".
 	pos:	        Location to draw it at.
-	operationAngle:	The direction of the operator, i.e. 180 if horizontal, 90 if vertical.
+	actuationAngle:	The direction of the actuator, i.e. 180 if horizontal, 90 if vertical.
 	reversed:	Set to 1 if normal, -1 if flipped.
 '
 m4_define_blind(`componentDrawButtonHead', `
 	m4_ifelse($1, `manual', `
 		line from polarCoord($2, 1.2, $3 - 90) to polarCoord($2, 1.2, $3 + 90);
 	', $1, `selector', `
-		OperatorSelectorT: polarCoord($2, 1.2, $3 - $4*90);
-		OperatorSelectorB: polarCoord($2, 1.2, $3 + $4*90);
-		line from polarCoord(OperatorSelectorB, 0.8, $3) to OperatorSelectorB \
-			then to OperatorSelectorT \
-			then to polarCoord(OperatorSelectorT, 0.8, $3 - 180);
+		ActuatorSelectorT: polarCoord($2, 1.2, $3 - $4*90);
+		ActuatorSelectorB: polarCoord($2, 1.2, $3 + $4*90);
+		line from polarCoord(ActuatorSelectorB, 0.8, $3) to ActuatorSelectorB \
+			then to ActuatorSelectorT \
+			then to polarCoord(ActuatorSelectorT, 0.8, $3 - 180);
 	', $1, `push', `
-		OperatorPushT: polarCoord($2, 1.2, $3 - 90);
-		OperatorPushB: polarCoord($2, 1.2, $3 + 90);
-		line from polarCoord(OperatorPushB, 0.8, $3 - 180) to OperatorPushB \
-			then to OperatorPushT \
-			then to polarCoord(OperatorPushT, 0.8, $3 - 180);
+		ActuatorPushT: polarCoord($2, 1.2, $3 - 90);
+		ActuatorPushB: polarCoord($2, 1.2, $3 + 90);
+		line from polarCoord(ActuatorPushB, 0.8, $3 - 180) to ActuatorPushB \
+			then to ActuatorPushT \
+			then to polarCoord(ActuatorPushT, 0.8, $3 - 180);
 	', $1, `pull', `
-		OperatorPullT: polarCoord($2, 1.2, $3 - 90);
-		OperatorPullB: polarCoord($2, 1.2, $3 + 90);
-		line from polarCoord(OperatorPullB, 0.8, $3) to OperatorPullB \
-			then to OperatorPullT \
-			then to polarCoord(OperatorPullT, 0.8, $3);
+		ActuatorPullT: polarCoord($2, 1.2, $3 - 90);
+		ActuatorPullB: polarCoord($2, 1.2, $3 + 90);
+		line from polarCoord(ActuatorPullB, 0.8, $3) to ActuatorPullB \
+			then to ActuatorPullT \
+			then to polarCoord(ActuatorPullT, 0.8, $3);
 	', $1, `mushroom', `
-		OperatorEStopT: polarCoord($2, 1.2, $3 - 90);
-		OperatorEStopB: polarCoord($2, 1.2, $3 + 90);
-		arc cw from OperatorEStopB to OperatorEStopT with .c at $2;
-		line from OperatorEStopB to \
-			polarCoord(OperatorEStopB, pointsToMillimetres(linethick/2), $3 - 180);
-		line from OperatorEStopT to \
-			polarCoord(OperatorEStopT, pointsToMillimetres(linethick/2), $3 - 180);
-		line from OperatorEStopB to OperatorEStopT;
+		ActuatorEStopT: polarCoord($2, 1.2, $3 - 90);
+		ActuatorEStopB: polarCoord($2, 1.2, $3 + 90);
+		arc cw from ActuatorEStopB to ActuatorEStopT with .c at $2;
+		line from ActuatorEStopB to \
+			polarCoord(ActuatorEStopB, pointsToMillimetres(linethick/2), $3 - 180);
+		line from ActuatorEStopT to \
+			polarCoord(ActuatorEStopT, pointsToMillimetres(linethick/2), $3 - 180);
+		line from ActuatorEStopB to ActuatorEStopT;
 	', $1, `foot', `
-		OperatorFootT: polarCoord($2,   1.33, $3 - $4*117);
-		OperatorFootB: polarCoord($2,   1.33, $3 + $4*63);
-		OperatorFootL: polarCoord(OperatorFootB, 0.89, $3 - $4*27);
-		line from OperatorFootL to OperatorFootB to OperatorFootT;
+		ActuatorFootT: polarCoord($2,   1.33, $3 - $4*117);
+		ActuatorFootB: polarCoord($2,   1.33, $3 + $4*63);
+		ActuatorFootL: polarCoord(ActuatorFootB, 0.89, $3 - $4*27);
+		line from ActuatorFootL to ActuatorFootB to ActuatorFootT;
 	', $1, `key', `
-		OperatorKeyTT: polarCoord($2,            1.33, $3 - $4*76);
-		OperatorKeyTC: polarCoord(OperatorKeyTT, 0.50, $3 + $4*90);
-		OperatorKeyBM: polarCoord(OperatorKeyTT, 2.48, $3 + $4*90);
-		OperatorKeyBL: polarCoord(OperatorKeyBM, 0.50, $3);
-		OperatorKeyBR: polarCoord(OperatorKeyBM, 0.50, $3 - 180);
-		circle rad 0.5 at OperatorKeyTC;
-		line from polarCoord(OperatorKeyTT, 1.0, $3 + $4*76) \
-			to polarCoord(OperatorKeyBL, 0.5, $3 - $4*90) \
-			to OperatorKeyBL \
-			to OperatorKeyBR \
-			to polarCoord(OperatorKeyBR, 0.5, $3 - $4*90) \
-			to polarCoord(OperatorKeyTT, 1.0, $3 - $4*256);
+		ActuatorKeyTT: polarCoord($2,            1.33, $3 - $4*76);
+		ActuatorKeyTC: polarCoord(ActuatorKeyTT, 0.50, $3 + $4*90);
+		ActuatorKeyBM: polarCoord(ActuatorKeyTT, 2.48, $3 + $4*90);
+		ActuatorKeyBL: polarCoord(ActuatorKeyBM, 0.50, $3);
+		ActuatorKeyBR: polarCoord(ActuatorKeyBM, 0.50, $3 - 180);
+		circle rad 0.5 at ActuatorKeyTC;
+		line from polarCoord(ActuatorKeyTT, 1.0, $3 + $4*76) \
+			to polarCoord(ActuatorKeyBL, 0.5, $3 - $4*90) \
+			to ActuatorKeyBL \
+			to ActuatorKeyBR \
+			to polarCoord(ActuatorKeyBR, 0.5, $3 - $4*90) \
+			to polarCoord(ActuatorKeyTT, 1.0, $3 - $4*256);
 	', $1, `turn',  `componentDrawButtonHead(selector, $2, $3, $4)
 	', $1, `twist', `componentDrawButtonHead(selector, $2, $3, $4)
 	', $1, `estop', `componentDrawButtonHead(mushroom, $2, $3, $4)
@@ -68,168 +68,168 @@ m4_define_blind(`componentDrawButtonHead', `
 
 `
 Helper macro for drawing button actions. Uses current direction. Defines at the very least
-two positions, OperatorActL and OperatorActR, which are the connection points on either side.
+two positions, ActuatorActL and ActuatorActR, which are the connection points on either side.
 
-Usage: componentDrawButtonAction(type, pos, operationAngle, reversed)
+Usage: componentDrawButtonAction(type, pos, actuationAngle, reversed)
 Params:
 	type:           Action type. One of "maintained", "maintained-reset", "off",
 	                "spring-return-l", "spring-return-r".
 	pos:            Location to draw it at.
-	operationAngle: The direction of the operator, i.e. 180 if horizontal, 90 if vertical.
+	actuationAngle: The direction of the actuator, i.e. 180 if horizontal, 90 if vertical.
 	reversed:       Set to 1 if normal, -1 if flipped.
 '
 m4_define_blind(`componentDrawButtonAction', `
 	m4_ifelse($1, `maintained', `
-		OperatorActB: polarCoord($2, 1.2, operatorAngle + operatorRev*90);
-		OperatorActL: polarCoord($2, 0.4, operatorAngle);
-		OperatorActR: polarCoord($2, 0.4, operatorAngle - 180);
-		line from polarCoord(OperatorActL, pointsToMillimetres(linethick/2), operatorAngle) \
-			to OperatorActL to OperatorActB to OperatorActR \
-			to polarCoord(OperatorActR, pointsToMillimetres(linethick/2), operatorAngle - 180);
+		ActuatorActB: polarCoord($2, 1.2, actuatorAngle + actuatorRev*90);
+		ActuatorActL: polarCoord($2, 0.4, actuatorAngle);
+		ActuatorActR: polarCoord($2, 0.4, actuatorAngle - 180);
+		line from polarCoord(ActuatorActL, pointsToMillimetres(linethick/2), actuatorAngle) \
+			to ActuatorActL to ActuatorActB to ActuatorActR \
+			to polarCoord(ActuatorActR, pointsToMillimetres(linethick/2), actuatorAngle - 180);
 	', $1, `maintained-reset', `
-		OperatorActL: polarCoord($2,           1.20, operatorAngle);
-		OperatorActR: polarCoord($2,           0.46, operatorAngle - 180);
-		OperatorActT: polarCoord(OperatorActL, 0.77, operatorAngle - 90*operatorRev);
-		line from OperatorActL to OperatorActT to OperatorActR;
+		ActuatorActL: polarCoord($2,           1.20, actuatorAngle);
+		ActuatorActR: polarCoord($2,           0.46, actuatorAngle - 180);
+		ActuatorActT: polarCoord(ActuatorActL, 0.77, actuatorAngle - 90*actuatorRev);
+		line from ActuatorActL to ActuatorActT to ActuatorActR;
 	', $1, `off', `
-		OperatorActL: $2;
-		OperatorActR: $2;
+		ActuatorActL: $2;
+		ActuatorActR: $2;
 		line dashed elen/25 \
-			from polarCoord($2, pointsToMillimetres(linethick/2), operatorAngle + 90*operatorRev) \
-			to polarCoord($2, 1.6, operatorAngle - 90*operatorRev);
+			from polarCoord($2, pointsToMillimetres(linethick/2), actuatorAngle + 90*actuatorRev) \
+			to polarCoord($2, 1.6, actuatorAngle - 90*actuatorRev);
 	', $1, `spring-return-l', `
-		OperatorActL: polarCoord($2,           0.4, operatorAngle);
-		OperatorActR: polarCoord($2,           1.2, operatorAngle - 180);
-		OperatorActT: polarCoord(OperatorActL, 0.8, operatorAngle - 90*operatorRev);
-		OperatorActB: polarCoord(OperatorActL, 0.8, operatorAngle + 90*operatorRev);
-		line from OperatorActR to OperatorActB to OperatorActL to OperatorActT to OperatorActR;
+		ActuatorActL: polarCoord($2,           0.4, actuatorAngle);
+		ActuatorActR: polarCoord($2,           1.2, actuatorAngle - 180);
+		ActuatorActT: polarCoord(ActuatorActL, 0.8, actuatorAngle - 90*actuatorRev);
+		ActuatorActB: polarCoord(ActuatorActL, 0.8, actuatorAngle + 90*actuatorRev);
+		line from ActuatorActR to ActuatorActB to ActuatorActL to ActuatorActT to ActuatorActR;
 	', $1, `spring-return-r', `
-		OperatorActL: polarCoord($2,           1.2, operatorAngle);
-		OperatorActR: polarCoord($2,           0.4, operatorAngle - 180);
-		OperatorActT: polarCoord(OperatorActR, 0.8, operatorAngle - 90*operatorRev);
-		OperatorActB: polarCoord(OperatorActR, 0.8, operatorAngle + 90*operatorRev);
-		line from OperatorActR to OperatorActB to OperatorActL to OperatorActT to OperatorActR;
+		ActuatorActL: polarCoord($2,           1.2, actuatorAngle);
+		ActuatorActR: polarCoord($2,           0.4, actuatorAngle - 180);
+		ActuatorActT: polarCoord(ActuatorActR, 0.8, actuatorAngle - 90*actuatorRev);
+		ActuatorActB: polarCoord(ActuatorActR, 0.8, actuatorAngle + 90*actuatorRev);
+		line from ActuatorActR to ActuatorActB to ActuatorActL to ActuatorActT to ActuatorActR;
 	')
 ')
 
 
 `
-Helper macro for drawing contact operators (e.g. see "operation" parameter in contactNO). Should be called
+Helper macro for drawing contact actuators (e.g. see "actuation" parameter in contactNO). Should be called
 within contact macro block itself (i.e. with "[", "]" brackets). Tries to combine multiple things in an
 intelligent way.
 
-Usage: componentAddContactOperators(operatorString, [isNCContact])
+Usage: componentAddContactActuators(actuatorString, [isNCContact])
 Params:
-	operatorString: Space-separated string of operator modifiers. Can be composed of following:
+	actuatorString: Space-separated string of actuator modifiers. Can be composed of following:
 			heads:  "manual", "selector", "turn", "twist" "push", "pull", "estop", "mushroom",
 			        "foot", "key"
 			action: "maintained", "3-pos", "mid-off", "spring-return", "spring-return-l", "spring-return-r"
 			reset:  any head listed above followed by "-reset" (e.g. "pull-reset")
 '
-m4_define_blind(`componentAddContactOperators', `
-	m4_pushdef(`operatorString', ` '$1` ')
+m4_define_blind(`componentAddContactActuators', `
+	m4_pushdef(`actuatorString', ` '$1` ')
 
 	m4_ifelse(dirIsVertical(peekDir()), 1, `
-		operatorAngle = 180;
-		operatorRev = 1;
+		actuatorAngle = 180;
+		actuatorRev = 1;
 	', `
-		operatorAngle = 90;
-		operatorRev = -1;
+		actuatorAngle = 90;
+		actuatorRev = -1;
 	');
-	OperatorPos: polarCoord(MidContact, 4, operatorAngle);
+	ActuatorPos: polarCoord(MidContact, 4, actuatorAngle);
 
 	# draw reset action
-	m4_pushdef(`operatorReset', m4_regexp(operatorString, `[ \t]\([A-Za-z]+\)-reset[ \t]', `\1'))
-	m4_ifelse(operatorReset, `', `', `
-		OperatorResetB: polarCoord(MidContact,     elen/8, operatorAngle);
-		OperatorResetT: polarCoord(OperatorResetB, elen/4, operatorAngle - operatorRev*90);
-		OperatorResetL: polarCoord(OperatorResetT, 2.4,    operatorAngle);
-		line dashed elen/18 from OperatorResetB to OperatorResetT to OperatorResetL;
-		componentDrawButtonHead(operatorReset, OperatorResetL, operatorAngle, operatorRev);
+	m4_pushdef(`actuatorReset', m4_regexp(actuatorString, `[ \t]\([A-Za-z]+\)-reset[ \t]', `\1'))
+	m4_ifelse(actuatorReset, `', `', `
+		ActuatorResetB: polarCoord(MidContact,     elen/8, actuatorAngle);
+		ActuatorResetT: polarCoord(ActuatorResetB, elen/4, actuatorAngle - actuatorRev*90);
+		ActuatorResetL: polarCoord(ActuatorResetT, 2.4,    actuatorAngle);
+		line dashed elen/18 from ActuatorResetB to ActuatorResetT to ActuatorResetL;
+		componentDrawButtonHead(actuatorReset, ActuatorResetL, actuatorAngle, actuatorRev);
 	')
 
-	# determine operator head, modify OperatorPos if necessary
-	m4_pushdef(`operatorHead', `')
-	m4_ifelse(m4_eval(m4_index(operatorString, ` manual ') != -1), 1, `
-		m4_define(`operatorHead', manual)
-	', m4_eval(m4_index(operatorString, ` selector ') != -1 ||
-	           m4_index(operatorString, ` turn ')     != -1 ||
-		   m4_index(operatorString, ` twist ')    != -1), 1, `
-		m4_define(`operatorHead', selector)
-	', m4_eval(m4_index(operatorString, ` push ') != -1), 1, `
-		m4_define(`operatorHead', push)
-	', m4_eval(m4_index(operatorString, ` pull ') != -1), 1, `
-		OperatorPos: polarCoord(OperatorPos, 0.825, operatorAngle - 180);
-		m4_define(`operatorHead', pull)
-	', m4_eval(m4_index(operatorString, ` estop ') != -1 ||
-	                  m4_index(operatorString, ` mushroom ') != -1), 1, `
-		m4_define(`operatorHead', mushroom)
-	', m4_eval(m4_index(operatorString, ` foot ') != -1), 1, `
-		OperatorPos: polarCoord(OperatorPos, 0.63, operatorAngle - 180);
-		m4_define(`operatorHead', foot)
-	', m4_eval(m4_index(operatorString, ` key ') != -1), 1, `
-		m4_define(`operatorHead', key)
+	# determine actuator head, modify ActuatorPos if necessary
+	m4_pushdef(`actuatorHead', `')
+	m4_ifelse(m4_eval(m4_index(actuatorString, ` manual ') != -1), 1, `
+		m4_define(`actuatorHead', manual)
+	', m4_eval(m4_index(actuatorString, ` selector ') != -1 ||
+	           m4_index(actuatorString, ` turn ')     != -1 ||
+		   m4_index(actuatorString, ` twist ')    != -1), 1, `
+		m4_define(`actuatorHead', selector)
+	', m4_eval(m4_index(actuatorString, ` push ') != -1), 1, `
+		m4_define(`actuatorHead', push)
+	', m4_eval(m4_index(actuatorString, ` pull ') != -1), 1, `
+		ActuatorPos: polarCoord(ActuatorPos, 0.825, actuatorAngle - 180);
+		m4_define(`actuatorHead', pull)
+	', m4_eval(m4_index(actuatorString, ` estop ') != -1 ||
+	                  m4_index(actuatorString, ` mushroom ') != -1), 1, `
+		m4_define(`actuatorHead', mushroom)
+	', m4_eval(m4_index(actuatorString, ` foot ') != -1), 1, `
+		ActuatorPos: polarCoord(ActuatorPos, 0.63, actuatorAngle - 180);
+		m4_define(`actuatorHead', foot)
+	', m4_eval(m4_index(actuatorString, ` key ') != -1), 1, `
+		m4_define(`actuatorHead', key)
 	')
 
 	# draw action
-	m4_ifelse(m4_index(operatorString, ` 3-pos '), -1, `
-		m4_ifelse(m4_eval(m4_index(operatorString, ` maintained ') != -1), 1, `
-			OperatorPos: polarCoord(OperatorPos, 1.5, operatorAngle);
-			OperatorActM: 1/2 between MidContact and OperatorPos;
+	m4_ifelse(m4_index(actuatorString, ` 3-pos '), -1, `
+		m4_ifelse(m4_eval(m4_index(actuatorString, ` maintained ') != -1), 1, `
+			ActuatorPos: polarCoord(ActuatorPos, 1.5, actuatorAngle);
+			ActuatorActM: 1/2 between MidContact and ActuatorPos;
 
 			# drawn differently if we have a reset action
-			m4_ifelse(operatorReset, `', `
-				componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev);
-				line dashed elen/18 from OperatorPos to OperatorActL;
-				line dashed elen/18 from MidContact to OperatorActR;
+			m4_ifelse(actuatorReset, `', `
+				componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
+				line dashed elen/18 from ActuatorPos to ActuatorActL;
+				line dashed elen/18 from MidContact to ActuatorActR;
 			', `
-				componentDrawButtonAction(maintained-reset, OperatorActM, operatorAngle, operatorRev);
-				line dashed elen/18 from OperatorPos to MidContact;
+				componentDrawButtonAction(maintained-reset, ActuatorActM, actuatorAngle, actuatorRev);
+				line dashed elen/18 from ActuatorPos to MidContact;
 			')
 		', `
-			m4_ifelse(operatorHead, `', `', `line dashed elen/18 from OperatorPos to MidContact')
+			m4_ifelse(actuatorHead, `', `', `line dashed elen/18 from ActuatorPos to MidContact')
 		')
 	', `
-		OperatorPos: polarCoord(OperatorPos, 4.73, operatorAngle);
-		operatorPosActSpacing = (8.73 - 1.6) / 3;
-		operatorPosEndOffset = (8.73 - (2 * operatorPosActSpacing)) / 2;
+		ActuatorPos: polarCoord(ActuatorPos, 4.73, actuatorAngle);
+		actuatorPosActSpacing = (8.73 - 1.6) / 3;
+		actuatorPosEndOffset = (8.73 - (2 * actuatorPosActSpacing)) / 2;
 
-		OperatorActM: polarCoord(MidContact, operatorPosEndOffset, operatorAngle);
-		m4_ifelse(m4_eval(m4_index(operatorString, ` spring-return ') != -1 ||
-		                  m4_index(operatorString, ` spring-return-r ') != -1), 1, `
-			componentDrawButtonAction(spring-return-r, OperatorActM, operatorAngle, operatorRev)
+		ActuatorActM: polarCoord(MidContact, actuatorPosEndOffset, actuatorAngle);
+		m4_ifelse(m4_eval(m4_index(actuatorString, ` spring-return ') != -1 ||
+		                  m4_index(actuatorString, ` spring-return-r ') != -1), 1, `
+			componentDrawButtonAction(spring-return-r, ActuatorActM, actuatorAngle, actuatorRev)
 		', `
-			componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev)
+			componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev)
 		')
-		line dashed elen/25 from MidContact to OperatorActR;
-		PrevOperatorActL: OperatorActL;
+		line dashed elen/25 from MidContact to ActuatorActR;
+		PrevActuatorActL: ActuatorActL;
 
-		OperatorActM: polarCoord(OperatorActM, operatorPosActSpacing, operatorAngle);
-		m4_ifelse(m4_eval(m4_index(operatorString, ` mid-off ') != -1), 1, `
-			componentDrawButtonAction(off, OperatorActM, operatorAngle, operatorRev);
+		ActuatorActM: polarCoord(ActuatorActM, actuatorPosActSpacing, actuatorAngle);
+		m4_ifelse(m4_eval(m4_index(actuatorString, ` mid-off ') != -1), 1, `
+			componentDrawButtonAction(off, ActuatorActM, actuatorAngle, actuatorRev);
 		', `
-			componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev);
+			componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
 		')
-		line dashed elen/25 from PrevOperatorActL to OperatorActR;
-		PrevOperatorActL: OperatorActL;
+		line dashed elen/25 from PrevActuatorActL to ActuatorActR;
+		PrevActuatorActL: ActuatorActL;
 
-		OperatorActM: polarCoord(OperatorActM, operatorPosActSpacing, operatorAngle);
-		m4_ifelse(m4_eval(m4_index(operatorString, ` spring-return ') != -1 ||
-		                  m4_index(operatorString, ` spring-return-l ') != -1), 1, `
-			componentDrawButtonAction(spring-return-l, OperatorActM, operatorAngle, operatorRev);
+		ActuatorActM: polarCoord(ActuatorActM, actuatorPosActSpacing, actuatorAngle);
+		m4_ifelse(m4_eval(m4_index(actuatorString, ` spring-return ') != -1 ||
+		                  m4_index(actuatorString, ` spring-return-l ') != -1), 1, `
+			componentDrawButtonAction(spring-return-l, ActuatorActM, actuatorAngle, actuatorRev);
 		', `
-			componentDrawButtonAction(maintained, OperatorActM, operatorAngle, operatorRev);
+			componentDrawButtonAction(maintained, ActuatorActM, actuatorAngle, actuatorRev);
 		')
-		line dashed elen/25 from PrevOperatorActL to OperatorActR;
-		line dashed elen/25 from OperatorPos to OperatorActL;
+		line dashed elen/25 from PrevActuatorActL to ActuatorActR;
+		line dashed elen/25 from ActuatorPos to ActuatorActL;
 	')
 
 	# finally draw button head
-	componentDrawButtonHead(operatorHead, OperatorPos, operatorAngle, operatorRev)
+	componentDrawButtonHead(actuatorHead, ActuatorPos, actuatorAngle, actuatorRev)
 
-	m4_popdef(`operatorReset')
-	m4_popdef(`operatorHead')
-	m4_popdef(`operatorString')
+	m4_popdef(`actuatorReset')
+	m4_popdef(`actuatorHead')
+	m4_popdef(`actuatorString')
 ')
 
 `
@@ -348,8 +348,8 @@ Params:
 	endLabel:	Ending terminal label. Defaults to "4".
 	type:		Contact type. Can specify more than one. See "typeString" parameter in
 	                componentAddContactModifiers for valid values.
-	operation:	Means of contact operation. Can specify more than one. See "operationString" parameter
-	                in componentAddContactOperators for valid values.
+	actuation:	Means of contact actuation. Can specify more than one. See "actuationString" parameter
+	                in componentAddContactActuators for valid values.
 '
 m4_define_blind(`contactNO', `
 	componentParseKVArgs(`_contactNO_',
@@ -363,7 +363,7 @@ m4_define_blind(`contactNO', `
 		 `startLabel', `3',
 		 `endLabel', `4',
 		 `type', `',
-		 `operation', `'), $@)
+		 `actuation', `'), $@)
 	componentHandleRef(_contactNO_)
 
 	# assemble terminal labels
@@ -402,7 +402,7 @@ m4_define_blind(`contactNO', `
 		MidContact: polarCoord(BM, 2.51, contactAngle);
 
 		componentAddContactModifiers(_contactNO_type)
-		componentAddContactOperators(_contactNO_operation)
+		componentAddContactActuators(_contactNO_actuation)
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNO_fullStartLabel, `', `', `T_'_contactNO_fullStartLabel`: AO')
@@ -438,8 +438,8 @@ Params:
 	endLabel:	Ending terminal label. Defaults to "2".
 	type:		Contact type. Can specify more than one. See "typeString" parameter in contactModifiers
 			for valid values. Not all will work properly with NC contact.
-	operation:	Means of contact operation. Can specify more than one. See "operationString" parameter
-	                in componentAddContactOperators for valid values.
+	actuation:	Means of contact actuation. Can specify more than one. See "actuationString" parameter
+	                in componentAddContactActuators for valid values.
 '
 m4_define_blind(`contactNC', `
 	componentParseKVArgs(`_contactNC_',
@@ -453,7 +453,7 @@ m4_define_blind(`contactNC', `
 		 `startLabel', `1',
 		 `endLabel', `2',
 		 `type', `',
-		 `operation', `'), $@)
+		 `actuation', `'), $@)
 	componentHandleRef(_contactNC_)
 
 	# assemble terminal labels
@@ -493,7 +493,7 @@ m4_define_blind(`contactNC', `
 		MidContact: polarCoord(BM, 2.51, contactAngle);
 
 		componentAddContactModifiers(_contactNC_type, true)
-		componentAddContactOperators(_contactNC_operation, true)
+		componentAddContactActuators(_contactNC_actuation, true)
 
 		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
 		m4_ifelse(_contactNC_fullStartLabel, `', `', `T_'_contactNC_fullStartLabel`: AO')
@@ -609,7 +609,7 @@ Params:
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		See contactNO, contactNC.
-	operation:	See contactNO, contactNC.
+	actuation:	See contactNO, contactNC.
 	contacts:	Description of what contacts, in the syntax "NO(startLabel, endLabel) NC(startLabel, endLabel)...".
 			If startLabel or endLabel are omitted (e.g. "NO" or "NO()"), they will be autonumbered using the default
 			labels and by incrementing the set number. If contact is in lowercase (e.g. "no" or "nc"), then the
@@ -627,7 +627,7 @@ m4_define_blind(`contactGroup', `
 		 `description', `',
 		 `part', `',
 		 `type', `',
-		 `operation', `',
+		 `actuation', `',
 		 `contacts', `',
 		 `linked', `true',
 		 `preDraw', `',
@@ -678,7 +678,7 @@ m4_define_blind(`_contactGroupParseContacts', `
 			m4_pushdef(`_labelParams', `startLabel=_firstArg, endLabel=_secondArg')
 		')
 
-		m4_pushdef(`_operation', m4_ifelse(_contactGroup_contactNum, 0, _contactGroup_operation, `'))
+		m4_pushdef(`_actuation', m4_ifelse(_contactGroup_contactNum, 0, _contactGroup_actuation, `'))
 		m4_define(`_contactGroup_contactNum', m4_eval(_contactGroup_contactNum + 1))
 
 		m4_pushdef(`_contactType', _contactGroup_type)
@@ -695,7 +695,7 @@ m4_define_blind(`_contactGroupParseContacts', `
 			set=_set,
 			_labelParams,
 			type=_contactType,
-			operation=_operation,
+			actuation=_actuation,
 			flipped=_contactGroup_flipped,
 		)
 
@@ -709,7 +709,7 @@ m4_define_blind(`_contactGroupParseContacts', `
 		m4_ifelse(dirIsVertical(peekDir()), 1, `move `right' elen/2', `move `down' elen/2');
 
 		m4_popdef(`_contactType')
-		m4_popdef(`_operation')
+		m4_popdef(`_actuation')
 		m4_popdef(`_labelParams')
 		m4_popdef(`_set')
 		m4_popdef(`_secondArg')

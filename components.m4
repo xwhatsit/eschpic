@@ -331,7 +331,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
-	operation:	Type of mechanical control to turn on/off. See componentDrawButtonHead for options.
+	actuation:	Type of mechanical control to turn on/off. See componentDrawButtonHead for options.
 			Defaults to "manual".
 	aux:		Description of auxiliary contact(s). In same syntax as "contacts" parameter in contactGroup
 			macro, e.g. "no(13, 14) nc(21, 22)", or simply "no, nc".
@@ -343,21 +343,21 @@ m4_define_blind(`motorStarter', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `operation', `manual',
+		 `actuation', `manual',
 		 `aux', `'), $@)
 	componentHandleRef(_motorStarter_)
 
-	m4_define(`_motorStarter_operationAngle', m4_ifelse(dirIsVertical(getDir()), 1, 180, 90))
+	m4_define(`_motorStarter_actuationAngle', m4_ifelse(dirIsVertical(getDir()), 1, 180, 90))
 	m4_define(`_motorStarter_postDraw', `
-		BoxC: polarCoord(FirstContactMidContact, elen*5/8, _motorStarter_operationAngle);
-		HandlePos: polarCoord(BoxC, elen*1/2, _motorStarter_operationAngle);
+		BoxC: polarCoord(FirstContactMidContact, elen*5/8, _motorStarter_actuationAngle);
+		HandlePos: polarCoord(BoxC, elen*1/2, _motorStarter_actuationAngle);
 		Box: box wid elen*3/8 ht elen*3/8 at BoxC;
 		line from Box.n to Box.s;
 		line from Box.e to Box.w;
 		componentDrawButtonHead(
-			_motorStarter_operation,
+			_motorStarter_actuation,
 			HandlePos,
-			_motorStarter_operationAngle, 
+			_motorStarter_actuationAngle, 
 			m4_ifelse(dirIsVertical(getDir()), 1, 1, -1));
 		line dashed elen/18 from HandlePos to Box.w;
 	')
