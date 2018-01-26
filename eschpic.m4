@@ -8,6 +8,7 @@ m4_include(text.m4)
 m4_include(components.m4)
 m4_include(contacts.m4)
 m4_include(connectors.m4)
+m4_include(modules.m4)
 m4_include(wires.m4)
 
 m4_divert(-1)

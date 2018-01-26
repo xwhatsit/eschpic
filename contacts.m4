@@ -6,7 +6,8 @@ Helper macro for drawing contact actuators. Uses current direction.
 Usage: componentDrawActuator(type, pos, actuationAngle, reversed)
 Params:
 	type:	        Head type. One of "manual", "selector" (also "turn" and "twist"), "push",
-			"pull", "mushroom" (also "estop"), "foot", or "key".
+			"pull", "mushroom" (also "estop"), "foot", "proximity" (also "prox") or
+			"key".
 	pos:	        Location to draw it at.
 	actuationAngle:	The direction of the actuator, i.e. 180 if horizontal, 90 if vertical.
 	reversed:	Set to 1 if normal, -1 if flipped.
@@ -46,6 +47,14 @@ m4_define_blind(`componentDrawActuator', `
 		ActuatorFootB: polarCoord($2,   1.33, $3 + $4*63);
 		ActuatorFootL: polarCoord(ActuatorFootB, 0.89, $3 - $4*27);
 		line from ActuatorFootL to ActuatorFootB to ActuatorFootT;
+	', $1, `proximity', `
+		ActuatorProxL: polarCoord($2, 2.4, $3);
+		ActuatorProxC: 1/2 between $2 and ActuatorProxL;
+		ActuatorProxT: polarCoord(ActuatorProxC, 1.2, $3 - $4*90);
+		ActuatorProxB: polarCoord(ActuatorProxC, 1.2, $3 + $4*90);
+		line from $2 to ActuatorProxT to ActuatorProxL to ActuatorProxB to $2;
+		line from ActuatorProxB+(-0.4, $4*0.4) to ActuatorProxT+(-$4*0.4, -0.4);
+		line from ActuatorProxB+($4*0.4, 0.4) to ActuatorProxT+(0.4, -$4*0.4);
 	', $1, `key', `
 		ActuatorKeyTT: polarCoord($2,            1.33, $3 - $4*76);
 		ActuatorKeyTC: polarCoord(ActuatorKeyTT, 0.50, $3 + $4*90);
@@ -62,6 +71,7 @@ m4_define_blind(`componentDrawActuator', `
 	', $1, `turn',  `componentDrawActuator(selector, $2, $3, $4)
 	', $1, `twist', `componentDrawActuator(selector, $2, $3, $4)
 	', $1, `estop', `componentDrawActuator(mushroom, $2, $3, $4)
+	', $1, `prox',  `componentDrawActuator(proximity, $2, $3, $4)
 	')
 ')
 
@@ -121,9 +131,8 @@ intelligent way.
 Usage: componentAddContactActuators(actuatorString, [isNCContact])
 Params:
 	actuatorString: Space-separated string of actuator modifiers. Can be composed of following:
-			heads:  "manual", "selector", "turn", "twist" "push", "pull", "estop", "mushroom",
-			        "foot", "key"
-			action: "maintained", "3-pos", "mid-off", "spring-return", "spring-return-l", "spring-return-r"
+			heads:  See "type" parameter in componentDrawActuator
+			action: See "type" parameter in componentDrawActuatorAction
 			reset:  any head listed above followed by "-reset" (e.g. "pull-reset")
 '
 m4_define_blind(`componentAddContactActuators', `
@@ -167,6 +176,10 @@ m4_define_blind(`componentAddContactActuators', `
 	', m4_eval(m4_index(actuatorString, ` foot ') != -1), 1, `
 		ActuatorPos: polarCoord(ActuatorPos, 0.63, actuatorAngle - 180);
 		m4_define(`actuatorHead', foot)
+	', m4_eval(m4_index(actuatorString, ` proximity ') != -1 ||
+	           m4_index(actuatorString, ` prox ')      != -1), 1, `
+		ActuatorPos: polarCoord(ActuatorPos, 1.2, actuatorAngle - 180);
+		m4_define(`actuatorHead', proximity)
 	', m4_eval(m4_index(actuatorString, ` key ') != -1), 1, `
 		m4_define(`actuatorHead', key)
 	')

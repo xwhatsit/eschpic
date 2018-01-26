@@ -128,6 +128,52 @@ m4_define_blind(`resistor', `
 
 
 `
+Diode. Draws in current direction.
+
+Usage: diode([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	type:		Diode type. Either left blank, or "LED". Defaults to blank.
+'
+m4_define_blind(`diode', `
+	componentParseKVArgs(`_diode_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `'
+		 `type', `'), $@)
+	componentHandleRef(_diode_)
+	[
+		pushDir();
+
+		line dirToDirection(peekDir()) elen/4;
+		Start: last line.start;
+
+		if dirIsVertical(peekDir()) then {
+			box wid elen/5 ht elen/2
+		} else {
+			box wid elen/2 ht elen/5
+		}
+
+		line dirToDirection(peekDir()) elen/4;
+		End: last line.end;
+
+		popDir();
+	] with .Start at _diode_pos;
+
+	componentDrawLabels(_diode_)
+
+	move to last [].End
+')
+
+
+`
 Earth/ground symbol. Single-ended.
 
 Usage: earth([comma-separated key-value parameters])
