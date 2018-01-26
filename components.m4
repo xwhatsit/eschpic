@@ -123,7 +123,7 @@ m4_define_blind(`resistor', `
 
 	componentDrawLabels(_resistor_)
 
-	move to last [].End
+	move to last [].End;
 ')
 
 
@@ -146,31 +146,63 @@ m4_define_blind(`diode', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
-		 `part', `'
+		 `part', `',
 		 `type', `'), $@)
 	componentHandleRef(_diode_)
 	[
 		pushDir();
 
-		line dirToDirection(peekDir()) elen/4;
-		Start: last line.start;
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+		Centre: 1/2 between Start and End;
 
-		if dirIsVertical(peekDir()) then {
-			box wid elen/5 ht elen/2
-		} else {
-			box wid elen/2 ht elen/5
-		}
+		move to Centre then dirToDirection(peekDir()) 1;
+		KM: Here;
+		move dirToDirection(dirCW(dirCW(peekDir()))) 2;
+		AM: Here;
 
-		line dirToDirection(peekDir()) elen/4;
-		End: last line.end;
+		line from Start to AM;
+		line from KM to End;
+
+		line from AM to polarCoord(AM, 1.2, dirToAngle(dirCW(peekDir()))) \
+			then to KM \
+			then to polarCoord(AM, 1.2, dirToAngle(dirCCW(peekDir()))) \
+			then to AM;
+		line from polarCoord(KM, 1.2 + pointsToMillimetres(linethick/2), dirToAngle(dirCW(peekDir()))) to \
+			polarCoord(KM, 1.2 + pointsToMillimetres(linethick/2), dirToAngle(dirCCW(peekDir())));
+
+		m4_ifelse(_diode_type, `LED', `
+			LEDArrowStart1: polarCoord(AM, 1.5, dirToAngle(peekDir()) - 70);
+			LEDArrowMid1: polarCoord(LEDArrowStart1, 0.85, dirToAngle(peekDir()) - 69);
+			LEDArrowEnd1: polarCoord(LEDArrowStart1, 1.6, dirToAngle(peekDir()) - 69);
+
+			LEDArrowStart2: polarCoord(LEDArrowStart1, 0.85, dirToAngle(peekDir()));
+			LEDArrowMid2: polarCoord(LEDArrowStart2, 0.85, dirToAngle(peekDir()) - 69);
+			LEDArrowEnd2: polarCoord(LEDArrowStart2, 1.6, dirToAngle(peekDir()) - 69);
+
+			line from LEDArrowMid1 to polarCoord(LEDArrowMid1, 0.2, dirToAngle(peekDir()) - 158) \
+				then to LEDArrowEnd1 \
+				then to polarCoord(LEDArrowMid1, 0.2, dirToAngle(peekDir()) + 22) \
+				then to LEDArrowMid1 shaded "black";
+			line from LEDArrowMid1 to LEDArrowStart1;
+
+			line from LEDArrowMid2 to polarCoord(LEDArrowMid2, 0.2, dirToAngle(peekDir()) - 158) \
+				then to LEDArrowEnd2 \
+				then to polarCoord(LEDArrowMid2, 0.2, dirToAngle(peekDir()) + 22) \
+				then to LEDArrowMid2 shaded "black";
+			line from LEDArrowMid2 to LEDArrowStart2;
+
+		')
 
 		popDir();
 	] with .Start at _diode_pos;
 
 	componentDrawLabels(_diode_)
 
-	move to last [].End
+	move to last [].End;
 ')
+m4_define_blind(`LED', `diode(type=LED, $@)')
 
 
 `
