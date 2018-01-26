@@ -37,29 +37,109 @@ m4_define_blind(`module', `
 		pushDir();
 		dirToDirection(peekDir());
 
-		m4_errprint(terminals: "_module_terminals" m4_newline())
 		m4_define(`_module_topterms', m4_regexp(_module_terminals, `^\([^|]*\)', `\1'))
 		m4_define(`_module_botterms', m4_regexp(_module_terminals, `|\(.*\)', `\1'))
-		m4_errprint(top terminals:    "_module_topterms" m4_newline())
-		m4_errprint(bottom terminals: "_module_botterms" m4_newline())
 
-		_moduleParseTerminals(_module_topterms)
-		_moduleParseTerminals(_module_botterms)
+		Start: Here;
 
-		box wid _module_width ht _module_height;
+		m4_pushdef(`_groupCount', 0)
+		m4_pushdef(`_totalTermCount', 0)
+		move dirToDirection(dirCCW(peekDir())) elen/8;
+		_moduleParseTerminals(_module_topterms, 1)
+		move dirToDirection(dirCCW(peekDir())) elen/8;
+		m4_define(`_module_topGroupCount', _groupCount)
+		m4_define(`_module_topTermCount', _totalTermCount)
+		m4_popdef(`_totalTermCount')
+		m4_popdef(`_groupCount')
+
+		move to Start;
+		move dirToDirection(peekDir()) 2*elen;
+
+		m4_pushdef(`_groupCount', 0)
+		m4_pushdef(`_totalTermCount', 0)
+		move dirToDirection(dirCCW(peekDir())) elen/8;
+		_moduleParseTerminals(_module_botterms, -1)
+		move dirToDirection(dirCCW(peekDir())) elen/8;
+		m4_define(`_module_botGroupCount', _groupCount)
+		m4_define(`_module_botTermCount', _totalTermCount)
+		m4_popdef(`_totalTermCount')
+		m4_popdef(`_groupCount')
+
+		m4_define(`_module_topWidth', m4_eval(_module_topGroupCount + _module_topTermCount*2))
+		m4_define(`_module_botWidth', m4_eval(_module_botGroupCount + _module_botTermCount*2))
+		m4_define(`_module_greatestWidth', `m4_ifelse(
+			m4_eval(_module_topWidth > _module_botWidth), 1, _module_topWidth, _module_botWidth)')
+
+		m4_ifelse(dirIsVertical(peekDir()), 1, `
+			m4_define(`_module_width', elen*_module_greatestWidth/4 + elen/4)
+		', `
+			m4_define(`_module_height', elen*_module_greatestWidth/4 + elen/4)
+		')
+
+		box wid _module_width ht _module_height with \
+			m4_ifelse(m4_trim(peekDir()),
+				dirDown,  `.nw', 
+				dirRight, `.nw',
+				dirUp,    `.sw',
+				dirLeft,  `.ne') at Start;
 
 		popDir();
-	]
+	] with .Start at _module_pos;
 
 	componentDrawLabels(_module_)
 ')
 m4_define_blind(`_moduleParseTerminals', `
+	m4_pushdef(`_regex', `^ *\(\w[^(]*\)? *\(([^)]*)\)')
+	m4_pushdef(`_index', m4_regexp($1, _regex))
+	m4_ifelse(_index, -1, `', `
+		m4_regexp($1, _regex, `
+			m4_pushdef(`_whole', \&)
+			m4_pushdef(`_group', \1)
+			m4_pushdef(`_terms', \2)
+		')
 
-	m4_errprint(matching:
-		m4_regexp($1, `^ *\(\w[^(]*\)? *\(([^)]*)\)', `group1: \1
-		group2: \2') m4_newline())
+		m4_define(`_groupCount', m4_eval(_groupCount + 1))
 
-	#m4_popdef(`_group')
+		m4_pushdef(`_termCount', 0)
+		_moduleDrawGroup(_group, _terms, $2)
+		m4_define(`_totalTermCount', m4_eval(_totalTermCount + _termCount))
+		m4_popdef(`_termCount')
+
+		m4_popdef(`_terms')
+		m4_popdef(`_group')
+
+		_moduleParseTerminals(m4_substr($1, m4_eval(_index + m4_len(_whole))), $2)
+		m4_popdef(`_whole')
+	')
+	m4_popdef(`_index')
+	m4_popdef(`_regex')
+')
+m4_define_blind(`_moduleDrawGroup', `
+	ModuleGroupStart: Here;
+	move dirToDirection(dirCCW(peekDir())) elen/8;
+	move to polarCoord(Here, elen/8, $3*dirToAngle(peekDir()));
+	m4_foreach(_term, $2, `
+		m4_define(`_termCount', m4_eval(_termCount + 1))
+		m4_ifelse(_term, `', `
+			box wid elen/2 ht elen/4 invis;
+		', `
+			TB`'_term: box wid elen/2 ht elen/4;
+			ModuleGroupTermRef: polarCoord(last box.c, elen/8, $3*dirToAngle(peekDir())-180);
+			G_`'$1`'_T_`'_term: ModuleGroupTermRef;
+			T_`'_term: ModuleGroupTermRef;
+			"textModuleTerminalLabel(_term)" at last box.c;
+		')
+		move to last box.c then dirToDirection(dirCCW(peekDir())) elen/4;
+	')
+	move to polarCoord(Here, elen/8, $3*dirToAngle(peekDir())-180);
+	move dirToDirection(dirCCW(peekDir())) elen/8;
+	ModuleGroupEnd: Here;
+
+	ModuleGroupTextRef: polarCoord(1/2 between ModuleGroupStart and ModuleGroupEnd,
+		5.5, $3*dirToAngle(peekDir()));
+	"textComponentRef($1)" at ModuleGroupTextRef;
+
+	move to ModuleGroupEnd;
 ')
 
 m4_divert(0)
