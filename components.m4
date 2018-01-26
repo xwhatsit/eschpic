@@ -195,6 +195,9 @@ m4_define_blind(`diode', `
 
 		')
 
+		A: Start;
+		K: End;
+
 		popDir();
 	] with .Start at _diode_pos;
 
