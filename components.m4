@@ -41,7 +41,7 @@ m4_define_blind(`_componentParseKVArgs_setDefault', `
 `
 Macro to assist drawing main component labels (ref/val/description etc.)
 
-Usage: componentDrawLabels(prefix)
+Usage: componentDrawLabels(prefix, [internal=false])
 '
 m4_define_blind(`componentDrawLabels', `
 	m4_ifelse($1, `', `', `
@@ -61,11 +61,19 @@ m4_define_blind(`componentDrawLabels', `
 				)\normalsize{}textComponentDescription(m4_indir($1`description')))')
 
 		m4_ifelse(m4_trim(m4_indir($1`labels')), `', `', `
-			if dirIsVertical(getDir()) then {
-				"textMultiLine(m4_indir($1`labels'))" at last [].w - (elen/4, 0) rjust;
-			} else {
-				"textMultiLine(m4_indir($1`labels'))" at last [].n + (0, elen/8) above;
-			}
+			m4_ifelse($2, `true', `
+				if dirIsVertical(getDir()) then {
+					"textMultiLine(m4_indir($1`labels'))" at last [].w + (elen/16, 0) ljust;
+				} else {
+					"textMultiLine(m4_indir($1`labels'))" at last [].n - (0, elen/32) below;
+				}
+			', `
+				if dirIsVertical(getDir()) then {
+					"textMultiLine(m4_indir($1`labels'))" at last [].w + (elen/4, 0) rjust;
+				} else {
+					"textMultiLine(m4_indir($1`labels'))" at last [].n + (0, elen/8) above;
+				}
+			')
 		')
 
 		m4_popdef($1`labels')
