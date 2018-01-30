@@ -154,6 +154,34 @@ m4_define_blind(`connector', `
 	move to last [].End;
 ')
 
+
+`
+Single terminal, with optional label.
+
+Usage: terminal([comma-separated key-value parameters])
+Params:
+	pos:	Position to place centre at. Defaults to "Here".
+	label:	Terminal label/number
+	part:	Part number. If this is supplied, it is added to the BOM.
+'
+m4_define_blind(`terminal', `
+	componentParseKVArgs(`_terminal_',
+		(`pos', `Here',
+		 `label', `',
+		 `part', `'), $@)
+	circle diam elen/8 with .c at _terminal_pos;
+
+	m4_ifelse(_terminal_label, `', `', `
+		m4_ifelse(dirIsVertical(getDir()), 1, `
+			  "textTerminalLabel(_terminal_label)" at last circle.w + (elen/32,0) rjust
+		', `
+			  "textTerminalLabel(_terminal_label)" at last circle.n - (0, elen/16) rjust
+		')
+	')
+
+	move to last circle.c;
+')
+
 m4_divert(0)
 
 # vim: filetype=pic
