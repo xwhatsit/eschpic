@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 General "module" symbol, with custom terminals and labels. Will draw either vertically or horizontally
 depending on current direction.
@@ -141,7 +139,3 @@ m4_define_blind(`_moduleDrawGroup', `
 
 	move to ModuleGroupEnd;
 ')
-
-m4_divert(0)
-
-# vim: filetype=pic

@@ -1,8 +1,3 @@
-# Set base unit used for components
-elen = 12.7;
-
-m4_divert(-1)
-
 `
 Macro to assist handling of component references. Prefixes the ref with the sheet number (if applicable), and
 places a pic label if it's valid.
@@ -462,8 +457,3 @@ m4_define_blind(`motorStarter', `
 	line dashed elen/18 from last [].Box.e to last[]. last [].MidContact;
 	move to last [].FirstContactEnd;
 ')
-
-
-m4_divert(0)
-
-# vim: filetype=pic

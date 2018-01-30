@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 Helper macro for drawing contact actuators. Uses current direction.
 
@@ -735,7 +733,3 @@ m4_define_blind(`_contactGroupParseContacts', `
 	m4_popdef(`_index')
 	m4_popdef(`_regexp')
 ')
-
-m4_divert(0)
-
-# vim: filetype=pic

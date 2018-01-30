@@ -1,15 +1,11 @@
-.PS
-
 m4_include(eschpic.m4)
 
-a3TitleBlock(
+a3Sheet(
 	sheet=1,
 	title=400VAC 3-phase Distribution,
 	ref=ABC123,
 	rev=0.1,
 );
-
-
 move to a3Pos(3, C);
 down;
 module(
@@ -26,6 +22,9 @@ line up from last [].T_A1 then left elen/2 then down;
 line down from last [].T_Y44 then right elen/2 then up;
 line up from last [].T_Y43 then right elen/2 then down;
 
-
-# vim: filetype=pic
-.PE
+a3Sheet(
+	sheet=2,
+	title=Next Sheet,
+	ref=ABC123,
+	rev=0.1,
+);

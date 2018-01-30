@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 Corner macro, to help with joining up lines at right-angles where the "then" part of a set of lines was omitted.
 '
@@ -81,7 +79,3 @@ m4_define_blind(`wireWithSideLabel', `
 		}
 	}
 ')
-
-m4_divert(0)
-
-# vim: filetype=pic

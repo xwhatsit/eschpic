@@ -1,7 +1,17 @@
-# Use millimetres instead of inches
-scale = 25.4;
+% eschpic document start, for processing with dpic -g
+\documentclass{article}
+\usepackage[landscape,a3paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
+\usepackage{tikz}
+\usepackage{datetime2}
+\usepackage{siunitx}
+\pagestyle{empty}
+\begin{document}
+m4_divert(9)
+\end{document}
+% eschpic document end (divert=9)
+m4_divert(-1)
 
-# Order of includes is important
+% Order of includes is important
 m4_include(util.m4)
 m4_include(direction.m4)
 m4_include(text.m4)
@@ -10,8 +20,6 @@ m4_include(contacts.m4)
 m4_include(connectors.m4)
 m4_include(modules.m4)
 m4_include(wires.m4)
-
-m4_divert(-1)
 
 `
 Gives a letter used for vertical-tic marks used on a3TitleBlock() below.
@@ -37,9 +45,9 @@ m4_define_blind(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
 
 
 `
-A3 title block (landscape). South-west corner of inside (drawable area) will be aligned with (0, 0).
+A3 sheet (landscape). South-west corner of inside (drawable area) will be aligned with (0, 0).
 
-Usage: a3TitleBlock([comma-separated key-value parameters])
+Usage: a3Sheet([comma-separated key-value parameters])
 Params:
         sheet:		Number for "Sheet:" box in titleblock. Font size is Latex \Huge. Required.
         title:          String for "Title:" box in titleblock. Font size is Latex \Huge.
@@ -70,7 +78,28 @@ Defines the following macros:
         a3NumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
 	a3PrefixRefs:	Gets set to whatever prefixRefs was in a3TitleBlock() call
 '
-m4_define_blind(`a3TitleBlock', `
+m4_define_blind(`a3Sheet', `
+m4_undivert(8)
+% eschpic A3 sheet start
+\begin{figure}
+	\centering
+.PS
+	# Use millimetres instead of inches
+	scale = 25.4;
+
+	# Set base unit used for components
+	elen = 12.7;
+
+	# set default direction
+	right;
+
+	m4_divert(8)
+.PE
+\end{figure}
+\pagebreak
+% eschpic A3 sheet end (divert=8)
+	m4_divert(0)
+
 	# set default args
 	m4_define(`_a3_sheet', `')
 	m4_define(`_a3_title', `')

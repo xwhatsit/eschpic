@@ -19,11 +19,11 @@ M4_DEPS=components.m4 \
 	util.m4       \
 	wires.m4
 
-all : doc.pdf ;@echo "$@ done"
+all : testdoc.pdf ;@echo "$@ done"
 
-doc.pdf: doc.tex test.tex
+testdoc.pdf: testdoc.tex $(wildcard sheet*.m4)
 	@echo "  LATEX	" $<
-	texfot --tee=/dev/null pdflatex doc.tex
+	texfot --tee=/dev/null pdflatex $<
 
 %.tex: %.pic
 	@echo "  PIC	" $<
@@ -34,4 +34,6 @@ doc.pdf: doc.tex test.tex
 	m4 $(M4_OPTS) $< > $@
 
 # use make -nps to figure out all intermediate targets
-clean :;@rm -rfv $(shell $(MAKE) -nps all | sed -n '/^# I/,$${/^[^\#\[%.][^ %]*: /s/:.*//p;}') $(filter %.d,$(MAKEFILE_LIST))
+clean:
+	rm -fv *.log *.aux
+	@rm -rfv $(shell $(MAKE) -nps all | sed -n '/^# I/,$${/^[^\#\[%.][^ %]*: /s/:.*//p;}') $(filter %.d,$(MAKEFILE_LIST))

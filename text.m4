@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 Show text ending with ohms symbol. Requires siunitx package to be installed.
 '
@@ -56,7 +54,3 @@ m4_define_blind(`textMultiLine',
 	`m4_forloop(`m4_argNum', 1, $#,
 		`m4_ifelse(m4_argNum, 1, `',
 			` \\')' \normalsize{}`m4_argn(m4_argNum, $@)')' m4_newline()`\end{tabular}}')
-
-
-
-m4_divert(0)

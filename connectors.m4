@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 Single male pin connector. Draws in current direction.
 
@@ -181,7 +179,3 @@ m4_define_blind(`terminal', `
 
 	move to last circle.c;
 ')
-
-m4_divert(0)
-
-# vim: filetype=pic

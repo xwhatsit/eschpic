@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 Special macros/variables for handling drawing directions; we save current direction into a pic
 variable, so we can restore direction after drawing a component.
@@ -109,8 +107,3 @@ m4_define_blind(`dirCCW',
 	`m4_ifelse(m4_trim(`$1'), dirRight, dirUp,
 	`m4_errprint(`error: dirCCW: invalid direction parameter:' m4_trim(`$1')
 		) m4_m4exit(1)')')')')')
-
-m4_divert(0)
-
-# set default direction
-right;

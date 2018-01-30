@@ -1,5 +1,3 @@
-m4_divert(-1)
-
 `
 Allows defining macros that won't substitute if no parameters are supplied.
 From m4 example documentation.
@@ -202,5 +200,3 @@ Calculates distance between two points.
 Usage: distanceBetweenPoints(startPos, endPos)
 '
 m4_define_blind(`distanceBetweenPoints',`sqrt((($2).y-($1).y)^2 +(($2).x-($1).x)^2)')
-
-m4_divert(0)
