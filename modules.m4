@@ -123,7 +123,7 @@ m4_define_blind(`_moduleDrawGroup', `
 		', `
 			TB`'_term: box wid elen/2 ht elen/4;
 			ModuleGroupTermRef: polarCoord(last box.c, elen/8, $3*dirToAngle(peekDir())-180);
-			G_`'$1`'_T_`'_term: ModuleGroupTermRef;
+			G_`'m4_patsubst($1, `[^A-Za-z0-9]', `_')_T_`'_term: ModuleGroupTermRef;
 			T_`'_term: ModuleGroupTermRef;
 			"textModuleTerminalLabel(_term)" at last box.c;
 		')
