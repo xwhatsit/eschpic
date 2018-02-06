@@ -4,6 +4,7 @@
 \usepackage{tikz}
 \usepackage{datetime2}
 \usepackage{siunitx}
+\usepackage{varwidth}
 \pagestyle{empty}
 \begin{document}
 m4_divert(9)
