@@ -121,11 +121,13 @@ m4_define_blind(`_moduleDrawGroup', `
 		m4_ifelse(_term, `', `
 			box wid elen/2 ht elen/4 invis;
 		', `
-			TB`'_term: box wid elen/2 ht elen/4;
+			m4_pushdef(`_term_escaped', `m4_patsubst(_term, `[^A-Za-z0-9]', `_')')
+			TB`'_term_escaped: box wid elen/2 ht elen/4;
 			ModuleGroupTermRef: polarCoord(last box.c, elen/8, $3*dirToAngle(peekDir())-180);
-			G_`'m4_patsubst($1, `[^A-Za-z0-9]', `_')_T_`'_term: ModuleGroupTermRef;
-			T_`'_term: ModuleGroupTermRef;
+			G_`'m4_patsubst($1, `[^A-Za-z0-9]', `_')_T_`'_term_escaped: ModuleGroupTermRef;
+			T_`'_term_escaped: ModuleGroupTermRef;
 			"textModuleTerminalLabel(_term)" at last box.c;
+			m4_popdef(`term_escaped')
 		')
 		move to last box.c then dirToDirection(dirCCW(peekDir())) elen/4;
 	')
