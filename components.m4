@@ -142,6 +142,8 @@ Params:
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		Diode type. Either left blank, or "LED". Defaults to blank.
+	startLabel:	Starting terminal label. Defaults to blank.
+	endLabel:	Ending terminal label. Defaults to blank.
 '
 m4_define_blind(`diode', `
 	componentParseKVArgs(`_diode_',
@@ -150,7 +152,9 @@ m4_define_blind(`diode', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `type', `'), $@)
+		 `type', `',
+		 `startLabel', `',
+		 `endLabel', `'), $@)
 	componentHandleRef(_diode_)
 	[
 		pushDir();
@@ -195,20 +199,94 @@ m4_define_blind(`diode', `
 				then to polarCoord(LEDArrowMid2, 0.2, dirToAngle(peekDir()) + 22) \
 				then to LEDArrowMid2 shaded "black";
 			line from LEDArrowMid2 to LEDArrowStart2;
-
 		')
 
 		A: Start;
 		K: End;
 
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A")
+		m4_ifelse(_diode_startLabel, `', `', `T_'_diode_startLabel`: A')
+		m4_ifelse(_diode_endLabel, `', `', `T_'_diode_endLabel`: K')
+
 		popDir();
 	] with .Start at _diode_pos;
+
+	# display terminal labels
+	componentDrawTerminalLabel(last [].A, textTerminalLabel(_diode_startLabel))
+	componentDrawTerminalLabel(last [].K, textTerminalLabel(_diode_endLabel))
 
 	componentDrawLabels(_diode_)
 
 	move to last [].End;
 ')
 m4_define_blind(`LED', `diode(type=LED, $@)')
+
+
+`
+Battery. Draws in current direction.
+
+Usage: battery([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+	        	letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	startLabel:	Starting terminal label. Defaults to blank.
+	endLabel:	Ending terminal label. Defaults to blank.
+'
+m4_define_blind(`battery', `
+	componentParseKVArgs(`_battery_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `type', `',
+		 `startLabel', `',
+		 `endLabel', `'), $@)
+	componentHandleRef(_battery_)
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+
+		move to Start then dirToDirection(peekDir()) elen*3/8;
+		AI: Here;
+		move dirToDirection(peekDir()) elen*9/32;
+		BI: Here;
+
+		line from Start to AI;
+		line from BI to End;
+
+		move to AI;
+		m4_forloop(`i', 0, 2, `
+			move dirToDirection(dirCW(peekDir())) elen/8;
+			line dirToDirection(dirCCW(peekDir())) elen/4;
+
+			move to last line.c then down elen*7/128;
+			m4_ifelse(dirIsVertical(peekDir()), 1, `box wid elen/8 ht elen/64', `box wid elen/64 ht elen/8') shaded "black" with .c at Here;
+			move to last box.c then dirToDirection(peekDir()) elen*7/128;
+		')
+
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A")
+		m4_ifelse(_battery_startLabel, `', `', `T_'_battery_startLabel`: Start')
+		m4_ifelse(_battery_endLabel, `', `', `T_'_battery_endLabel`: End')
+
+		popDir();
+	] with .Start at _battery_pos;
+
+	# display terminal labels
+	componentDrawTerminalLabel(last [].Start, textTerminalLabel(_battery_startLabel))
+	componentDrawTerminalLabel(last [].End,   textTerminalLabel(_battery_endLabel))
+
+	componentDrawLabels(_battery_)
+
+	move to last [].End;
+')
 
 
 `
@@ -331,8 +409,8 @@ m4_define_blind(`coil', `
 		}
 
 		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A1")
-		m4_ifelse(_coil_fullStartLabel, `', `', `T_'_coil_startLabel`: AO')
-		m4_ifelse(_coil_fullEndLabel,   `', `', `T_'_coil_endLabel`:   BO')
+		m4_ifelse(_coil_startLabel, `', `', `T_'_coil_startLabel`: AO')
+		m4_ifelse(_coil_endLabel,   `', `', `T_'_coil_endLabel`:   BO')
 
 		popDir();
 	] with .Start at _coil_pos;
