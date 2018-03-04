@@ -14,8 +14,8 @@ m4_define_blind(`componentDrawActuator', `
 	m4_ifelse($1, `manual', `
 		line from polarCoord($2, 1.2, $3 - 90) to polarCoord($2, 1.2, $3 + 90);
 	', $1, `selector', `
-		ActuatorSelectorT: polarCoord($2, 1.2, $3 - $4*90);
-		ActuatorSelectorB: polarCoord($2, 1.2, $3 + $4*90);
+		ActuatorSelectorT: polarCoord($2, 1.2, $3 - ($4*90));
+		ActuatorSelectorB: polarCoord($2, 1.2, $3 + ($4*90));
 		line from polarCoord(ActuatorSelectorB, 0.8, $3) to ActuatorSelectorB \
 			then to ActuatorSelectorT \
 			then to polarCoord(ActuatorSelectorT, 0.8, $3 - 180);
@@ -41,31 +41,31 @@ m4_define_blind(`componentDrawActuator', `
 			polarCoord(ActuatorEStopT, pointsToMillimetres(linethick/2), $3 - 180);
 		line from ActuatorEStopB to ActuatorEStopT;
 	', $1, `foot', `
-		ActuatorFootT: polarCoord($2,   1.33, $3 - $4*117);
-		ActuatorFootB: polarCoord($2,   1.33, $3 + $4*63);
-		ActuatorFootL: polarCoord(ActuatorFootB, 0.89, $3 - $4*27);
+		ActuatorFootT: polarCoord($2,   1.33, $3 - ($4*117));
+		ActuatorFootB: polarCoord($2,   1.33, $3 + ($4*63));
+		ActuatorFootL: polarCoord(ActuatorFootB, 0.89, $3 - ($4*27));
 		line from ActuatorFootL to ActuatorFootB to ActuatorFootT;
 	', $1, `proximity', `
 		ActuatorProxL: polarCoord($2, 2.4, $3);
 		ActuatorProxC: 1/2 between $2 and ActuatorProxL;
-		ActuatorProxT: polarCoord(ActuatorProxC, 1.2, $3 - $4*90);
-		ActuatorProxB: polarCoord(ActuatorProxC, 1.2, $3 + $4*90);
+		ActuatorProxT: polarCoord(ActuatorProxC, 1.2, $3 - ($4*90));
+		ActuatorProxB: polarCoord(ActuatorProxC, 1.2, $3 + ($4*90));
 		line from $2 to ActuatorProxT to ActuatorProxL to ActuatorProxB to $2;
-		line from ActuatorProxB+(-0.4, $4*0.4) to ActuatorProxT+(-$4*0.4, -0.4);
-		line from ActuatorProxB+($4*0.4, 0.4) to ActuatorProxT+(0.4, -$4*0.4);
+		line from ActuatorProxB+(-0.4, ($4*0.4)) to ActuatorProxT+(-($4*0.4), -0.4);
+		line from ActuatorProxB+(($4*0.4), 0.4) to ActuatorProxT+(0.4, -($4*0.4));
 	', $1, `key', `
-		ActuatorKeyTT: polarCoord($2,            1.33, $3 - $4*76);
-		ActuatorKeyTC: polarCoord(ActuatorKeyTT, 0.50, $3 + $4*90);
-		ActuatorKeyBM: polarCoord(ActuatorKeyTT, 2.48, $3 + $4*90);
+		ActuatorKeyTT: polarCoord($2,            1.33, $3 - ($4*76));
+		ActuatorKeyTC: polarCoord(ActuatorKeyTT, 0.50, $3 + ($4*90));
+		ActuatorKeyBM: polarCoord(ActuatorKeyTT, 2.48, $3 + ($4*90));
 		ActuatorKeyBL: polarCoord(ActuatorKeyBM, 0.50, $3);
 		ActuatorKeyBR: polarCoord(ActuatorKeyBM, 0.50, $3 - 180);
 		circle rad 0.5 at ActuatorKeyTC;
-		line from polarCoord(ActuatorKeyTT, 1.0, $3 + $4*76) \
-			to polarCoord(ActuatorKeyBL, 0.5, $3 - $4*90) \
+		line from polarCoord(ActuatorKeyTT, 1.0, $3 + ($4*76)) \
+			to polarCoord(ActuatorKeyBL, 0.5, $3 - ($4*90)) \
 			to ActuatorKeyBL \
 			to ActuatorKeyBR \
-			to polarCoord(ActuatorKeyBR, 0.5, $3 - $4*90) \
-			to polarCoord(ActuatorKeyTT, 1.0, $3 - $4*256);
+			to polarCoord(ActuatorKeyBR, 0.5, $3 - ($4*90)) \
+			to polarCoord(ActuatorKeyTT, 1.0, $3 - ($4*256));
 	', $1, `turn',  `componentDrawActuator(selector, $2, $3, $4)
 	', $1, `twist', `componentDrawActuator(selector, $2, $3, $4)
 	', $1, `estop', `componentDrawActuator(mushroom, $2, $3, $4)
