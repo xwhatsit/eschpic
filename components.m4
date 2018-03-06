@@ -522,16 +522,42 @@ m4_define_blind(`motorStarter', `
 			_motorStarter_actuationAngle, 
 			m4_ifelse(dirIsVertical(getDir()), 1, 1, -1));
 		line dashed elen/18 from HandlePos to Box.w;
+
+		Thermal: thermalOperator(pos=FirstContactEnd);
+		Current: overCurrentOperator();
+		line down 5/16*elen;
+		T_2: Here;
+
+		thermalOperator(pos=polarCoord(FirstContactEnd, elen/2, _motorStarter_actuationAngle + 180));
+		overCurrentOperator();
+		line down 5/16*elen;
+		T_4: Here;
+
+		thermalOperator(pos=polarCoord(FirstContactEnd, elen, _motorStarter_actuationAngle + 180));
+		overCurrentOperator();
+		line down 5/16*elen;
+		T_6: Here;
+
+		ThermalX: m4_ifelse(dirIsVertical(getDir()), 1, `(Box.s, Thermal.w)', `(Thermal.w, Box.s)');
+		CurrentX: m4_ifelse(dirIsVertical(getDir()), 1, `(Box.s, Current.w)', `(Current.w, Box.s)');
+		line dashed elen/18 from Box.s to ThermalX then to Thermal.w;
+		line dashed elen/18 from ThermalX to CurrentX then to Current.w;
+		End: Here;
+
+		componentDrawTerminalLabel(T_2, 2);
+		componentDrawTerminalLabel(T_4, 4);
+		componentDrawTerminalLabel(T_6, 6);
 	')
 	contactGroup(
 		linked=false,
 		pos=_motorStarter_pos,
 		postDraw=_motorStarter_postDraw,
-		contacts=NO(1,2) NO(3,4) NO(5,6) _motorStarter_aux,
+		contacts=NO(1,) NO(3,) NO(5,) _motorStarter_aux,
 		type=breaker disconnector
 	);
 
+
+	line dashed elen/18 from last [].Box.e to last[]. 7th last [].MidContact;
 	componentDrawLabels(_motorStarter_)
-	line dashed elen/18 from last [].Box.e to last[]. last [].MidContact;
-	move to last [].FirstContactEnd;
+	move to last [].End;
 ')
