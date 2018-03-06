@@ -733,3 +733,85 @@ m4_define_blind(`_contactGroupParseContacts', `
 	m4_popdef(`_index')
 	m4_popdef(`_regexp')
 ')
+
+
+`
+Thermal operating mechanism.
+
+Usage: thermalOperator([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+'
+m4_define_blind(`thermalOperator', `
+	componentParseKVArgs(`_thermalOperator_',
+		(`pos', `Here',
+		 `flipped', `false',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `'), $@)
+	componentHandleRef(_thermalOperator_)
+
+	[
+		pushDir();
+
+		Start: Here;
+		line dirToDirection(peekDir()) elen/16 \
+			then dirToDirection(dirCCW(peekDir())) elen/8 \
+			then dirToDirection(peekDir()) elen/8 \
+			then dirToDirection(dirCW(peekDir())) elen/8 \
+			then dirToDirection(peekDir()) elen/16;
+		End: Here;
+
+		box wid elen/2 ht elen/4 with .n at Start;
+
+	] with .Start at _thermalOperator_pos;
+
+	componentDrawLabels(_thermalOperator_)
+	move to last [].End;
+')
+
+
+`
+Over-current operating mechanism.
+
+Usage: overCurrentOperator([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+'
+m4_define_blind(`overCurrentOperator', `
+	componentParseKVArgs(`_overCurrentOperator_',
+		(`pos', `Here',
+		 `flipped', `false',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `'), $@)
+	componentHandleRef(_overCurrentOperator_)
+
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen/4;
+		End: Here;
+
+		"{\scriptsize\strut{}$I>$}" at 1/2 between Start and End;
+
+		box wid elen/2 ht elen/4 with .n at Start;
+
+	] with .Start at _overCurrentOperator_pos;
+
+	componentDrawLabels(_overCurrentOperator_)
+	move to last [].End;
+')
