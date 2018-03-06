@@ -65,15 +65,15 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 
 	m4_ifelse(thenPos, -1, `
 		m4_pushdef(`segment', $1)
-		m4_define(`segType', last)
+		m4_ifelse(segType, mid, `m4_define(`segType', last)')
 	', `
 		m4_pushdef(`segment', m4_substr($1, 0, thenPos))
 	')
 
 	m4_ifelse(segment, `', `', `
 		m4_ifelse(segType, first, `
-			Wire___LastPos: Here;
 			line segment
+			Wire___LastPos: last line.start;
 			Wire___CurrPos: Here;
 			m4_ifelse($3, start, `
 				_wire___angle      = angleBetweenPoints(Wire___LastPos, Here);
