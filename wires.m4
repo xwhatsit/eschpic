@@ -46,6 +46,104 @@ m4_define_blind(`wireWithInlineLabel', `
 
 
 `
+Usage: wire(linespec, label, labelPos)
+Params:
+	linespec: text describing a single line segment
+	label:    the actual text to print (optional)
+	labelPos: one of start, mid, end   (optional, defaults to "start")
+'
+m4_define_blind(`wire', `
+	m4_ifelse($2, `', `
+		line $1
+	', `
+		_wireWithInlineLabelParseSegment($1, $2, m4_ifelse($3, `', `start', $3), first)
+	')
+')
+m4_define_blind(`_wireWithInlineLabelParseSegment', `
+	m4_pushdef(`thenPos', m4_regexp($1, `\bthen\b'))
+	m4_pushdef(`segType', m4_ifelse($4, `', mid, $4))
+
+	m4_ifelse(thenPos, -1, `
+		m4_pushdef(`segment', $1)
+		m4_define(`segType', last)
+	', `
+		m4_pushdef(`segment', m4_substr($1, 0, thenPos))
+	')
+
+	m4_ifelse(segment, `', `', `
+		m4_ifelse(segType, first, `
+			Wire___LastPos: Here;
+			line segment
+			Wire___CurrPos: Here;
+			m4_ifelse($3, start, `
+				_wire___angle      = angleBetweenPoints(Wire___LastPos, Here);
+				_wire___textLength = textWireLabelLength(($2));
+				_wire___wireLength = distanceBetweenPoints(Wire___LastPos, Here);
+				Wire___TextCentre: polarCoord(Wire___LastPos, elen/4 + (_wire___textLength / 2), _wire___angle);
+
+				if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
+					box wid _wire___textLength ht textWireLabelHeight() shaded "black" with .c at Wire___TextCentre;
+					"\rotatebox{90}{textWireLabel(($2))}" at 1/2 between Wire___LastPos and Wire___CurrPos;
+					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+				} else {
+					box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+					"textWireLabel(($2))" at Wire___TextCentre;
+					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+				}
+			')
+		', segType, mid, `
+			Wire___LastPos: Here;
+			continue segment;
+			Wire___CurrPos: Here;
+
+			m4_ifelse($3, mid, `
+				_wire___angle      = angleBetweenPoints(Wire___LastPos, Here);
+				_wire___textLength = textWireLabelLength(($2));
+				_wire___wireLength = distanceBetweenPoints(Wire___LastPos, Here);
+				Wire___TextCentre: 1/2 between Wire___LastPos and Wire___CurrPos;
+
+				if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
+					box ht _wire___textLength wid textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+					"\rotatebox{90}{textWireLabel(($2))}" at Wire___TextCentre;
+					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+				} else {
+					box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+					"textWireLabel(($2))" at Wire___TextCentre;
+					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+				}
+			')
+		', segType, last, `
+			Wire___LastPos: Here;
+			continue segment;
+			Wire___CurrPos: Here;
+			m4_ifelse($3, end, `
+				_wire___angle      = angleBetweenPoints(Wire___LastPos, Here);
+				_wire___textLength = textWireLabelLength(($2));
+				_wire___wireLength = distanceBetweenPoints(Wire___LastPos, Here);
+				Wire___TextCentre: polarCoord(Wire___LastPos, _wire___wireLength - (elen/4 + (_wire___textLength / 2)), _wire___angle);
+
+				if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
+					box ht _wire___textLength wid textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+					"\rotatebox{90}{textWireLabel(($2))}" at Wire___TextCentre;
+				} else {
+					box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+					"textWireLabel(($2))" at Wire___TextCentre;
+				}
+			')
+		')
+	')
+
+	m4_ifelse(thenPos, -1, `', `
+		_wireWithInlineLabelParseSegment(m4_substr($1, m4_eval(thenPos + 4)), $2, $3)
+	')
+
+	m4_popdef(`segment')
+	m4_popdef(`segType')
+	m4_popdef(`thenPos')
+')
+
+
+`
 Usage: wireWithSideLabel(linespec, label, labelPos)
 Params:
 	linespec: text describing a single line segment
@@ -79,3 +177,7 @@ m4_define_blind(`wireWithSideLabel', `
 		}
 	}
 ')
+
+
+#`
+#Usage: wireGroup(linespec, 

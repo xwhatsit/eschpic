@@ -40,9 +40,10 @@ m4_define_blind(`textWireLabel', `{\small\ttfamily{}$1}')
 
 
 `
-Calculates length of wire label style text in millimetres
+Calculates sizes of wire label style text in millimetres
 '
 m4_define_blind(`textWireLabelLength', `(m4_len($1) * 1.6601882)')
+m4_define_blind(`textWireLabelHeight', `pointsToMillimetres(6.25)')
 
 
 `
