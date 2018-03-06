@@ -149,6 +149,13 @@ m4_define(`m4_newline', `
 
 
 `
+Like m4_errprint, but puts a newline on the end
+'
+m4_define(`m4_errprintl', `m4_errprint($@
+)')
+
+
+`
 Expands to all characters (1-255), except with the dash moved to the end (for translit).
 '
 m4_define(`m4_cr_all', `m4_format(m4_forloop(i, 1, 255, `%c') m4_forloop(j, 1, 44, `, j')m4_forloop(k, 46, 255, `, k'), 45)')
