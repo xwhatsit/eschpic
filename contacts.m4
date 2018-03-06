@@ -415,9 +415,9 @@ m4_define_blind(`contactNO', `
 		componentAddContactModifiers(_contactNO_type)
 		componentAddContactActuators(_contactNO_actuation)
 
-		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
-		m4_ifelse(_contactNO_fullStartLabel, `', `', `T_'m4_patsubst(_contactNO_fullStartLabel, `[^A-Za-z0-9]', `_')`: AO')
-		m4_ifelse(_contactNO_fullEndLabel,   `', `', `T_'m4_patsubst(_contactNO_fullEndLabel,   `[^A-Za-z0-9]', `_')`: BO')
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T13")
+		m4_ifelse(_contactNO_fullStartLabel, `', `', `T'm4_patsubst(_contactNO_fullStartLabel, `[^A-Za-z0-9]', `_')`: AO')
+		m4_ifelse(_contactNO_fullEndLabel,   `', `', `T'm4_patsubst(_contactNO_fullEndLabel,   `[^A-Za-z0-9]', `_')`: BO')
 
 		popDir();
 	] with .Start at _contactNO_pos;
@@ -506,9 +506,9 @@ m4_define_blind(`contactNC', `
 		componentAddContactModifiers(_contactNC_type, true)
 		componentAddContactActuators(_contactNC_actuation, true)
 
-		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13")
-		m4_ifelse(_contactNC_fullStartLabel, `', `', `T_'m4_patsubst(_contactNC_fullStartLabel, `[^A-Za-z0-9]', `_')`: AO')
-		m4_ifelse(_contactNC_fullEndLabel,   `', `', `T_'m4_patsubst(_contactNC_fullEndLabel,   `[^A-Za-z0-9]', `_')`: BO')
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T13")
+		m4_ifelse(_contactNC_fullStartLabel, `', `', `T'm4_patsubst(_contactNC_fullStartLabel, `[^A-Za-z0-9]', `_')`: AO')
+		m4_ifelse(_contactNC_fullEndLabel,   `', `', `T'm4_patsubst(_contactNC_fullEndLabel,   `[^A-Za-z0-9]', `_')`: BO')
 
 		popDir();
 	] with .Start at _contactNC_pos;
@@ -592,8 +592,8 @@ m4_define_blind(`contactCO', `
 
 		line from NC to NCCorner to NCJoin;
 
-		# if terminal labels are defined, add positional labels as "T_" + name (e.g. ".T_13") (already present for NO contact)
-		m4_ifelse(_contactCO_fullNCLabel, `', `', `T_'_contactCO_fullNCLabel`: NC')
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T13") (already present for NO contact)
+		m4_ifelse(_contactCO_fullNCLabel, `', `', `T'_contactCO_fullNCLabel`: NC')
 
 		popDir();
 	] with .Start at _contactCO_pos;
@@ -712,9 +712,9 @@ m4_define_blind(`_contactGroupParseContacts', `
 
 		# redefine terminal labels if they exist
 		m4_ifelse(m4_indir(_contact`'_type`'_fullStartLabel), `', `',
-			`T_'m4_indir(_contact`'_type`'_fullStartLabel)`: last [].T_'m4_indir(_contact`'_type`'_fullStartLabel))
+			`T'm4_indir(_contact`'_type`'_fullStartLabel)`: last [].T'm4_indir(_contact`'_type`'_fullStartLabel))
 		m4_ifelse(m4_indir(_contact`'_type`'_fullEndLabel), `', `',
-			`T_'m4_indir(_contact`'_type`'_fullEndLabel)`: last [].T_'m4_indir(_contact`'_type`'_fullEndLabel))
+			`T'm4_indir(_contact`'_type`'_fullEndLabel)`: last [].T'm4_indir(_contact`'_type`'_fullEndLabel))
 
 		move to last [].Start;
 		m4_ifelse(dirIsVertical(peekDir()), 1, `move `right' elen/2', `move `down' elen/2');

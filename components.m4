@@ -204,9 +204,9 @@ m4_define_blind(`diode', `
 		A: Start;
 		K: End;
 
-		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A")
-		m4_ifelse(_diode_startLabel, `', `', `T_'_diode_startLabel`: A')
-		m4_ifelse(_diode_endLabel, `', `', `T_'_diode_endLabel`: K')
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TA")
+		m4_ifelse(_diode_startLabel, `', `', `T'_diode_startLabel`: A')
+		m4_ifelse(_diode_endLabel, `', `', `T'_diode_endLabel`: K')
 
 		popDir();
 	] with .Start at _diode_pos;
@@ -272,9 +272,9 @@ m4_define_blind(`battery', `
 			move to last box.c then dirToDirection(peekDir()) elen*7/128;
 		')
 
-		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A")
-		m4_ifelse(_battery_startLabel, `', `', `T_'_battery_startLabel`: Start')
-		m4_ifelse(_battery_endLabel, `', `', `T_'_battery_endLabel`: End')
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TA")
+		m4_ifelse(_battery_startLabel, `', `', `T'_battery_startLabel`: Start')
+		m4_ifelse(_battery_endLabel, `', `', `T'_battery_endLabel`: End')
 
 		popDir();
 	] with .Start at _battery_pos;
@@ -408,9 +408,9 @@ m4_define_blind(`coil', `
 			box wid elen/4 ht elen*(3/8) with .c at Centre;
 		}
 
-		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T_A1")
-		m4_ifelse(_coil_startLabel, `', `', `T_'_coil_startLabel`: AO')
-		m4_ifelse(_coil_endLabel,   `', `', `T_'_coil_endLabel`:   BO')
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TA1")
+		m4_ifelse(_coil_startLabel, `', `', `T'_coil_startLabel`: AO')
+		m4_ifelse(_coil_endLabel,   `', `', `T'_coil_endLabel`:   BO')
 
 		popDir();
 	] with .Start at _coil_pos;
@@ -457,8 +457,8 @@ m4_define_blind(`contactor3ph', `
 		m4_define(`_contactor3ph_groupOffset', `m4_ifelse(dirIsVertical(getDir()), 1, `(elen/2, 0)', `(0, -elen/2)')')
 		m4_define(`_contactor3ph_preDraw', `
 			Coil: coil();
-			T_A1: last [].T_A1;
-			T_A2: last [].T_A2;
+			TA1: last [].TA1;
+			TA2: last [].TA2;
 			move to last [].Start;
 			move to Here + _contactor3ph_groupOffset;
 		')
@@ -526,17 +526,17 @@ m4_define_blind(`motorStarter', `
 		Thermal: thermalOperator(pos=FirstContactEnd);
 		Current: overCurrentOperator();
 		line down 5/16*elen;
-		T_2: Here;
+		T2: Here;
 
 		thermalOperator(pos=polarCoord(FirstContactEnd, elen/2, _motorStarter_actuationAngle + 180));
 		overCurrentOperator();
 		line down 5/16*elen;
-		T_4: Here;
+		T4: Here;
 
 		thermalOperator(pos=polarCoord(FirstContactEnd, elen, _motorStarter_actuationAngle + 180));
 		overCurrentOperator();
 		line down 5/16*elen;
-		T_6: Here;
+		T6: Here;
 
 		ThermalX: m4_ifelse(dirIsVertical(getDir()), 1, `(Box.s, Thermal.w)', `(Thermal.w, Box.s)');
 		CurrentX: m4_ifelse(dirIsVertical(getDir()), 1, `(Box.s, Current.w)', `(Current.w, Box.s)');
@@ -544,9 +544,9 @@ m4_define_blind(`motorStarter', `
 		line dashed elen/18 from ThermalX to CurrentX then to Current.w;
 		End: Here;
 
-		componentDrawTerminalLabel(T_2, 2);
-		componentDrawTerminalLabel(T_4, 4);
-		componentDrawTerminalLabel(T_6, 6);
+		componentDrawTerminalLabel(T2, 2);
+		componentDrawTerminalLabel(T4, 4);
+		componentDrawTerminalLabel(T6, 6);
 	')
 	contactGroup(
 		linked=false,
