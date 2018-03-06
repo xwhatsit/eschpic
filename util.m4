@@ -141,12 +141,18 @@ m4_define(`m4_prefixKVArgs', `
 		`m4_define($1`'m4_getKVKey(m4_kvArg), m4_getKVVal(m4_kvArg))')')')
 
 
-
 `
 Substitutes to simple newline; makes writing neatly-formatted macros easier.
 '
 m4_define(`m4_newline', `
 ')
+
+
+`
+Expands to all characters (1-255), except with the dash moved to the end (for translit).
+'
+m4_define(`m4_cr_all', `m4_format(m4_forloop(i, 1, 255, `%c') m4_forloop(j, 1, 44, `, j')m4_forloop(k, 46, 255, `, k'), 45)')
+
 
 `
 Converts pts to mm.
