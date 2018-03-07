@@ -11,28 +11,34 @@
 \usepackage{tikz}
 \usepackage{varwidth}
 \pagestyle{empty}
+
+\DTLsetseparator{,}
+
+\IfFileExists{bom.csv.sorted}{
+\DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom.csv.sorted}
+
 \begin{document}
 m4_divert(9)
 \pagebreak
 
+\DTLifdbempty{bom}{}{
 \begin{figure}
 \centering
 \section*{Component List}
-
-\DTLsetseparator{,}
-\DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom.csv.sorted}
-
 \begin{tabular}{l l l r r}
-%1A2 & XPS-AC5121 & E-Stop Module & \hyperlink{1A2_0}{1.3C} & 004094 \\
-%2K3 & Omron G23A & Manual Relay & \hyperlink{2K3_0}{2.7E} & 300123 \\
 \toprule
 Reference & Value & Description & Location & Part Number \\ \midrule
-\DTLforeach*{bom}{\ref=ref,\val=val,\description=description,\location=location,\part=part,\uid=uid}{
-\ref & \val & \description & \hyperlink{\uid}{\location} & \part \\}
-\\\bottomrule
+\DTLforeach*{bom}
+{\ref=ref,\val=val,\description=description,\location=location,\part=part,\uid=uid}
+{%
+	\DTLiffirstrow{}{\\}%
+	\ref & \val & \description & \hyperlink{\uid}{\location} & \part
+} \\
+\bottomrule
 \end{tabular}
-
 \end{figure}
+}
+}{}
 
 \end{document}
 % eschpic document end (divert=9)

@@ -138,7 +138,7 @@ Support macro writing out BOM entries when triggered from aux file
 Usage: _componentBOMEntry(ref, id, val, description, part, sheet, hpos, vpos)
 '
 m4_define_blind(`_componentBOMEntry', `
-	m4_ifelse($4, `', `', `print "$1,$3,$4,$6.$7`'a3VPosLetter($8),$5,$1_$2" >> "bom.csv"')
+	m4_ifelse($5, `', `', `print "$1,$3,$4,$6.$7`'a3VPosLetter($8),$5,$1_$2" >> "bom.csv"')
 ')
 
 
