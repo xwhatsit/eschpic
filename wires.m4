@@ -65,7 +65,8 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 
 	m4_ifelse(thenPos, -1, `
 		m4_pushdef(`segment', $1)
-		m4_ifelse(segType, mid, `m4_define(`segType', last)')
+		m4_ifelse($3, mid, `m4_define(`segType', mid)',
+		          $3, end, `m4_define(`segType', last)')
 	', `
 		m4_pushdef(`segment', m4_substr($1, 0, thenPos))
 	')
@@ -82,14 +83,13 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 				Wire___TextCentre: polarCoord(Wire___LastPos, elen/4 + (_wire___textLength / 2), _wire___angle);
 
 				if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
-					box wid _wire___textLength ht textWireLabelHeight() shaded "black" with .c at Wire___TextCentre;
-					"\rotatebox{90}{textWireLabel(($2))}" at 1/2 between Wire___LastPos and Wire___CurrPos;
-					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+					box ht _wire___textLength wid textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+					"\rotatebox{90}{textWireLabel(($2))}" at Wire___TextCentre;
 				} else {
 					box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
 					"textWireLabel(($2))" at Wire___TextCentre;
-					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 				}
+				line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 			')
 		', segType, mid, `
 			Wire___LastPos: Here;
@@ -105,12 +105,11 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 				if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
 					box ht _wire___textLength wid textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
 					"\rotatebox{90}{textWireLabel(($2))}" at Wire___TextCentre;
-					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 				} else {
 					box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
 					"textWireLabel(($2))" at Wire___TextCentre;
-					line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 				}
+				line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 			')
 		', segType, last, `
 			Wire___LastPos: Here;
@@ -129,6 +128,7 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 					box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
 					"textWireLabel(($2))" at Wire___TextCentre;
 				}
+				line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 			')
 		')
 	')
