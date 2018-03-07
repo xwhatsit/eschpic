@@ -179,5 +179,91 @@ m4_define_blind(`wireWithSideLabel', `
 ')
 
 
-#`
-#Usage: wireGroup(linespec, 
+`
+Wire cross-reference, writes out to aux file.
+
+Usage: wireRef(name, pos)
+Params:
+	name:		Internal name used to refer to reference.
+	pos:		Position to place reference at. Defaults to "Here".
+'
+m4_define_blind(`wireRef', `
+	m4_pushdef(`pos', m4_ifelse($2, `', Here, $2))
+
+	# output this wire ref first
+	print sprintf("`_wireRef'($1, %.0f, %.0f, %.0f)", a3SheetNum, a3HPosOf(pos`'.x), a3VPosOf(pos`'.y)) >> "eschpic.aux"
+
+	m4_ifdef(`_wireRefOut_$1.last', `
+		m4_define(`_wireRefOut_$1.last', m4_eval(m4_defn(`_wireRefOut_$1.last') + 1))
+	', `
+		m4_define(`_wireRefOut_$1.last', 0)
+	')
+	m4_pushdef(`currID', m4_defn(`_wireRefOut_$1.last'))
+
+	# find first ref without our ID
+	m4_pushdef(`haveRef', 0)
+	m4_ifdef(`_wireRef_$1.last', `
+		m4_forloop(`searchID', 0, m4_defn(`_wireRef_$1.last'), `
+			m4_ifelse(m4_eval(searchID != currID && haveRef != 1), 1, `
+				m4_define(`haveRef', 1)
+				_wireRefDrawText($1, currID, searchID, pos)
+			')
+		')
+	')
+	m4_ifelse(haveRef, 0, `
+		m4_errprintl(`warning: no ref found for' $1 `, may need to recompile')
+		"textWireLabel(/?.?)" at pos;
+	')
+	m4_popdef(`haveRef')
+
+	m4_popdef(`currID')
+	m4_popdef(`pos')
+')
+
+
+`
+Support macro to draw rotated/shifted wire reference.
+
+Usage: _wireRefDrawText(label, currID, referencedID, pos)
+'
+m4_define_blind(`_wireRefDrawText', `
+	m4_pushdef(`text', _wireRefText($1, $3))
+	m4_pushdef(`visibleText', m4_ifelse(dirIsVertical(getDir()), 1, `\rotatebox{90}{textWireLabel(text)}', `textWireLabel(text)'))
+
+	"\hypertarget{$1:$2}{\hyperlink{$1:$3}{visibleText}}" \
+		m4_ifelse(getDir(), dirUp,    `above',
+		          getDir(), dirDown,  `below',
+			  getDir(), dirLeft,  `rjust',
+			  getDir(), dirRight, `ljust') at pos;
+
+	m4_popdef(`visibleText')
+	m4_popdef(`text')
+')
+
+
+`
+Support macro to create wire reference labelling text from a label and ID.
+
+Usage: _wireRefText(label, id)
+'
+m4_define_blind(`_wireRefText', `m4_dnl
+/`'m4_defn(_wireRef_$1[$2].sheet).`'m4_defn(_wireRef_$1[$2].h)`'a3VPosLetter(m4_defn(_wireRef_$1[$2].v))')
+
+
+`
+Macro to read in wire refs from aux file
+'
+m4_define_blind(`_wireRef', `
+	m4_ifdef(_wireRef_$1.last, `
+		m4_define(_wireRef_$1.last, m4_eval(m4_defn(_wireRef_$1.last) + 1))
+	', `
+		m4_define(_wireRef_$1.last, 0)
+	')
+	m4_pushdef(`currID', m4_defn(_wireRef_$1.last))
+
+	m4_define(_wireRef_$1[currID].sheet, $2)
+	m4_define(_wireRef_$1[currID].h, $3)
+	m4_define(_wireRef_$1[currID].v, $4)
+
+	m4_popdef(`currID')
+')

@@ -1,5 +1,6 @@
 % eschpic document start, for processing with dpic -g
 \documentclass{article}
+\usepackage[hidelinks]{hyperref}
 \usepackage[landscape,a3paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
 \usepackage{tikz}
 \usepackage{datetime2}
@@ -21,6 +22,10 @@ m4_include(contacts.m4)
 m4_include(connectors.m4)
 m4_include(modules.m4)
 m4_include(wires.m4)
+
+# include aux file, then clear it
+m4_sinclude(eschpic.aux)
+m4_syscmd(rm eschpic.aux)
 
 `
 Gives a letter used for vertical-tic marks used on a3TitleBlock() below.
@@ -211,7 +216,7 @@ Usage: a3HPosOf(hpos)
 Params:
         hpos:   horizontal position in millimetres
 '
-m4_define_blind(`a3HPosOf', `floor($1 / (a3IW / a3NumHTics)) + 1')
+m4_define_blind(`a3HPosOf', `(floor($1 / (a3IW / a3NumHTics)) + 1)')
 
 
 `
@@ -232,6 +237,16 @@ Params:
 	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
 '
 m4_define_blind(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
+
+
+`
+Gives tic-number (not letter!) of vertical position in millimetres. Only works if using A3 title block.
+
+Usage: a3VPosOf(vpos)
+Params:
+	vpos:	vertical position in millimetres
+'
+m4_define_blind(`a3VPosOf', `floor(a3NumVTics - ($1 / (a3IH / a3NumVTics)))')
 
 
 `

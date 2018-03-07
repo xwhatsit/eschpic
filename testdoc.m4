@@ -15,12 +15,11 @@ module(
 	terminals=X1(A1, A2) (Y1) (13, 23, 33, Y43) | (,) (Y2) X8(14, 24, 34, Y44)
 );
 
-line down from last [].T_34;
-line up from last[].T_Y1;
-line down from last [].G_X8_T_14 then right elen/2 then up;
-line up from last [].T_A1 then left elen/2 then down;
-line down from last [].T_Y44 then right elen/2 then up;
-line up from last [].T_Y43 then right elen/2 then down;
+line down elen*2 from last [].T34 then right elen*4;
+wireRef(A2T34)
+
+line up from last[].TY1;
+line down from last [].GX8T14 then right elen/2 then up;
 
 a3Sheet(
 	sheet=2,
@@ -28,3 +27,8 @@ a3Sheet(
 	ref=ABC123,
 	rev=0.1,
 );
+
+line from a3Pos(6, E) down;
+wireRef(A2T34)
+
+#print sprintf("___wireRef(A2T34, %.0f, %.0f, %.0f)", a3SheetNum, a3HPosOf(Here.x), a3VPosOf(Here.y)) >> "eschpic.aux"

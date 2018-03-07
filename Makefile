@@ -7,6 +7,8 @@ ifndef V
 .SILENT:
 endif
 
+.PRECIOUS: %.md5
+
 M4_OPTS=-P # prefix builtins with "m4_"
 
 M4_DEPS=components.m4 \
@@ -29,9 +31,15 @@ testdoc.pdf: testdoc.tex $(wildcard sheet*.m4)
 	@echo "  PIC	" $<
 	dpic -g $< > $@
 
-%.pic: %.m4 $(M4_DEPS)
+%.pic: %.m4 $(M4_DEPS) eschpic.aux.md5
 	@echo "  M4	" $<
 	m4 $(M4_OPTS) $< > $@
+
+%.md5: FORCE
+	@echo "  MD5	" $*
+	@$(if $(filter-out $(shell cat $@ 2>/dev/null),$(shell md5sum $*)),md5sum $* > $@)
+
+FORCE:
 
 # use make -nps to figure out all intermediate targets
 clean:
