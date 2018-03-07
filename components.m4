@@ -87,6 +87,62 @@ m4_define_blind(`componentDrawTerminalLabel', `
 
 
 `
+Macro to assist writing BOM file's header (column names)
+'
+m4_define_blind(`componentStartBOMFile', `
+	print "Reference,Value,Description,Location,Part Number,UID" > "bom.csv"
+')
+
+
+`
+Macro to assist writing out BOM entries to aux file
+
+Usage: componentWriteBOM(prefix)
+'
+m4_define_blind(`componentWriteBOM', `
+	m4_pushdef(`ref', m4_indir($1`ref_prefixed'))
+	m4_pushdef(`val', m4_indir($1`val'))
+	m4_pushdef(`description', m4_indir($1`description'))
+	m4_pushdef(`part', m4_indir($1`part'))
+	m4_pushdef(`sheet', a3SheetNum)
+	m4_pushdef(`hpos', a3HPosOf((m4_indir($1`pos')).x))
+	m4_pushdef(`vpos', a3VPosOf((m4_indir($1`pos')).y))
+
+	m4_ifelse(m4_indir($1`ref'), `', `', `
+		m4_ifdef(`_componentBOM_'ref`.last', `
+			m4_define(`_componentBOM_'ref`.last', m4_eval(m4_defn(`_componentBOM_'ref`.last') + 1))
+		', `
+			m4_define(`_componentBOM_'ref`.last', 0)
+		')
+		m4_pushdef(`currID', m4_defn(`_componentBOM_'ref`.last'))
+
+		print sprintf("`_componentBOMEntry'(ref,currID,val,description,part,sheet,%.0f,%.0f)", hpos, vpos) >> "eschpic.aux";
+		"\hypertarget{ref`_'currID}{}" at m4_indir($1`pos');
+
+		m4_popdef(`currID')
+	')
+
+	m4_popdef(`vpos')
+	m4_popdef(`hpos')
+	m4_popdef(`sheet')
+	m4_popdef(`part')
+	m4_popdef(`description')
+	m4_popdef(`val')
+	m4_popdef(`ref')
+')
+
+
+`
+Support macro writing out BOM entries when triggered from aux file
+
+Usage: _componentBOMEntry(ref, id, val, description, part, sheet, hpos, vpos)
+'
+m4_define_blind(`_componentBOMEntry', `
+	m4_ifelse($4, `', `', `print "$1,$3,$4,$6.$7`'a3VPosLetter($8),$5,$1_$2" >> "bom.csv"')
+')
+
+
+`
 Resistor. Draws in current direction.
 
 Usage: resistor([comma-separated key-value parameters])
@@ -125,6 +181,7 @@ m4_define_blind(`resistor', `
 	] with .Start at _resistor_pos;
 
 	componentDrawLabels(_resistor_)
+	componentWriteBOM(_resistor_)
 
 	move to last [].End;
 ')
@@ -216,6 +273,7 @@ m4_define_blind(`diode', `
 	componentDrawTerminalLabel(last [].K, textTerminalLabel(_diode_endLabel))
 
 	componentDrawLabels(_diode_)
+	componentWriteBOM(_diode_)
 
 	move to last [].End;
 ')
@@ -284,6 +342,7 @@ m4_define_blind(`battery', `
 	componentDrawTerminalLabel(last [].End,   textTerminalLabel(_battery_endLabel))
 
 	componentDrawLabels(_battery_)
+	componentWriteBOM(_battery_)
 
 	move to last [].End;
 ')
@@ -420,6 +479,7 @@ m4_define_blind(`coil', `
 	componentDrawTerminalLabel(last [].BO, textTerminalLabel(_coil_endLabel))
 
 	componentDrawLabels(_coil_)
+	componentWriteBOM(_coil_)
 
 	move to last [].End
 ')
@@ -472,6 +532,7 @@ m4_define_blind(`contactor3ph', `
 	);
 
 	componentDrawLabels(_contactor3ph_)
+	componentWriteBOM(_contactor3ph_)
 	m4_ifelse(_contactor3ph_coil, `true', `
 		line dashed elen/18 from last [].Coil.e to last []. last [].MidContact;
 		move to last [].Coil.End;
@@ -559,5 +620,6 @@ m4_define_blind(`motorStarter', `
 
 	line dashed elen/18 from last [].Box.e to last[]. 7th last [].MidContact;
 	componentDrawLabels(_motorStarter_)
+	componentWriteBOM(_motorStarter_)
 	move to last [].End;
 ')

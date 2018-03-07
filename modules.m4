@@ -85,6 +85,7 @@ m4_define_blind(`module', `
 	] with .Start at _module_pos;
 
 	componentDrawLabels(_module_, true)
+	componentWriteBOM(_module_, true)
 ')
 m4_define_blind(`_moduleParseTerminals', `
 	m4_pushdef(`_regex', `^ *\(\w[^(]*\)? *\(([^)]*)\)')

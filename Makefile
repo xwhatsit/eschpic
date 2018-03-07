@@ -21,7 +21,7 @@ M4_DEPS=components.m4 \
 	util.m4       \
 	wires.m4
 
-all : testdoc.pdf ;@echo "$@ done"
+all : testdoc.pdf bom.csv.sorted ;@echo "$@ done"
 
 testdoc.pdf: testdoc.tex $(wildcard sheet*.m4)
 	@echo "  LATEX	" $<
@@ -38,6 +38,10 @@ testdoc.pdf: testdoc.tex $(wildcard sheet*.m4)
 %.md5: FORCE
 	@echo "  MD5	" $*
 	@$(if $(filter-out $(shell cat $@ 2>/dev/null),$(shell md5sum $*)),md5sum $* > $@)
+
+%.csv.sorted: %.csv
+	@echo "  SORT	" $<
+	tail +2 $< | sort -n > $@
 
 FORCE:
 

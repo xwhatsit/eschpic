@@ -1,14 +1,39 @@
 % eschpic document start, for processing with dpic -g
 \documentclass{article}
-\usepackage[hidelinks]{hyperref}
-\usepackage[landscape,a3paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
-\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{datatool}
 \usepackage{datetime2}
+\usepackage{float}
+\usepackage[a3paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
+\usepackage{pdflscape}
+\usepackage[hidelinks]{hyperref}
 \usepackage{siunitx}
+\usepackage{tikz}
 \usepackage{varwidth}
 \pagestyle{empty}
 \begin{document}
 m4_divert(9)
+\pagebreak
+
+\begin{figure}
+\centering
+\section*{Component List}
+
+\DTLsetseparator{,}
+\DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom.csv.sorted}
+
+\begin{tabular}{l l l r r}
+%1A2 & XPS-AC5121 & E-Stop Module & \hyperlink{1A2_0}{1.3C} & 004094 \\
+%2K3 & Omron G23A & Manual Relay & \hyperlink{2K3_0}{2.7E} & 300123 \\
+\toprule
+Reference & Value & Description & Location & Part Number \\ \midrule
+\DTLforeach*{bom}{\ref=ref,\val=val,\description=description,\location=location,\part=part,\uid=uid}{
+\ref & \val & \description & \hyperlink{\uid}{\location} & \part \\}
+\\\bottomrule
+\end{tabular}
+
+\end{figure}
+
 \end{document}
 % eschpic document end (divert=9)
 m4_divert(-1)
@@ -23,9 +48,9 @@ m4_include(connectors.m4)
 m4_include(modules.m4)
 m4_include(wires.m4)
 
-# include aux file, then clear it
-m4_sinclude(eschpic.aux)
-m4_syscmd(rm eschpic.aux)
+`
+The following macros need to be here up the top, as they are used early on.
+'
 
 `
 Gives a letter used for vertical-tic marks used on a3TitleBlock() below.
@@ -48,6 +73,23 @@ Params:
 	letter:	Letter between A and J
 '
 m4_define_blind(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
+
+
+
+
+% diversion 7 is run once within the first pic environment
+m4_divert(7)
+# start new BOM file with header
+componentStartBOMFile()
+
+# include aux file, then clear it
+m4_sinclude(eschpic.aux)
+m4_syscmd(rm -f eschpic.aux)
+
+# end (divert=7)
+m4_divert(-1)
+
+
 
 
 `
@@ -73,7 +115,7 @@ Sets these pic variables:
 Defines the following macros:
 	a3SheetNum:	The sheet number specified in the "sheet" parameter
         a3OW:           Overall width of A3 landscape paper (420mm)
-        a3OH:           Overall height of A3 landscape paper (297mm)
+        a3OH:           Overall height of A3 landscape paper, minus 1mm between pages (296mm)
         a3OuterMargin:  Gets set to whatever outerMargin was in a3TitleBlock() call
         a3InnerMargin:  Gets set to whatever innerMargin was in a3TitleBlock() call
         a3W:            Width of titleblock in mm
@@ -87,9 +129,11 @@ Defines the following macros:
 m4_define_blind(`a3Sheet', `
 m4_undivert(8)
 % eschpic A3 sheet start
-\begin{figure}
+\begin{landscape}
+\begin{figure}[H]
 	\centering
 .PS
+	m4_undivert(7)
 	# Use millimetres instead of inches
 	scale = 25.4;
 
@@ -102,6 +146,7 @@ m4_undivert(8)
 	m4_divert(8)
 .PE
 \end{figure}
+\end{landscape}
 \pagebreak
 % eschpic A3 sheet end (divert=8)
 	m4_divert(0)
@@ -126,7 +171,7 @@ m4_undivert(8)
 
 	m4_define(`a3SheetNum', _a3_sheet)
         m4_define(`a3OW', `420')
-        m4_define(`a3OH', `297')
+        m4_define(`a3OH', `296')
         m4_define(`a3OuterMargin', _a3_outerMargin)
         m4_define(`a3InnerMargin', _a3_innerMargin)
         m4_define(`a3W', `m4_eval(a3OW - (a3OuterMargin * 2))')

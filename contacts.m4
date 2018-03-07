@@ -427,6 +427,7 @@ m4_define_blind(`contactNO', `
 	componentDrawTerminalLabel(last [].BO, _contactNO_fullEndLabel);
 
 	componentDrawLabels(_contactNO_)
+	componentWriteBOM(_contactNO_)
 
 	move to last [].End
 ')
@@ -518,6 +519,7 @@ m4_define_blind(`contactNC', `
 	componentDrawTerminalLabel(last [].BO, _contactNC_fullEndLabel);
 
 	componentDrawLabels(_contactNC_)
+	componentWriteBOM(_contactNC_)
 
 	move to last [].End
 ')
@@ -602,6 +604,7 @@ m4_define_blind(`contactCO', `
 	componentDrawTerminalLabel(last [].NC, _contactCO_fullNCLabel);
 
 	componentDrawLabels(_contactCO_)
+	componentWriteBOM(_contactCO_)
 
 	move to last [].End;
 ')
@@ -666,6 +669,7 @@ m4_define_blind(`contactGroup', `
 	] with .FirstContactStart at _contactGroup_pos;
 
 	componentDrawLabels(_contactGroup_)
+	componentWriteBOM(_contactGroup_)
 
 	move to last [].FirstContactEnd;
 ')
@@ -773,6 +777,7 @@ m4_define_blind(`thermalOperator', `
 	] with .Start at _thermalOperator_pos;
 
 	componentDrawLabels(_thermalOperator_)
+	componentWriteBOM(_thermalOperator_)
 	move to last [].End;
 ')
 
@@ -813,5 +818,6 @@ m4_define_blind(`overCurrentOperator', `
 	] with .Start at _overCurrentOperator_pos;
 
 	componentDrawLabels(_overCurrentOperator_)
+	componentWriteBOM(_overCurrentOperator_)
 	move to last [].End;
 ')
