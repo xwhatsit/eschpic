@@ -137,7 +137,7 @@ m4_define_blind(`_moduleDrawGroup', `
 
 	ModuleGroupTextRef: polarCoord(1/2 between ModuleGroupStart and ModuleGroupEnd,
 		5.5, $3*dirToAngle(peekDir()));
-	"textComponentRef($1)" at ModuleGroupTextRef;
+	"textModuleTerminalLabel($1)" at ModuleGroupTextRef;
 
 	move to ModuleGroupEnd;
 ')
