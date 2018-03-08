@@ -118,12 +118,12 @@ m4_define_blind(`connectorFemale', `
 
 
 `
-Multi-pin connector. Pins are numbered from 1 to pincount.
+Multi-pin connector. Pins are numbered from 1 to count.
 
 Defines position labels for each pin (replace "n" with pin number):
 	.Tn: End position of pin
 	.Xn: Connector-end of pin
-	.Cn: Sub-connector itself (e.g. can use .Cn.Start etc.)
+	.Cn: Sub-connector itself (e.g. can use .C3.Start etc.)
 
 Usage: connector([comma-separated key-value parameters])
 Params:
@@ -134,7 +134,8 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
-	pincount:	Pin count. Defaults to 1.
+	count:		Pin count. Defaults to 1, or the count of labels in "labels" if those are supplied.
+	labels:		Pin labels, in syntax "(1, 2, 3, PE)" etc. If not supplied, will auto-number from 1 to pincount.
 	gender:		One of "male", "female", "m", "f", "M", or "F". Defaults to "female".
 	showPinNums:	Whether or not to display pin numbers. Either (default) "true" or false.
 '
@@ -146,7 +147,8 @@ m4_define_blind(`connector', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `pincount', `1',
+		 `count', `',
+		 `labels', `',
 		 `gender', `female',
 		 `showPinNums', `true'), $@)
 	componentHandleRef(_connector_)
@@ -163,16 +165,25 @@ m4_define_blind(`connector', `
 	m4_ifdef(`_connector_gender', `', `m4_errprint(`error: connector: gender unrecognised: "' _connector_gender_orig `"' m4_newline())
 	                                   m4_m4exit(1)')
 
+	m4_ifelse(_connector_labels, `', `
+		m4_ifelse(_connector_count, `', `m4_define(`_connector_count', 1)')
+		m4_define(`_connector_labels', `( m4_forloop(i, 1, _connector_count, `i, ') )')
+	', `
+		m4_ifelse(_connector_count, `', `m4_define(`_connector_count', m4_nargs(m4_extractargs(_connector_labels)))')
+	')
+	m4_errprintl(`connector count:' _connector_count)
+	m4_errprintl(`connector labels:' _connector_labels)
+
 	[
 		Start: Here;
-		m4_forloop(`i', 1, _connector_pincount, `
+		m4_forloop(`i', 1, _connector_count, `
 			C`'i: m4_indir(connector`'_connector_gender,
-			               pin=m4_ifelse(_connector_showPinNums, true, i),
+			               pin=m4_ifelse(_connector_showPinNums, true, m4_argn(i, m4_extractargs(_connector_labels))),
 				       flipped=_connector_flipped)
 			X`'i: last [].AO;
 			T`'i: last [].BO;
 			move to last [].Start;
-			m4_ifelse(i, _connector_pincount, `', `
+			m4_ifelse(i, _connector_count, `', `
 				m4_ifelse(dirIsVertical(peekDir()), 1, `
 					move `right' elen/2;
 				', `
