@@ -17,6 +17,23 @@ m4_define(`m4_dequote', `m4_patsubst(m4_patsubst(`$1', `^"'), `"$')')
 
 
 `
+Counts number of arguments; from m4 example documentation.
+
+Usage: m4_nargs(arguments)
+'
+m4_define(`m4_nargs', `$#')
+
+
+`
+Extracts arguments from a list of args; i.e., turns (foo, bar, diddly) into foo,bar,diddly.
+
+Usage: m4_extractargs((arg1, arg2, arg3))
+'
+m4_define_blind(`m4_extractargs', `_$0$1')
+m4_define_blind(`_m4_extractargs', `$@')
+
+
+`
 Expands to argument n out of remaining arguments; from m4 example documentation.
 
 Usage: m4_argn(argumentNumber, args)
