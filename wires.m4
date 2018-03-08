@@ -173,6 +173,85 @@ m4_define_blind(`wireWithSideLabel', `
 
 
 `
+Bus entry/exit symbol.
+
+Defines position labels for each wire connection point, as .Tn.
+Also defines .Bus (or just .B) for the bus connection point.
+
+Usage: busFan([comma-separated key-value parameters])
+Params:
+	pos:		Start position. Defaults to "Here".
+	type:		Either "entry" or "exit".
+	count:		Number of wires. If not specified, figures this out from the "labels" parameter.
+	labels:		Labels for each wire, in form "(L1, L2, L3, PE)".
+'
+m4_define_blind(`busFan', `
+	componentParseKVArgs(`_busFan_',
+		(`pos', `Here',
+		 `type', `',
+		 `count', `',
+		 `labels', `'), $@)
+	
+	m4_ifelse(_busFan_count, `', `m4_define(`_busFan_count', m4_nargs(m4_extractargs(_busFan_labels)))')
+	m4_ifelse(_busFan_count, 0, `
+		m4_errprintl(`error: busFan has zero count')
+		m4_m4exit(1)
+	')
+
+	m4_ifelse(_busFan_type, `entry', `
+	', _busFan_type, `exit',  `
+	', `
+		m4_errprintl(`error: busFan needs a type of either "entry" or "exit"')
+		m4_m4exit(1)
+	')
+	
+	[
+		pushDir();
+
+		m4_pushdef(`wireDir', m4_ifelse(_busFan_type, `entry', peekDir(), dirCW(dirCW(peekDir()))))
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen/2;
+		m4_ifelse(_busFan_type, `entry', `
+			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') ((_busFan_count - 1) / 2) * elen/2
+		', `
+			move m4_ifelse(dirIsVertical(peekDir()), 1, `left', `up') ((_busFan_count - 1) / 2) * elen/2
+		')
+		move dirToDirection(peekDir()) elen/2;
+		End: Here;
+
+		m4_ifelse(_busFan_type, entry, `
+			FirstWire: Start;
+			Bus: End;
+		', `
+			Bus: Start;
+			FirstWire: End;
+		')
+
+		move to Bus then dirToDirection(dirCW(dirCW(wireDir))) elen/2;
+		C: Here;
+
+		move to FirstWire;
+		m4_forloop(i, 1, _busFan_count, `
+			spline from Here dirToDirection(wireDir) elen/2 then to C then to Bus;
+
+			move to last spline.start;
+			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+		')
+
+		circle rad 0.5 color "green" at FirstWire;
+		circle rad 0.5 color "orange" at C;
+		circle rad 0.5 color "red" at Bus;
+
+		m4_popdef(`wireDir')
+
+		popDir();
+
+	] with .Start at _busFan_pos;
+')
+
+
+`
 Wire cross-reference, writes out to aux file.
 
 Usage: wireRef(name, pos)
