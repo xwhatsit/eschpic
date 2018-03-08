@@ -171,8 +171,6 @@ m4_define_blind(`connector', `
 	', `
 		m4_ifelse(_connector_count, `', `m4_define(`_connector_count', m4_nargs(m4_extractargs(_connector_labels)))')
 	')
-	m4_errprintl(`connector count:' _connector_count)
-	m4_errprintl(`connector labels:' _connector_labels)
 
 	[
 		Start: Here;
