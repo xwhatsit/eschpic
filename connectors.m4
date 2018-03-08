@@ -4,6 +4,7 @@ Single male pin connector. Draws in current direction.
 Usage: connectorMale([comma-separated key-value parameters])
 Params:
 	pos:		Position to place ".Start" at. Defaults to "Here".
+	flipped:	Whether connector is flipped (i.e. draws connector part first with trailing wire). Either "true" or (default) "false".
 	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
@@ -14,6 +15,7 @@ Params:
 m4_define_blind(`connectorMale', `
 	componentParseKVArgs(`_connectorMale_',
 		(`pos', `Here',
+		 `flipped', `false',
 		 `ref', `',
 		 `val', `',
 		 `description', `',
@@ -27,22 +29,33 @@ m4_define_blind(`connectorMale', `
 		move dirToDirection(peekDir()) elen;
 		End: Here;
 
+		m4_ifelse(_connectorMale_flipped, true, `
+			AO: Start;
+			BO: End;
+		', `
+			AO: End;
+			BO: Start;
+		')
 
-		LabelPos: 3/8 between Start and End;
+		LabelPos: 3/8 between AO and BO;
+
+		angle = angleBetweenPoints(AO, BO);
 		
-		move to Start;
-		move dirToDirection(peekDir()) 0.8;
-		circle rad 0.8 at Here shade "black";
-		line from polarCoord(last circle.c, 0.8, dirToAngle(peekDir()) + 90) dirToDirection(peekDir()) 2.4 \
-			then dirToDirection(dirCW(peekDir())) 1.6 \
-			then dirToDirection(dirCW(dirCW(peekDir()))) 2.4 shaded "black";
-		line from polarCoord(Start, 2.4, dirToAngle(peekDir())) to End;
+		circle rad elen*1/16 at polarCoord(AO, elen/16, angle) shade "black";
+		Sq1: polarCoord(last circle.c, elen/16, angle + 90);
+		Sq2: polarCoord(last circle.c, elen/16, angle - 90);
+		Sq3: polarCoord(Sq2, elen*3/16, angle);
+		Sq4: polarCoord(Sq1, elen*3/16, angle);
+
+		line from last circle.c to Sq1 then to Sq4 then to Sq3 then to Sq2 then to last circle.c shaded "black";
+		line from polarCoord(AO, elen*3/16, angle) to BO;
 
 		popDir();
 	] with .Start at _connectorMale_pos;
 
 	componentDrawTerminalLabel(last [].LabelPos, _connectorMale_pin);
 	componentDrawLabels(_connectorMale_)
+	componentWriteBOM(_connectorMale_)
 
 	move to last [].End;
 ')
@@ -54,6 +67,7 @@ Single female pin connector. Draws in current direction.
 Usage: connectorFemale([comma-separated key-value parameters])
 Params:
 	pos:		Position to place ".Start" at. Defaults to "Here".
+	flipped:	Whether connector is flipped (i.e. draws connector part first with trailing wire). Either "true" or (default) "false".
 	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
@@ -64,6 +78,7 @@ Params:
 m4_define_blind(`connectorFemale', `
 	componentParseKVArgs(`_connectorFemale_',
 		(`pos', `Here',
+		 `flipped', `false',
 		 `ref', `',
 		 `val', `',
 		 `description', `',
@@ -77,16 +92,26 @@ m4_define_blind(`connectorFemale', `
 		move dirToDirection(peekDir()) elen;
 		End: Here;
 
-		LabelPos: 1/4 between Start and End;
+		m4_ifelse(_connectorFemale_flipped, true, `
+			AO: Start;
+			BO: End;
+		', `
+			AO: End;
+			BO: Start;
+		')
 
-		arc ccw from polarCoord(Start, 1.6, dirToAngle(peekDir()) - 90) to polarCoord(Start, 1.6, dirToAngle(peekDir()) + 90) with .c at Start;
-		line from polarCoord(Start, 1.6, dirToAngle(peekDir())) to End;
+		LabelPos: 1/4 between AO and BO;
+
+		angle = angleBetweenPoints(AO, BO);
+		arc ccw from polarCoord(AO, elen/8, angle - 90) to polarCoord(AO, elen/8, angle + 90) with .c at AO;
+		line from polarCoord(AO, elen/8, angle) to BO;
 
 		popDir();
 	] with .Start at _connectorFemale_pos;
 
 	componentDrawTerminalLabel(last [].LabelPos, _connectorFemale_pin);
 	componentDrawLabels(_connectorFemale_)
+	componentWriteBOM(_connectorFemale_)
 
 	move to last [].End;
 ')
@@ -102,6 +127,7 @@ Defines position labels for each pin (replace "n" with pin number):
 Usage: connector([comma-separated key-value parameters])
 Params:
 	pos:		Position to place pin 1 ".Start" at. Defaults to "Here".
+	flipped:	Whether connector is flipped (i.e. draws connector part first with trailing wire). Either "true" or (default) "false".
 	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
@@ -113,6 +139,7 @@ Params:
 m4_define_blind(`connector', `
 	componentParseKVArgs(`_connector_',
 		(`pos', `Here',
+		 `flipped', `false',
 		 `ref', `',
 		 `val', `',
 		 `description', `',
@@ -136,7 +163,7 @@ m4_define_blind(`connector', `
 	[
 		Start: Here;
 		m4_forloop(`i', 1, _connector_pincount, `
-			   C_`'i: m4_indir(connector`'_connector_gender, pin=i)
+			   C_`'i: m4_indir(connector`'_connector_gender, pin=i, flipped=_connector_flipped)
 			   T_`'i:         last [].End;
 			   move to last [].Start;
 			   m4_ifelse(i, _connector_pincount, `',
@@ -148,6 +175,7 @@ m4_define_blind(`connector', `
 	] with .Start at _connector_pos;
 
 	componentDrawLabels(_connector_)
+	componentWriteBOM(_connector_)
 
 	move to last [].End;
 ')
@@ -160,13 +188,11 @@ Usage: terminal([comma-separated key-value parameters])
 Params:
 	pos:	Position to place centre at. Defaults to "Here".
 	label:	Terminal label/number
-	part:	Part number. If this is supplied, it is added to the BOM.
 '
 m4_define_blind(`terminal', `
 	componentParseKVArgs(`_terminal_',
 		(`pos', `Here',
-		 `label', `',
-		 `part', `'), $@)
+		 `label', `'), $@)
 	circle diam elen/8 with .c at _terminal_pos;
 
 	m4_ifelse(_terminal_label, `', `', `
