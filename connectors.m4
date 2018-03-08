@@ -37,7 +37,7 @@ m4_define_blind(`connectorMale', `
 			BO: Start;
 		')
 
-		LabelPos: 3/8 between AO and BO;
+		LabelPos: 7/16 between AO and BO;
 
 		angle = angleBetweenPoints(AO, BO);
 		
@@ -135,6 +135,7 @@ Params:
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pincount:	Pin count. Defaults to 1.
 	gender:		One of "male", "female", "m", "f", "M", or "F". Defaults to "female".
+	showPinNums:	Whether or not to display pin numbers. Either (default) "true" or false.
 '
 m4_define_blind(`connector', `
 	componentParseKVArgs(`_connector_',
@@ -145,7 +146,8 @@ m4_define_blind(`connector', `
 		 `description', `',
 		 `part', `',
 		 `pincount', `1',
-		 `gender', `female'), $@)
+		 `gender', `female',
+		 `showPinNums', `true'), $@)
 	componentHandleRef(_connector_)
 	
 	# determine gender
@@ -163,15 +165,20 @@ m4_define_blind(`connector', `
 	[
 		Start: Here;
 		m4_forloop(`i', 1, _connector_pincount, `
-			   C_`'i: m4_indir(connector`'_connector_gender, pin=i, flipped=_connector_flipped)
-			   T_`'i:         last [].End;
-			   move to last [].Start;
-			   m4_ifelse(i, _connector_pincount, `',
-			   	`m4_ifelse(dirIsVertical(peekDir()), 1,
-					`move `right' elen/2',
-					`move `down' elen/2')')
+			C`'i: m4_indir(connector`'_connector_gender,
+			               pin=m4_ifelse(_connector_showPinNums, true, i),
+				       flipped=_connector_flipped)
+			T`'i: last [].AO;
+			move to last [].Start;
+			m4_ifelse(i, _connector_pincount, `', `
+				m4_ifelse(dirIsVertical(peekDir()), 1, `
+					move `right' elen/2;
+				', `
+					move `down' elen/2;
+				')
+			')
 		')
-		End: Here;
+		End: T1;
 	] with .Start at _connector_pos;
 
 	componentDrawLabels(_connector_)
