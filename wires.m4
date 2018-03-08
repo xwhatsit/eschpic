@@ -239,10 +239,6 @@ m4_define_blind(`busFan', `
 			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
 		')
 
-		circle rad 0.5 color "green" at FirstWire;
-		circle rad 0.5 color "orange" at C;
-		circle rad 0.5 color "red" at Bus;
-
 		m4_popdef(`wireDir')
 
 		popDir();
