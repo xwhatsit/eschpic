@@ -121,8 +121,9 @@ m4_define_blind(`connectorFemale', `
 Multi-pin connector. Pins are numbered from 1 to pincount.
 
 Defines position labels for each pin (replace "n" with pin number):
-	.T_n: End position of pin
-	.C_n: Sub-connector itself (e.g. can use .C_n.Start etc.)
+	.Tn: End position of pin
+	.Xn: Connector-end of pin
+	.Cn: Sub-connector itself (e.g. can use .Cn.Start etc.)
 
 Usage: connector([comma-separated key-value parameters])
 Params:
@@ -168,7 +169,8 @@ m4_define_blind(`connector', `
 			C`'i: m4_indir(connector`'_connector_gender,
 			               pin=m4_ifelse(_connector_showPinNums, true, i),
 				       flipped=_connector_flipped)
-			T`'i: last [].AO;
+			X`'i: last [].AO;
+			T`'i: last [].BO;
 			move to last [].Start;
 			m4_ifelse(i, _connector_pincount, `', `
 				m4_ifelse(dirIsVertical(peekDir()), 1, `
@@ -178,7 +180,7 @@ m4_define_blind(`connector', `
 				')
 			')
 		')
-		End: T1;
+		End: C1.End;
 	] with .Start at _connector_pos;
 
 	componentDrawLabels(_connector_)
