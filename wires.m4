@@ -410,7 +410,7 @@ m4_define_blind(`wireRef', `
 	')
 	m4_ifelse(haveRef, 0, `
 		m4_errprintl(`warning: no ref found for' $1 `, may need to recompile')
-		"textWireLabel(/?.?)" at pos;
+		"textWireLabel(/?.?)" _wireRefTextAlignment() at pos;
 	')
 	m4_popdef(`haveRef')
 
@@ -428,15 +428,17 @@ m4_define_blind(`_wireRefDrawText', `
 	m4_pushdef(`text', _wireRefText($1, $3))
 	m4_pushdef(`visibleText', m4_ifelse(dirIsVertical(getDir()), 1, `\rotatebox{90}{textWireLabel(text)}', `textWireLabel(text)'))
 
-	"\hypertarget{$1:$2}{\hyperlink{$1:$3}{visibleText}}" \
-		m4_ifelse(getDir(), dirUp,    `above',
-		          getDir(), dirDown,  `below',
-			  getDir(), dirLeft,  `rjust',
-			  getDir(), dirRight, `ljust') at pos;
+	"\hypertarget{$1:$2}{\hyperlink{$1:$3}{visibleText}}" _wireRefTextAlignment() at pos;
 
 	m4_popdef(`visibleText')
 	m4_popdef(`text')
 ')
+
+
+`
+Support macro to calculate text alignment for wire reference. Uses current dir.
+'
+m4_define_blind(`_wireRefTextAlignment', `m4_ifelse(getDir(), dirUp, `above', getDir(), dirDown, `below', getDir(), dirLeft,  `rjust', getDir(), dirRight, `ljust')')
 
 
 `
