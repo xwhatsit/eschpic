@@ -31,27 +31,37 @@ m4_define_blind(`_componentParseKVArgs_setDefault', `
 
 
 `
+Support macro to combine ref/val/description text into a multiline text string. Puts them onto the stack
+as [prefix]labels, remember to pop this off!
+
+Usage: componentCombineLabels(prefix)
+'
+m4_define_blind(`componentCombineLabels', `
+	m4_pushdef($1`labels', `')
+
+	m4_ifelse(m4_trim(m4_indir($1`ref')), `', `',
+		`m4_define($1`labels',
+			m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
+			)\normalsize{}textComponentRef(m4_indir($1`ref_prefixed')))')
+	m4_ifelse(m4_trim(m4_indir($1`val')), `', `',
+		`m4_define($1`labels',
+			m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
+			)\normalsize{}textComponentVal(m4_indir($1`val')))')
+	m4_ifelse(m4_trim(m4_indir($1`description')), `', `',
+		`m4_define($1`labels',
+			m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
+			)\normalsize{}textComponentDescription(m4_indir($1`description')))')
+')
+
+
+`
 Macro to assist drawing main component labels (ref/val/description etc.)
 
 Usage: componentDrawLabels(prefix, [internal=false])
 '
 m4_define_blind(`componentDrawLabels', `
 	m4_ifelse($1, `', `', `
-		m4_pushdef($1`labels', `')
-
-		m4_ifelse(m4_trim(m4_indir($1`ref')), `', `',
-			`m4_define($1`labels',
-				m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
-				)\normalsize{}textComponentRef(m4_indir($1`ref_prefixed')))')
-		m4_ifelse(m4_trim(m4_indir($1`val')), `', `',
-			`m4_define($1`labels',
-				m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
-				)\normalsize{}textComponentVal(m4_indir($1`val')))')
-		m4_ifelse(m4_trim(m4_indir($1`description')), `', `',
-			`m4_define($1`labels',
-				m4_ifelse(m4_trim($1`labels'), `', `', m4_indir($1`labels')` \\'
-				)\normalsize{}textComponentDescription(m4_indir($1`description')))')
-
+		componentCombineLabels($1)
 		m4_ifelse(m4_trim(m4_indir($1`labels')), `', `', `
 			m4_ifelse($2, `true', `
 				if dirIsVertical(getDir()) then {

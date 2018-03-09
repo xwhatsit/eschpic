@@ -48,9 +48,9 @@ m4_define_blind(`wireWithInlineLabel', `
 `
 Usage: wire(linespec, label, labelPos)
 Params:
-	linespec: text describing a single line segment
+	linespec: text describing path wire takes (can have multiple segments, be sure to use "then" to separate)
 	label:    the actual text to print (optional)
-	labelPos: one of start, mid, end   (optional, defaults to "start")
+	labelPos: one of start, mid, end (optional, defaults to "start")
 '
 m4_define_blind(`wire', `
 	m4_ifelse($2, `', `
@@ -71,7 +71,7 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 
 	m4_ifelse(segment, `', `', `
 		m4_ifelse(segType, first, `
-			line segment
+			line segment;
 			Wire___LastPos: last line.start;
 			Wire___CurrPos: Here;
 		', segType, mid, `
@@ -175,6 +175,8 @@ m4_define_blind(`wireWithSideLabel', `
 `
 Bus entry/exit symbol.
 
+Can use busEntry/busExit convenience macros and omit the "type" param.
+
 Defines position labels for each wire connection point, as .Tn.
 Also defines .Bus (or just .B) for the bus connection point.
 
@@ -227,13 +229,19 @@ m4_define_blind(`busFan', `
 			Bus: Start;
 			FirstWire: End;
 		')
+		B: Bus;
 
 		move to Bus then dirToDirection(dirCW(dirCW(wireDir))) elen/2;
 		C: Here;
 
 		move to FirstWire;
 		m4_forloop(i, 1, _busFan_count, `
-			spline from Here dirToDirection(wireDir) elen/2 then to C then to Bus;
+			`T'i: Here;
+
+			m4_ifelse(_busFan_labels, `', `', `"textTerminalLabel(m4_argn(i, m4_extractargs(_busFan_labels)))" \
+				m4_ifelse(dirIsVertical(peekDir()), 1, `rjust', `above') at `T'i');
+
+			spline from `T'i dirToDirection(wireDir) elen/2 then to C then to Bus;
 
 			move to last spline.start;
 			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
@@ -244,6 +252,128 @@ m4_define_blind(`busFan', `
 		popDir();
 
 	] with .Start at _busFan_pos;
+
+	move to last [].End;
+')
+m4_define_blind(`busEntry', `busFan(type=entry, $@)')
+m4_define_blind(`busExit', `busFan(type=exit, $@)')
+
+
+`
+Bus/cable.
+
+Usage: bus([comma-separated key-value parameters])
+Params:
+	path:		text describing path bus takes (can have multiple segments, be sure to use "then" to separate)
+	ref:		reference to display for the wire, will be prefixed with sheet num if this is enabled
+	val:		value text to display
+	description:	description text
+	labelPos:	position of labelling, one of "start", "mid", "end" (defaults to "mid")
+'
+m4_define_blind(`bus', `
+	componentParseKVArgs(`_bus_',
+		(`path', `',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `labelPos', `mid'), $@)
+	
+	m4_ifelse(_bus_path, `', `
+		m4_errprintl(`error: bus must have a "path" parameter')
+		m4_m4exit(1)
+	')
+
+	m4_pushdef(`haveLabelInfo', false)
+	m4_pushdef(`labelDir')
+
+	_busParseSegment(_bus_path, _bus_ref, _bus_val, _bus_description, _bus_labelPos, first)
+
+	m4_ifelse(haveLabelInfo, true, `
+		_bus___angle     = angleBetweenPoints(Bus___LabelLineStart, Bus___LabelLineEnd);
+		m4_ifelse(_bus_labelPos, start, `
+			Bus___LabelC: polarCoord(Bus___LabelLineStart, elen/4, _bus___angle);
+		', _bus_labelPos, mid, `
+			Bus___LabelC: 1/2 between Bus___LabelLineStart and Bus___LabelLineEnd;
+		', _bus_labelPos, end, `
+			Bus___LabelC: polarCoord(Bus___LabelLineEnd, elen/4, _bus___angle + 180);
+		')
+
+		m4_ifelse(dirIsVertical(labelDir), 1, `
+			line from Bus___LabelC - (elen/8, elen/16) to Bus___LabelC + (elen/8, elen/16);
+		', `
+			line from Bus___LabelC - (elen/16, elen/8) to Bus___LabelC + (elen/16, elen/8);
+		')
+
+		componentHandleRef(_bus_)
+		componentCombineLabels(_bus_)
+		m4_ifelse(dirIsVertical(labelDir), 1, `
+			"textMultiLine(_bus_labels)" rjust at last line.start;
+		', `
+			"textMultiLine(_bus_labels)" above at last line.end;
+		')
+		m4_popdef(_bus_labels)
+	')
+
+	m4_popdef(`labelDir')
+	m4_popdef(`haveLabelInfo')
+
+	move to Bus___CurrPos;
+')
+m4_define_blind(`_busParseSegment', `
+	m4_pushdef(`thenPos', m4_regexp($1, `\bthen\b'))
+	m4_pushdef(`segType', m4_ifelse($6, `', mid, $6))
+
+	m4_ifelse(thenPos, -1, `
+		m4_pushdef(`segment', $1)
+	', `
+		m4_pushdef(`segment', m4_substr($1, 0, thenPos))
+	')
+
+	m4_ifelse(segment, `', `', `
+		m4_ifelse(segType, first, `
+			line segment thickness 2.5*linethick;
+			Bus___LastPos: last line.start;
+			Bus___CurrPos: Here;
+		', segType, mid, `
+		  	Bus___LastPos: Here;
+			continue segment;
+			Bus___CurrPos: Here;
+		')
+
+		m4_pushdef(`labelPos', none)
+		m4_ifelse($5, start, `
+			m4_ifelse(segType, first, `m4_define(`labelPos', start)')
+		', $5, mid, `
+			m4_ifelse(segType, mid, `
+				m4_define(`labelPos', mid)
+			', segType, first, `
+				m4_ifelse(thenPos, -1, `m4_define(`labelPos', mid)')
+			')
+		', $5, end, `
+			m4_ifelse(thenPos, -1, `m4_define(`labelPos', end)')
+		')
+
+		m4_ifelse(labelPos, none, `', `
+			m4_ifelse(haveLabelInfo, false, `
+				m4_define(`haveLabelInfo', true)
+				Bus___LabelLineStart: Bus___LastPos;
+				Bus___LabelLineEnd: Bus___CurrPos;
+				m4_define(`labelDir', getDir())
+			', `
+				m4_define(`labelPos', none)
+			')
+		')
+
+		m4_popdef(`labelPos')
+	')
+
+	m4_ifelse(thenPos, -1, `', `
+		_busParseSegment(m4_substr($1, m4_eval(thenPos + 4)), $2, $3, $4, $5)
+	')
+
+	m4_popdef(`segment')
+	m4_popdef(`segType')
+	m4_popdef(`thenPos')
 ')
 
 
