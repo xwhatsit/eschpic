@@ -630,3 +630,68 @@ m4_define_blind(`motorStarter', `
 	componentWriteBOM(_motorStarter_)
 	move to last [].End;
 ')
+
+
+`
+Transformer.
+
+Usage: transformer([comma-separated key-value parameters])
+Params:
+	pos:		Position to place start at. Defaults to "Here".
+	ref:		Component reference name.
+	val:		Component value
+	description:	Addition text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+'
+m4_define_blind(`transformer', `
+	componentParseKVArgs(`_transformer_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `'), $@)
+	componentHandleRef(_transformer_)
+
+	[
+		pushDir();
+
+		Start: Here;
+		move down elen;
+		End: Here;
+
+		line from Start dirToDirection(peekDir()) elen*13/32;
+		PrimaryBase: Here;
+		m4_define(_transformer_coilDir, m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down'))
+		m4_forloop(i, 1, 4, `
+			ArcStart: Here;
+			move _transformer_coilDir elen/8;
+			ArcEnd: Here;
+			ArcC: 1/2 between ArcStart and ArcEnd;
+			arc ccw from ArcStart to ArcEnd with .c at ArcC;
+		')
+		line dirToDirection(dirCW(dirCW(peekDir()))) elen*13/32;
+		TP1: Start;
+		TP2: Here;
+
+		move to PrimaryBase then dirToDirection(peekDir()) elen*3/16;
+		SecondaryBase: Here;
+		m4_forloop(i, 1, 4, `
+			ArcStart: Here;
+			move _transformer_coilDir elen/8;
+			ArcEnd: Here;
+			ArcC: 1/2 between ArcStart and ArcEnd;
+			arc cw from ArcStart to ArcEnd with .c at ArcC;
+		')
+		line dirToDirection(peekDir()) elen*13/32;
+		TS1: End;
+		TS2: Here;
+		line from SecondaryBase to End;
+
+		popDir();
+	] with .Start at _transformer_pos;
+
+	componentDrawLabels(_transformer_)
+	componentWriteBOM(_transformer_)
+
+	move to last [].End
+')
