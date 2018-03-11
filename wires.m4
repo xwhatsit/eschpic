@@ -50,13 +50,15 @@ Usage: wire(linespec, label, labelPos)
 Params:
 	linespec: text describing path wire takes (can have multiple segments, be sure to use "then" to separate)
 	label:    the actual text to print (optional)
-	labelPos: one of start, mid, end (optional, defaults to "start")
+	labelPos: one or more of start, mid, end (optional, defaults to "start end")
 '
 m4_define_blind(`wire', `
 	m4_ifelse($2, `', `
 		line $1
 	', `
-		_wireWithInlineLabelParseSegment($1, $2, m4_ifelse($3, `', `start', $3), first)
+		m4_pushdef(`haveDrawnMid', false)
+		_wireWithInlineLabelParseSegment($1, $2, m4_ifelse($3, `', `start end', $3), first)
+		m4_popdef(`haveDrawnMid')
 	')
 ')
 m4_define_blind(`_wireWithInlineLabelParseSegment', `
@@ -80,47 +82,35 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 			Wire___CurrPos: Here;
 		')
 
-		m4_pushdef(`labelPos', none)
-		m4_ifelse($3, start, `
-			m4_ifelse(segType, first, `m4_define(`labelPos', start)')
-		', $3, mid, `
+		m4_pushdef(`labelPos', `')
+		m4_ifelse(m4_eval(m4_regexp($3, `\bstart\b') != -1), 1, `
+			m4_ifelse(segType, first, `m4_define(`labelPos', labelPos `start')')
+		')
+		m4_ifelse(m4_eval(m4_regexp($3, `\bmid\b') != -1), 1, `
 			m4_ifelse(segType, mid, `
-				m4_define(`labelPos', mid)
+				m4_define(`labelPos', labelPos `mid')
 			', segType, first, `
-				m4_ifelse(thenPos, -1, `m4_define(`labelPos', mid)')
+				m4_ifelse(thenPos, -1, `m4_define(`labelPos', labelPos `mid')')
 			')
-		', $3, end, `
-			m4_ifelse(thenPos, -1, `m4_define(`labelPos', end)')
+		')
+		m4_ifelse(m4_eval(m4_regexp($3, `\bend\b') != -1), 1, `
+			m4_ifelse(thenPos, -1, `m4_define(`labelPos', labelPos `end')')
 		')
 
-		m4_ifelse(labelPos, none, `', `
+		m4_ifelse(labelPos, `', `', `
 			_wire___angle      = angleBetweenPoints(Wire___LastPos, Here);
 			_wire___textLength = textWireLabelLength(($2));
 			_wire___wireLength = distanceBetweenPoints(Wire___LastPos, Here);
 		')
 
-		m4_ifelse(labelPos, start, `
-			Wire___TextCentre: polarCoord(Wire___LastPos, elen/4 + (_wire___textLength / 2), _wire___angle);
-		', labelPos, mid, `
-			Wire___TextCentre: 1/2 between Wire___LastPos and Wire___CurrPos;
-		', labelPos, end, `
-			Wire___TextCentre: polarCoord(Wire___LastPos, _wire___wireLength - (elen/4 + (_wire___textLength / 2)), _wire___angle);
+		m4_ifelse(m4_eval(m4_regexp(labelPos, `\bstart\b') != -1), 1, `
+			  _wireWithInlineLabelDrawLabel(start, $2)
 		')
-
-		# Because we have to do a double-line over the bit after the label (to allow "continue" to work, might as well
-		# double line the lot; for some reason PDF viewers at certain zoom levels make overwritten lines slightly bold
-		m4_ifelse(labelPos, none, `
-			line from Wire___LastPos to Wire___CurrPos;
-		', `
-			if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
-				box ht _wire___textLength wid textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
-				"\rotatebox{90}{textWireLabel(($2))}" at Wire___TextCentre;
-			} else {
-				box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
-				"textWireLabel(($2))" at Wire___TextCentre;
-			}
-			line from Wire___LastPos to polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle + 180);
-			line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+		m4_ifelse(m4_eval(m4_regexp(labelPos, `\bmid\b') != -1), 1, `
+			m4_ifelse(haveDrawnMid, false, `_wireWithInlineLabelDrawLabel(mid, $2)')
+		')
+		m4_ifelse(m4_eval(m4_regexp(labelPos, `\bend\b') != -1), 1, `
+			  _wireWithInlineLabelDrawLabel(end, $2)
 		')
 
 		m4_popdef(`labelPos')
@@ -133,6 +123,26 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 	m4_popdef(`segment')
 	m4_popdef(`segType')
 	m4_popdef(`thenPos')
+')
+m4_define_blind(`_wireWithInlineLabelDrawLabel', `
+	m4_define(`haveDrawnMid', true)
+
+	m4_ifelse($1, start, `
+		Wire___TextCentre: polarCoord(Wire___LastPos, elen/4 + (_wire___textLength / 2), _wire___angle);
+	', $1, mid, `
+		Wire___TextCentre: 1/2 between Wire___LastPos and Wire___CurrPos;
+	', $1, end, `
+		Wire___TextCentre: polarCoord(Wire___LastPos, _wire___wireLength - (elen/4 + (_wire___textLength / 2)), _wire___angle);
+	')
+
+	if abs(Wire___LastPos.y - Wire___CurrPos.y) > abs(Wire___LastPos.x - Wire___CurrPos.x) then {
+		box ht _wire___textLength wid textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+		"\rotatebox{90}{textWireLabel(($2))}" at Wire___TextCentre;
+	} else {
+		box wid _wire___textLength ht textWireLabelHeight() colored "white" with .c at Wire___TextCentre;
+		"textWireLabel(($2))" at Wire___TextCentre;
+	}
+	line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
 ')
 
 
