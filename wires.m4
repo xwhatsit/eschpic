@@ -125,6 +125,7 @@ Params:
 	count:		How many wires to place. Not required if "labels" is supplied.
 	labels:		Wire labels for each wire, in form "(L1, L2, L3, PE)" etc.
 	labelPos:	One or more of start, mid, end (optional, defaults to "start end")
+	stagger:	Either or both of start and end. Adds offset to start and/or end. Defaults to no stagger.
 '
 m4_define_blind(`wireGroup', `
 	componentParseKVArgs(`_wireGroup_',
@@ -132,7 +133,8 @@ m4_define_blind(`wireGroup', `
 		 `path', `',
 		 `count', `',
 		 `labels', `()',
-		 `labelPos', `start end'), $@)
+		 `labelPos', `start end',
+		 `stagger', `'), $@)
 	
 	m4_ifelse(_wireGroup_path, `', `
 		m4_errprintl(`error: wireGroup must have a "path" parameter')
@@ -182,20 +184,20 @@ m4_define_blind(`wireGroup', `
 	m4_popdef(`segCount')
 ')
 m4_define_blind(`_wireGroupGetOffset', ` m4_dnl
-	m4_ifelse($1, 0, ` m4_dnl
+	m4_ifelse(m4_eval($1 == 0 && m4_regexp(_wireGroup_stagger, `\bstart\b') == -1), 1, ` m4_dnl
 		WireGroup___Pos_$1 + _wireGroupDirOffset(1, $2) m4_dnl
 	', ` m4_dnl
 		WireGroup___Pos_$1 + _wireGroupDirOffset($1, $2) + _wireGroupEndOffset($1, $2) m4_dnl
 	') m4_dnl
 ')
 m4_define_blind(`_wireGroupDirOffset', ` m4_dnl
-	m4_ifelse(dirIsVertical(m4_indir(_wireGroup_direction[$1])), 1, ($2 * elen/2, 0), (0, -($2 * elen/2))) m4_dnl
+	m4_ifelse(dirIsVertical(m4_indir(_wireGroup_direction[m4_max($1, 1)])), 1, ($2 * elen/2, 0), (0, -($2 * elen/2))) m4_dnl
 ')
 m4_define_blind(`_wireGroupEndOffset', ` m4_dnl
-	m4_ifelse($1, segCount, ` m4_dnl
+	m4_ifelse(m4_eval($1 == segCount && m4_regexp(_wireGroup_stagger, `\bend\b') == -1), 1, ` m4_dnl
 		(0, 0) m4_dnl
 	', ` m4_dnl
-		m4_ifelse(dirIsVertical(m4_indir(_wireGroup_direction[$1])), 1, ` m4_dnl
+		m4_ifelse(dirIsVertical(m4_indir(_wireGroup_direction[m4_max($1, 1)])), 1, ` m4_dnl
 			(0, -($2 * elen/2)) m4_dnl
 		', ` m4_dnl
 			($2 * elen/2, 0) m4_dnl
