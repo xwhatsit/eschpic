@@ -8,9 +8,13 @@ m4_define(`corner',
 
 `
 Wire junction to show wires joining. Can alternatively use "junction" instead of "dot".
+
+Usage: dot[(pos)]
+Params:
+	pos:	Position to place junction at
 '
-m4_define(`dot', `circle diam 1 fill 0 with .c at Here; move to last circle.c')
-m4_define(`junction', m4_defn(`dot'))
+m4_define(`dot', `circle diam 1 fill 0 with .c at m4_ifelse($1, `', `Here', $1); move to last circle.c')
+m4_define(`junction', `dot($@)')
 
 
 `
