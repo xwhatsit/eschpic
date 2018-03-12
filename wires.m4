@@ -117,6 +117,96 @@ m4_define_blind(`_wireDrawLabel', `
 
 
 `
+Usage: wireGroup([comma-separated key-value parameters])
+Params:
+	path:	Path of the first line
+	count:		How many wires to place. Not required if "labels" is supplied.
+	labels:		Wire labels for each wire, in form "(L1, L2, L3, PE)" etc.
+	labelPos:	One or more of start, mid, end (optional, defaults to "start end")
+'
+m4_define_blind(`wireGroup', `
+	componentParseKVArgs(`_wireGroup_',
+		(`path', `',
+		 `count', `',
+		 `labels', `()',
+		 `labelPos', `start end'), $@)
+	
+	m4_ifelse(_wireGroup_path, `', `
+		m4_errprintl(`error: wireGroup must have a "path" parameter')
+		m4_m4exit(1)
+	')
+
+	m4_ifelse(_wireGroup_count, `', `m4_define(`_wireGroup_count', m4_nargs(m4_extractargs(_wireGroup_labels)))')
+	m4_ifelse(_wireGroup_count, 0, `
+		m4_errprintl(`error: wireGroup has zero count')
+		m4_m4exit(1)
+	')
+
+	m4_pushdef(`segCount', 0)
+	_wireGroupParseSegment(_wireGroup_path, _wireGroup_labelPos, first)
+	m4_errprintl(`seg count:' segCount)
+	m4_forloop(i, 0, m4_eval(_wireGroup_count - 1), `
+		wire(from _wireGroupGetOffset(0, i) to _wireGroupGetOffset(1, i) m4_forloop(j, 2, segCount, `then to _wireGroupGetOffset(j, i)'),
+		     m4_argn(m4_eval(i + 1), m4_extractargs(_wireGroup_labels)),
+		     _wireGroup_labelPos)
+	')
+	move to `WireGroup___Pos_'segCount;
+	m4_popdef(`segCount')
+')
+m4_define_blind(`_wireGroupGetOffset', ` m4_dnl
+	m4_ifelse($1, 0, ` m4_dnl
+		WireGroup___Pos_$1 + _wireGroupDirOffset(1, $2) m4_dnl
+	', ` m4_dnl
+		WireGroup___Pos_$1 + _wireGroupDirOffset($1, $2) + _wireGroupEndOffset($1, $2) m4_dnl
+	') m4_dnl
+')
+m4_define_blind(`_wireGroupDirOffset', ` m4_dnl
+	m4_ifelse(dirIsVertical(m4_indir(_wireGroup_direction[$1])), 1, ($2 * elen/2, 0), (0, -($2 * elen/2))) m4_dnl
+')
+m4_define_blind(`_wireGroupEndOffset', ` m4_dnl
+	m4_ifelse($1, segCount, ` m4_dnl
+		(0, 0) m4_dnl
+	', ` m4_dnl
+		m4_ifelse(dirIsVertical(m4_indir(_wireGroup_direction[$1])), 1, ` m4_dnl
+			(0, -($2 * elen/2)) m4_dnl
+		', ` m4_dnl
+			($2 * elen/2, 0) m4_dnl
+		') m4_dnl
+	') m4_dnl
+')
+m4_define_blind(`_wireGroupParseSegment', `
+	m4_pushdef(`thenPos', m4_regexp($1, `\bthen\b'))
+	m4_pushdef(`segType', m4_ifelse($3, `', mid, $3))
+
+	m4_ifelse(thenPos, -1, `
+		m4_pushdef(`segment', $1)
+	', `
+		m4_pushdef(`segment', m4_substr($1, 0, thenPos))
+	')
+
+	m4_ifelse(segment, `', `', `
+		m4_ifelse(segType, first, `
+			line segment invis;
+			`WireGroup___Pos_'segCount`: last line.start;'
+		', `
+			continue segment;
+		')
+		`WireGroup___Pos_'m4_eval(segCount + 1)`: Here;'
+	')
+	m4_define(`_wireGroup_direction['m4_eval(segCount + 1)`]', getDir())
+	m4_define(`segCount', m4_eval(segCount + 1))
+
+
+	m4_ifelse(thenPos, -1, `', `
+		_wireGroupParseSegment(m4_substr($1, m4_eval(thenPos + 4)), $2)
+	')
+
+	m4_popdef(`segType')
+	m4_popdef(`thenPos')
+')
+
+
+`
 Bus entry/exit symbol.
 
 Can use busEntry/busExit convenience macros and omit the "type" param.
