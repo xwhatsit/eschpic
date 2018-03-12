@@ -39,25 +39,25 @@ m4_define_blind(`module', `
 		m4_define(`_module_botterms', m4_regexp(_module_terminals, `|\(.*\)', `\1'))
 
 		Start: Here;
+		move dirToDirection(dirCW(peekDir())) elen/2;
+		BoxStart: Here;
 
 		m4_pushdef(`_groupCount', 0)
 		m4_pushdef(`_totalTermCount', 0)
-		move dirToDirection(dirCCW(peekDir())) elen/8;
+		move to BoxStart then dirToDirection(dirCCW(peekDir())) elen/8;
 		_moduleParseTerminals(_module_topterms, 1)
-		move dirToDirection(dirCCW(peekDir())) elen/8;
 		m4_define(`_module_topGroupCount', _groupCount)
 		m4_define(`_module_topTermCount', _totalTermCount)
 		m4_popdef(`_totalTermCount')
 		m4_popdef(`_groupCount')
 
-		move to Start;
+		move to BoxStart;
 		move dirToDirection(peekDir()) 2*elen;
 
 		m4_pushdef(`_groupCount', 0)
 		m4_pushdef(`_totalTermCount', 0)
 		move dirToDirection(dirCCW(peekDir())) elen/8;
 		_moduleParseTerminals(_module_botterms, -1)
-		move dirToDirection(dirCCW(peekDir())) elen/8;
 		m4_define(`_module_botGroupCount', _groupCount)
 		m4_define(`_module_botTermCount', _totalTermCount)
 		m4_popdef(`_totalTermCount')
@@ -79,7 +79,7 @@ m4_define_blind(`module', `
 				dirDown,  `.nw', 
 				dirRight, `.nw',
 				dirUp,    `.sw',
-				dirLeft,  `.ne') at Start;
+				dirLeft,  `.ne') at BoxStart;
 
 		popDir();
 	] with .Start at _module_pos;
