@@ -14,38 +14,6 @@ m4_define(`junction', m4_defn(`dot'))
 
 
 `
-Usage: wireWithInlineLabel(linespec, label, labelPos)
-Params:
-	linespec: text describing a single line segment
-	label:    the actual text to print
-	labelPos: one of start, mid, end
-'
-m4_define_blind(`wireWithInlineLabel', `
-	line $1 invis;
-	{
-		_angle = angleBetweenPoints(last line.start, last line.end);
-		_textLength = textWireLabelLength(($2));
-		_wireLength = distanceBetweenPoints(last line.start, last line.end);
-
-		m4_ifelse(
-			$3, `start', `_startLength = elen/4',
-			$3, `mid',   `_startLength = (_wireLength - _textLength) / 2',
-			$3, `end',   `_startLength = (_wireLength - _textLength) - elen/4');
-
-		line from last line.start to polarCoord(last line.start, _startLength, _angle);
-		line from last line.end to polarCoord(last line.end, _textLength, _angle) invis;
-		line from last line.end to 3rd last line.end;
-		if abs(last line.start.y - last line.end.y) > \
-			abs(last line.start.x - last line.end.x) then {
-			"\rotatebox{90}{textWireLabel(($2))}" at 2nd last line.c;
-		} else {
-			"textWireLabel(($2))" at 2nd last line.c;
-		}
-	}
-')
-
-
-`
 Usage: wire(linespec, label, labelPos)
 Params:
 	linespec: text describing path wire takes (can have multiple segments, be sure to use "then" to separate)
@@ -57,11 +25,11 @@ m4_define_blind(`wire', `
 		line $1
 	', `
 		m4_pushdef(`haveDrawnMid', false)
-		_wireWithInlineLabelParseSegment($1, $2, m4_ifelse($3, `', `start end', $3), first)
+		_wireParseSegment($1, $2, m4_ifelse($3, `', `start end', $3), first)
 		m4_popdef(`haveDrawnMid')
 	')
 ')
-m4_define_blind(`_wireWithInlineLabelParseSegment', `
+m4_define_blind(`_wireParseSegment', `
 	m4_pushdef(`thenPos', m4_regexp($1, `\bthen\b'))
 	m4_pushdef(`segType', m4_ifelse($4, `', mid, $4))
 
@@ -104,29 +72,31 @@ m4_define_blind(`_wireWithInlineLabelParseSegment', `
 		')
 
 		m4_ifelse(m4_eval(m4_regexp(labelPos, `\bstart\b') != -1), 1, `
-			  _wireWithInlineLabelDrawLabel(start, $2)
+			_wireDrawLabel(start, $2)
 		')
 		m4_ifelse(m4_eval(m4_regexp(labelPos, `\bmid\b') != -1), 1, `
-			m4_ifelse(haveDrawnMid, false, `_wireWithInlineLabelDrawLabel(mid, $2)')
+			m4_ifelse(haveDrawnMid, false, `
+				m4_define(`haveDrawnMid', true)
+				_wireDrawLabel(mid, $2)
+
+			')
 		')
 		m4_ifelse(m4_eval(m4_regexp(labelPos, `\bend\b') != -1), 1, `
-			  _wireWithInlineLabelDrawLabel(end, $2)
+			_wireDrawLabel(end, $2)
 		')
 
 		m4_popdef(`labelPos')
 	')
 
 	m4_ifelse(thenPos, -1, `', `
-		_wireWithInlineLabelParseSegment(m4_substr($1, m4_eval(thenPos + 4)), $2, $3)
+		_wireParseSegment(m4_substr($1, m4_eval(thenPos + 4)), $2, $3)
 	')
 
 	m4_popdef(`segment')
 	m4_popdef(`segType')
 	m4_popdef(`thenPos')
 ')
-m4_define_blind(`_wireWithInlineLabelDrawLabel', `
-	m4_define(`haveDrawnMid', true)
-
+m4_define_blind(`_wireDrawLabel', `
 	m4_ifelse($1, start, `
 		Wire___TextCentre: polarCoord(Wire___LastPos, elen/4 + (_wire___textLength / 2), _wire___angle);
 	', $1, mid, `
@@ -143,42 +113,6 @@ m4_define_blind(`_wireWithInlineLabelDrawLabel', `
 		"textWireLabel(($2))" at Wire___TextCentre;
 	}
 	line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
-')
-
-
-`
-Usage: wireWithSideLabel(linespec, label, labelPos)
-Params:
-	linespec: text describing a single line segment
-	label:    the actual text to print
-	labelPos: one of start, mid, end
-'
-m4_define_blind(`wireWithSideLabel', `
-	line $1;
-	{
-		_angle = angleBetweenPoints(last line.start, last line.end);
-		_textLength = textWireLabelLength($2);
-		_wireLength = distanceBetweenPoints(last line.start, last line.end);
-
-		m4_ifelse(
-			$3, `start', `_startLength = elen/4',
-			$3, `mid',   `_startLength = (_wireLength - _textLength) / 2',
-			$3, `end',   `_startLength = (_wireLength - _textLength) - elen/4');
-
-		if abs(last line.start.y - last line.end.y) > \
-			abs(last line.start.x - last line.end.x) then {
-			"\rotatebox{90}{textWireLabel($2)}" at \
-				(1/2 between polarCoord(last line.start, _startLength, _angle) and \
-					polarCoord(last line.start, _startLength + _textLength, _angle)) + \
-						(elen/32,0) rjust;
-						
-		} else {
-			"textWireLabel($2)" at \
-				(1/2 between polarCoord(last line.start, _startLength, _angle) and \
-					polarCoord(last line.start, _startLength + _textLength, _angle)) - \
-						(0,elen/16) above;
-		}
-	}
 ')
 
 
