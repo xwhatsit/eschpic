@@ -119,14 +119,17 @@ m4_define_blind(`_wireDrawLabel', `
 `
 Usage: wireGroup([comma-separated key-value parameters])
 Params:
-	path:	Path of the first line
+	ref:		Optional; if given, reference positions are created as "Ref.Start1", "Ref.End1". If labels are supplied and they are
+			valid pic reference labels, will also create "Ref.Label.Start", "Ref.Label.End" etc.
+	path:		Path of the first line
 	count:		How many wires to place. Not required if "labels" is supplied.
 	labels:		Wire labels for each wire, in form "(L1, L2, L3, PE)" etc.
 	labelPos:	One or more of start, mid, end (optional, defaults to "start end")
 '
 m4_define_blind(`wireGroup', `
 	componentParseKVArgs(`_wireGroup_',
-		(`path', `',
+		(`ref', `',
+		 `path', `',
 		 `count', `',
 		 `labels', `()',
 		 `labelPos', `start end'), $@)
@@ -144,13 +147,38 @@ m4_define_blind(`wireGroup', `
 
 	m4_pushdef(`segCount', 0)
 	_wireGroupParseSegment(_wireGroup_path, _wireGroup_labelPos, first)
-	m4_errprintl(`seg count:' segCount)
 	m4_forloop(i, 0, m4_eval(_wireGroup_count - 1), `
 		wire(from _wireGroupGetOffset(0, i) to _wireGroupGetOffset(1, i) m4_forloop(j, 2, segCount, `then to _wireGroupGetOffset(j, i)'),
 		     m4_argn(m4_eval(i + 1), m4_extractargs(_wireGroup_labels)),
 		     _wireGroup_labelPos)
 	')
-	move to `WireGroup___Pos_'segCount;
+
+	m4_ifelse(_wireGroup_ref, `', `', `
+		_wireGroup_ref: [
+			Start1: WireGroup___Pos_0;
+			End1:   WireGroup___Pos_`'segCount;
+			m4_forloop(i, 2, _wireGroup_count, `
+				Start`'i: WireGroup___Pos_0 + _wireGroupDirOffset(1, m4_eval(i - 1));
+				End`'i:   WireGroup___Pos_`'segCount + _wireGroupDirOffset(segCount, m4_eval(i - 1));
+			')
+
+			m4_ifelse(_wireGroup_labels, `()', `', `
+				m4_forloop(i, 1, _wireGroup_count, `
+					m4_pushdef(`label', m4_argn(i, m4_extractargs(_wireGroup_labels)))
+					m4_ifelse(m4_eval(m4_regexp(label, `^[A-Z][A-Za-z0-9]*$') != -1), 1, `
+						label: [
+							Start: Start`'i;
+							End:   End`'i;
+						] with .Start at Start`'i;
+					')
+					m4_popdef(`label')
+				')
+			')
+		] with .Start1 at WireGroup___Pos_0;
+	')
+
+	move to WireGroup___Pos_`'segCount;
+
 	m4_popdef(`segCount')
 ')
 m4_define_blind(`_wireGroupGetOffset', ` m4_dnl
