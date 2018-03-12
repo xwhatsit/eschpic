@@ -168,7 +168,7 @@ m4_define_blind(`wireGroup', `
 			End1:   WireGroup___Pos_`'segCount;
 			m4_forloop(i, 2, _wireGroup_count, `
 				Start`'i: WireGroup___Pos_0 + _wireGroupDirOffset(1, m4_eval(i - 1));
-				End`'i:   WireGroup___Pos_`'segCount + _wireGroupDirOffset(segCount, m4_eval(i - 1));
+				End`'i:   WireGroup___Pos_`'segCount + _wireGroupDirOffset(segCount, m4_eval(i - 1)) + _wireGroupEndOffset(segCount, m4_eval(i - 1));
 			')
 
 			m4_ifelse(_wireGroup_labels, `()', `', `
@@ -482,10 +482,10 @@ m4_define_blind(`wireRef', `
 	m4_ifelse(haveRef, 0, `
 		m4_errprintl(`warning: no ref found for' $1 `, may need to recompile')
 		"textWireLabel(/?.?)" _wireRefTextAlignment() at pos;
-		pushDir()
-		move to pos then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
-		popDir()
 	')
+	pushDir()
+	move to pos then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+	popDir()
 	m4_popdef(`haveRef')
 
 	m4_popdef(`currID')
