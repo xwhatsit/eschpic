@@ -179,6 +179,13 @@ m4_define(`m4_cr_all', `m4_format(m4_forloop(i, 1, 255, `%c') m4_forloop(j, 1, 4
 
 
 `
+Min/max macros as you'd expect. Work only on integers, as we're using m4 for this.
+'
+m4_define_blind(`m4_min', `m4_ifelse(m4_eval($1 < $2), 1, $1, $2)')
+m4_define_blind(`m4_max', `m4_ifelse(m4_eval($1 > $2), 1, $1, $2)')
+
+
+`
 Converts pts to mm.
 '
 m4_define_blind(`pointsToMillimetres', `(($1) * 25.4 / 72)')
