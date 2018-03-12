@@ -147,6 +147,13 @@ m4_define_blind(`wireGroup', `
 		m4_m4exit(1)
 	')
 
+	m4_ifelse(_wireGroup_ref, `', `', `
+		m4_ifelse(m4_eval(m4_regexp(_wireGroup_ref, `^[A-Z][A-Za-z0-9]*$') == -1), 1, `
+			m4_errprintl(`error: wireGroup ref' "_wireGroup_ref" `is not a valid pic label')
+			m4_m4exit(1)
+		')
+	')
+
 	m4_pushdef(`segCount', 0)
 	_wireGroupParseSegment(_wireGroup_path, _wireGroup_labelPos, first)
 	m4_forloop(i, 0, m4_eval(_wireGroup_count - 1), `
