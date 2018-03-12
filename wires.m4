@@ -442,7 +442,7 @@ m4_define_blind(`_busParseSegment', `
 
 
 `
-Wire cross-reference, writes out to aux file.
+Wire cross-reference, writes out to aux file. Automatically moves down/right for next wire ref depending on direction.
 
 Usage: wireRef(name, pos)
 Params:
@@ -475,6 +475,9 @@ m4_define_blind(`wireRef', `
 	m4_ifelse(haveRef, 0, `
 		m4_errprintl(`warning: no ref found for' $1 `, may need to recompile')
 		"textWireLabel(/?.?)" _wireRefTextAlignment() at pos;
+		pushDir()
+		move to pos then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+		popDir()
 	')
 	m4_popdef(`haveRef')
 
