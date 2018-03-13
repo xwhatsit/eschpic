@@ -820,6 +820,8 @@ m4_define_blind(`motor', `
 
 	componentDrawLabels(_motor_)
 	componentWriteBOM(_motor_)
+
+	move to last [].Start;
 ')
 
 `
@@ -893,4 +895,6 @@ m4_define_blind(`brake', `
 
 	componentDrawLabels(_brake_)
 	componentWriteBOM(_brake_)
+
+	move to last [].End;
 ')
