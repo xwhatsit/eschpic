@@ -107,3 +107,14 @@ m4_define_blind(`dirCCW',
 	`m4_ifelse(m4_trim(`$1'), dirRight, dirUp,
 	`m4_errprint(`error: dirCCW: invalid direction parameter:' m4_trim(`$1')
 		) m4_m4exit(1)')')')')')
+
+`
+Finds reverse direction
+'
+m4_define_blind(`dirRev',
+	`m4_ifelse(m4_trim(`$1'), dirUp,    dirDown,
+	`m4_ifelse(m4_trim(`$1'), dirDown,  dirUp,
+	`m4_ifelse(m4_trim(`$1'), dirLeft,  dirRight,
+	`m4_ifelse(m4_trim(`$1'), dirRight, dirLeft,
+	`m4_errprint(`error: dirRev: invalid direction parameter:' m4_trim(`$1')
+		) m4_m4exit(1)')')')')')
