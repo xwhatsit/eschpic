@@ -784,9 +784,9 @@ m4_define_blind(`motor', `
 			componentDrawTerminalLabel(Start, _motor_label1)
 			componentDrawTerminalLabel(CT,    _motor_label2)
 			componentDrawTerminalLabel(RT,    _motor_label3)
-			m4_ifelse(m4_regexp(m4_indir(_motor_label1), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
-			m4_ifelse(m4_regexp(m4_indir(_motor_label2), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: CT);
-			m4_ifelse(m4_regexp(m4_indir(_motor_label3), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
+			m4_ifelse(m4_regexp(_motor_label1, `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
+			m4_ifelse(m4_regexp(_motor_label2, `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: CT);
+			m4_ifelse(m4_regexp(_motor_label3, `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
 		')
 
 
@@ -820,4 +820,77 @@ m4_define_blind(`motor', `
 
 	componentDrawLabels(_motor_)
 	componentWriteBOM(_motor_)
+')
+
+`
+Brake.
+
+Usage: brake([comma-separated key-value parameters])
+Params:
+	pos:		Position to place starting terminal at. Defaults to "Here".
+	ref:		Component reference name.
+	val:		Component value.
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to BOM.
+	startLabel:	Label of start terminal; defaults to A1.
+	endLabel:	Label of end terminal; defaults to A2.
+'
+m4_define_blind(`brake', `
+	componentParseKVArgs(`_brake_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `startLabel', `A1',
+		 `endLabel', `A2'), $@)
+	componentHandleRef(_brake_)
+
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+
+		m4_ifelse(dirIsConventional(peekDir()), 1, `
+			AO: Start;
+			BO: End;
+		', `
+			AO: End;
+			BO: Start;
+		')
+		AM: 3/8 between AO and BO;
+		BM: 3/8 between BO and AO;
+		Centre: 1/2 between AO and BO;
+
+		m4_define(`_brake_brakeDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown))
+
+		line from AO to AM;
+		line from BO to BM;
+		box m4_ifelse(dirIsVertical(peekDir()), 1, wid elen*3/8 ht elen/4, wid elen/4 ht elen*3/8) at Centre;
+		line from m4_ifelse(dirIsVertical(peekDir()), 1, `last box.e') dirToDirection(_brake_brakeDir) elen/8;
+		BC1: Here;
+		move from BC1 dirToDirection(peekDir()) elen*3/32;
+		BB1: Here;
+		move from BC1 dirToDirection(dirRev(peekDir())) elen*3/32;
+		BT1: Here;
+
+		move from BC1 dirToDirection(_brake_brakeDir) elen/16;
+		BC2: Here;
+		move from BC2 dirToDirection(peekDir()) elen*9/64;
+		BB2: Here;
+		move from BC2 dirToDirection(dirRev(peekDir())) elen*9/64;
+		BT2: Here;
+
+		line from BC1 to BT1 to BT2 to BB2 to BB1 to BC1;
+
+		componentDrawTerminalLabel(AO, _brake_startLabel)
+		componentDrawTerminalLabel(BO, _brake_endLabel)
+
+		popDir();
+	] with .Start at _brake_pos;
+
+	componentDrawLabels(_brake_)
+	componentWriteBOM(_brake_)
 ')
