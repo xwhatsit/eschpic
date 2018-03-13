@@ -660,8 +660,9 @@ m4_define_blind(`contactGroup', `
 		FirstContactStart:      _contactGroup_contactNum`'th last [].Start;
 		FirstContactMidContact: _contactGroup_contactNum`'th last [].MidContact;
 		FirstContactEnd:        _contactGroup_contactNum`'th last [].End;
+		LastContactMidContact:  last [].MidContact;
 		m4_ifelse(_contactGroup_linked, `true',
-			`line dashed elen/18 from FirstContactMidContact to last [].MidContact');
+			`line dashed elen/18 from FirstContactMidContact to LastContactMidContact');
 
 		_contactGroup_postDraw
 
