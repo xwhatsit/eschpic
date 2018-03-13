@@ -640,7 +640,7 @@ Params:
 	pos:		Position to place start at. Defaults to "Here".
 	ref:		Component reference name.
 	val:		Component value
-	description:	Addition text describing component purpose etc.
+	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 '
 m4_define_blind(`transformer', `
@@ -694,4 +694,130 @@ m4_define_blind(`transformer', `
 	componentWriteBOM(_transformer_)
 
 	move to last [].End
+')
+
+
+`
+Motor.
+
+Usage: motor([comma-separated key-value parameters])
+Params:
+	pos:		Position to place first terminal at. Defaults to "Here".
+	ref:		Component reference name.
+	val:		Component value.
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to BOM.
+	phase:		Either 2 or 3 (default), meaning 2-phase or 3-phase.
+	type:		Either AC (default) or DC.
+	labels:		Terminal labels. In format (U1, V1, W1). Defaults to (U1, V1, W1) for 3-phase, and "(1, 2)" for 2-phase.
+	showPE:		Whether to show PE terminal. Either true or false (default).
+	showEarth:	Whether or not to show earthing. Either true or false (default).
+'
+m4_define_blind(`motor', `
+	componentParseKVArgs(`_motor_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `phase', `3',
+		 `type', `AC',
+		 `labels', `',
+		 `showPE', `false',
+		 `showEarth', `false'), $@)
+	componentHandleRef(_motor_)
+
+	[
+		pushDir();
+
+		m4_define(`_motor_termDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
+		m4_define(`_motor_termSpacing', m4_ifelse(_motor_phase, 3, elen/2, elen/4))
+
+		Start: Here;
+		move dirToDirection(_motor_termDir) _motor_termSpacing;
+		CT: Here;
+		move dirToDirection(_motor_termDir) _motor_termSpacing;
+		RT: Here;
+		move to CT then dirToDirection(peekDir()) elen*3/4;
+		circle rad elen*5/16 with .c at Here;
+
+
+		"textComponentDescription(M)" above at last circle.c - (0,elen/8);
+		m4_ifelse(_motor_phase, 2, `
+			line from Start dirToDirection(peekDir()) elen*9/16;
+			line from RT   dirToDirection(peekDir()) elen*9/16;
+
+			move to last circle.c then down elen*3/32 then left elen*15/128;
+			line right elen*15/64;
+			move from last line.c down elen/16 then left elen*15/128;
+			line dashed elen*3/64 right elen*15/64;
+
+			m4_ifelse(_motor_labels, `', `m4_define(`_motor_labels', (1, 2))')
+			m4_define(`_motor_label1', m4_argn(1, m4_extractargs(_motor_labels)))
+			m4_define(`_motor_label2', m4_argn(2, m4_extractargs(_motor_labels)))
+			dirToDirection(peekDir());
+			componentDrawTerminalLabel(Start, _motor_label1)
+			componentDrawTerminalLabel(RT,    _motor_label2)
+			m4_ifelse(m4_regexp(m4_indir(_motor_label1), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
+			m4_ifelse(m4_regexp(m4_indir(_motor_label2), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
+		', `
+			line from Start dirToDirection(peekDir()) elen/4 then to last m4_ifelse(m4_trim(peekDir()), dirDown,  circle.nw,
+												m4_trim(peekDir()), dirUp,    circle.sw,
+												m4_trim(peekDir()), dirRight, circle.nw,
+												m4_trim(peekDir()), dirLeft,  circle.ne);
+			line from CT to last m4_ifelse(m4_trim(peekDir()), dirDown,  circle.n,
+						       m4_trim(peekDir()), dirUp,    circle.s,
+						       m4_trim(peekDir()), dirRight, circle.w,
+						       m4_trim(peekDir()), dirLeft,  circle.e);
+			line from RT dirToDirection(peekDir()) elen/4 then to last m4_ifelse(m4_trim(peekDir()), dirDown,  circle.ne,
+											     m4_trim(peekDir()), dirUp,    circle.se,
+											     m4_trim(peekDir()), dirRight, circle.sw,
+											     m4_trim(peekDir()), dirLeft,  circle.se);
+
+			"textComponentDescription(3$\sim$)" below at last circle.c + (0,elen*3/32);
+
+			m4_ifelse(_motor_labels, `', `m4_define(`_motor_labels', (U1, V1, W1))')
+			m4_define(`_motor_label1', m4_argn(1, m4_extractargs(_motor_labels)))
+			m4_define(`_motor_label2', m4_argn(2, m4_extractargs(_motor_labels)))
+			m4_define(`_motor_label3', m4_argn(3, m4_extractargs(_motor_labels)))
+			dirToDirection(peekDir());
+			componentDrawTerminalLabel(Start, _motor_label1)
+			componentDrawTerminalLabel(CT,    _motor_label2)
+			componentDrawTerminalLabel(RT,    _motor_label3)
+			m4_ifelse(m4_regexp(m4_indir(_motor_label1), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
+			m4_ifelse(m4_regexp(m4_indir(_motor_label2), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: CT);
+			m4_ifelse(m4_regexp(m4_indir(_motor_label3), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
+		')
+
+
+		m4_ifelse(_motor_showPE, true, `
+			move to RT then dirToDirection(_motor_termDir) elen/2;
+			TPE: Here;
+			move dirToDirection(peekDir()) m4_ifelse(_motor_phase, 2, elen/2, elen/4);
+			PE1: Here;
+			PE3: last m4_ifelse(dirIsVertical(peekDir()), 1, circle.e, circle.s);
+			move from PE3 dirToDirection(_motor_termDir) elen*3/16;
+			PE2: Here;
+			line from TPE to PE1 then to PE2 then to PE3;
+
+			dirToDirection(peekDir());
+			componentDrawTerminalLabel(TPE, PE)
+		')
+
+		m4_ifelse(_motor_showEarth, true, `
+			ET1: last m4_ifelse(dirIsVertical(peekDir()), 1, circle.e, circle.s);
+			move to ET1 then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/16;
+			ET2: Here;
+			move dirToDirection(peekDir()) elen*3/64;
+			line from Here dirToDirection(dirRev(peekDir())) elen*3/32;
+			move to ET2;
+			m4_ifelse(dirIsVertical(peekDir()), 1, `line right elen/4')
+			earth();
+		')
+
+		popDir();
+	] with .Start at _motor_pos;
+
+	componentDrawLabels(_motor_)
+	componentWriteBOM(_motor_)
 ')
