@@ -758,8 +758,8 @@ m4_define_blind(`motor', `
 			dirToDirection(peekDir());
 			componentDrawTerminalLabel(Start, _motor_label1)
 			componentDrawTerminalLabel(RT,    _motor_label2)
-			m4_ifelse(m4_regexp(m4_indir(_motor_label1), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
-			m4_ifelse(m4_regexp(m4_indir(_motor_label2), `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
+			m4_ifelse(m4_regexp(m4_indir(_motor_label1), `[A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
+			m4_ifelse(m4_regexp(m4_indir(_motor_label2), `[A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
 		', `
 			line from Start dirToDirection(peekDir()) elen/4 then to last m4_ifelse(m4_trim(peekDir()), dirDown,  circle.nw,
 												m4_trim(peekDir()), dirUp,    circle.sw,
@@ -784,9 +784,9 @@ m4_define_blind(`motor', `
 			componentDrawTerminalLabel(Start, _motor_label1)
 			componentDrawTerminalLabel(CT,    _motor_label2)
 			componentDrawTerminalLabel(RT,    _motor_label3)
-			m4_ifelse(m4_regexp(_motor_label1, `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
-			m4_ifelse(m4_regexp(_motor_label2, `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: CT);
-			m4_ifelse(m4_regexp(_motor_label3, `^[A-Z][A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
+			m4_ifelse(m4_regexp(_motor_label1, `[A-Za-z0-9]*$'), 0, `T'_motor_label1: Start);
+			m4_ifelse(m4_regexp(_motor_label2, `[A-Za-z0-9]*$'), 0, `T'_motor_label2: CT);
+			m4_ifelse(m4_regexp(_motor_label3, `[A-Za-z0-9]*$'), 0, `T'_motor_label2: RT);
 		')
 
 
