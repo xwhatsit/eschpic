@@ -66,10 +66,11 @@ m4_define_blind(`componentDrawActuator', `
 			to ActuatorKeyBR \
 			to polarCoord(ActuatorKeyBR, 0.5, $3 - ($4*90)) \
 			to polarCoord(ActuatorKeyTT, 1.0, $3 - ($4*256));
-	', $1, `turn',  `componentDrawActuator(selector, $2, $3, $4)
-	', $1, `twist', `componentDrawActuator(selector, $2, $3, $4)
-	', $1, `estop', `componentDrawActuator(mushroom, $2, $3, $4)
-	', $1, `prox',  `componentDrawActuator(proximity, $2, $3, $4)
+	', $1, `turn',     `componentDrawActuator(selector, $2, $3, $4)
+	', $1, `twist',    `componentDrawActuator(selector, $2, $3, $4)
+	', $1, `estop',    `componentDrawActuator(mushroom, $2, $3, $4)
+	', $1, `prox',     `componentDrawActuator(proximity, $2, $3, $4)
+	', $1, `distance', `componentDrawActuator(proximity, $2, $3, $4)
 	')
 ')
 
