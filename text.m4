@@ -31,7 +31,7 @@ m4_define_blind(`textTerminalLabel', `{\small\ttfamily\itshape\strut{}$1}')
 `
 Produces (unquoted) text in module terminal label style.
 '
-m4_define_blind(`textModuleTerminalLabel', `{\small\ttfamily\strut{}$1}')
+m4_define_blind(`textModuleTerminalLabel', `{\footnotesize\ttfamily\strut{}$1}')
 
 `
 Produces (unquoted) text in wire label style.
