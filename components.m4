@@ -205,6 +205,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
+	flipped:	Either true or false (default). Diode normally draws anode to cathode.
 	type:		Diode type. Either left blank, or "LED". Defaults to blank.
 	startLabel:	Starting terminal label. Defaults to blank.
 	endLabel:	Ending terminal label. Defaults to blank.
@@ -216,6 +217,7 @@ m4_define_blind(`diode', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
+		 `flipped', `false',
 		 `type', `',
 		 `startLabel', `',
 		 `endLabel', `'), $@)
@@ -228,45 +230,52 @@ m4_define_blind(`diode', `
 		End: Here;
 		Centre: 1/2 between Start and End;
 
-		move to Centre then dirToDirection(peekDir()) 1;
-		KM: Here;
-		move dirToDirection(dirCW(dirCW(peekDir()))) 2;
-		AM: Here;
+		m4_ifelse(_diode_flipped, false, `
+			AO: Start;
+			BO: End;
+		', `
+			AO: End;
+			BO: Start;
+		')
 
-		line from Start to AM;
-		line from KM to End;
+		AM: 5/32 between Centre and AO;
+		KM: 5/32 between Centre and BO;
 
-		line from AM to polarCoord(AM, 1.2, dirToAngle(dirCW(peekDir()))) \
+		line from AO to AM;
+		line from KM to BO;
+
+		line from AM to polarCoord(AM, elen*3/32, dirToAngle(dirCW(peekDir()))) \
 			then to KM \
-			then to polarCoord(AM, 1.2, dirToAngle(dirCCW(peekDir()))) \
+			then to polarCoord(AM, elen*3/32, dirToAngle(dirCCW(peekDir()))) \
 			then to AM;
-		line from polarCoord(KM, 1.2 + pointsToMillimetres(linethick/2), dirToAngle(dirCW(peekDir()))) to \
-			polarCoord(KM, 1.2 + pointsToMillimetres(linethick/2), dirToAngle(dirCCW(peekDir())));
+		line from polarCoord(KM, elen*3/32 + pointsToMillimetres(linethick/2), dirToAngle(dirCW(peekDir()))) to \
+			polarCoord(KM, elen*3/32 + pointsToMillimetres(linethick/2), dirToAngle(dirCCW(peekDir())));
 
 		m4_ifelse(_diode_type, `LED', `
-			LEDArrowStart1: polarCoord(AM, 1.5, dirToAngle(peekDir()) - 70);
-			LEDArrowMid1: polarCoord(LEDArrowStart1, 0.85, dirToAngle(peekDir()) - 69);
-			LEDArrowEnd1: polarCoord(LEDArrowStart1, 1.6, dirToAngle(peekDir()) - 69);
+			akAngle = angleBetweenPoints(AO, BO);
+			LEDArrowStart1: polarCoord(AM, elen*15/128, akAngle - 70);
+			LEDArrowMid1: polarCoord(LEDArrowStart1, elen*17/256, akAngle - 69);
+			LEDArrowEnd1: polarCoord(LEDArrowStart1, elen/8, akAngle - 69);
 
-			LEDArrowStart2: polarCoord(LEDArrowStart1, 0.85, dirToAngle(peekDir()));
-			LEDArrowMid2: polarCoord(LEDArrowStart2, 0.85, dirToAngle(peekDir()) - 69);
-			LEDArrowEnd2: polarCoord(LEDArrowStart2, 1.6, dirToAngle(peekDir()) - 69);
+			LEDArrowStart2: polarCoord(LEDArrowStart1, elen*17/256, akAngle);
+			LEDArrowMid2: polarCoord(LEDArrowStart2, elen*17/256, akAngle - 69);
+			LEDArrowEnd2: polarCoord(LEDArrowStart2, elen/8, akAngle - 69);
 
-			line from LEDArrowMid1 to polarCoord(LEDArrowMid1, 0.2, dirToAngle(peekDir()) - 158) \
+			line from LEDArrowMid1 to polarCoord(LEDArrowMid1, elen/64, akAngle - 158) \
 				then to LEDArrowEnd1 \
-				then to polarCoord(LEDArrowMid1, 0.2, dirToAngle(peekDir()) + 22) \
+				then to polarCoord(LEDArrowMid1, elen/64, akAngle + 22) \
 				then to LEDArrowMid1 shaded "black";
 			line from LEDArrowMid1 to LEDArrowStart1;
 
-			line from LEDArrowMid2 to polarCoord(LEDArrowMid2, 0.2, dirToAngle(peekDir()) - 158) \
+			line from LEDArrowMid2 to polarCoord(LEDArrowMid2, elen/64, akAngle - 158) \
 				then to LEDArrowEnd2 \
-				then to polarCoord(LEDArrowMid2, 0.2, dirToAngle(peekDir()) + 22) \
+				then to polarCoord(LEDArrowMid2, elen/64, akAngle + 22) \
 				then to LEDArrowMid2 shaded "black";
 			line from LEDArrowMid2 to LEDArrowStart2;
 		')
 
-		A: Start;
-		K: End;
+		A: AO;
+		K: BO;
 
 		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TA")
 		m4_ifelse(_diode_startLabel, `', `', `T'_diode_startLabel`: A')
