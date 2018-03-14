@@ -195,6 +195,84 @@ m4_define_blind(`resistor', `
 
 
 `
+Potentiometer. Defines T1, T2, T3 position references (2x outside terminals and the sliding contact
+terminal respectively).
+
+Usage: potentiometer([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	flipped:	Either true or false (default). Normally, drawn in conventional direction (sliding
+			terminal down or right).
+'
+m4_define_blind(`potentiometer', `
+	componentParseKVArgs(`_potentiometer_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `flipped', `false'), $@)
+	componentHandleRef(_potentiometer_)
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+
+		m4_ifelse(m4_eval(dirIsConventional(peekDir()) ^ m4_ifelse(_potentiometer_flipped, false, 0, 1)), 1, `
+			AO: Start;
+			BO: End;
+		', `
+			AO: End;
+			BO: Start;
+		')
+
+		AM: 5/16 between AO and BO;
+		BM: 5/16 between BO and AO;
+
+		box m4_ifelse(dirIsVertical(peekDir()), 1, `wid elen/8 ht elen*3/8', `wid elen*3/8 ht elen/8') at 1/2 between AO and BO;
+		line from AO to AM;
+		line from BO to BM;
+
+		CM: `last box'm4_ifelse(dirIsVertical(peekDir()), 1, `.e', `.s');
+		m4_define(`_potentiometer_slideDir', m4_ifelse(dirIsVertical(peekDir()), 1, `dirRight', `dirDown'));
+		move to CM then dirToDirection(_potentiometer_slideDir) elen/32;
+		CA3: Here;
+		move dirToDirection(_potentiometer_slideDir) elen*3/32;
+		CA1: Here;
+		move dirToDirection(peekDir()) elen/32;
+		CA2: Here;
+		move to CA1 then dirToDirection(dirRev(peekDir())) elen/32;
+		CA4: Here;
+		line from CA1 to CA2 to CA3 to CA4 to CA1 filled 0;
+
+		move to last box.c then dirToDirection(_potentiometer_slideDir) elen/2;
+		CT: Here;
+		move to BO then dirToDirection(_potentiometer_slideDir) elen/2;
+		CO: Here;
+		line from CO to CT then to CA1;
+
+		T1: AO;
+		T2: BO;
+		T3: CO;
+
+		popDir();
+	] with .Start at _potentiometer_pos;
+
+	componentDrawLabels(_potentiometer_)
+	componentWriteBOM(_potentiometer_)
+
+	move to last [].End;
+')
+
+
+`
 Diode. Draws in current direction.
 
 Usage: diode([comma-separated key-value parameters])
