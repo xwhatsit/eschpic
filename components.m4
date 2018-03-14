@@ -297,6 +297,73 @@ m4_define_blind(`LED', `diode(type=LED, $@)')
 
 
 `
+Pilot lamp.
+
+Usage: lamp([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+	        	letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	startLabel:	Starting terminal label. Defaults to X1.
+	endLabel:	Ending terminal label. Defaults to X2.
+'
+m4_define_blind(`lamp', `
+	componentParseKVArgs(`_lamp_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `startLabel', `X1',
+		 `endLabel', `X2'), $@)
+	componentHandleRef(_lamp_)
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir()) elen;
+		End: Here;
+
+		m4_ifelse(dirIsConventional(peekDir()), 1, `
+			AO: Start;
+			BO: End;
+		', `
+			AO: End;
+			BO: Start;
+		')
+
+		AM: 5/16 between AO and BO;
+		BM: 5/16 between BO and AO;
+
+		circle rad elen*3/16 at 1/2 between AO and BO;
+		line from last circle.ne to last circle.sw;
+		line from last circle.nw to last circle.se;
+
+		line from AO to AM;
+		line from BO to BM;
+
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TX1")
+		m4_ifelse(_lamp_startLabel, `', `', `T'_lamp_startLabel`: Start')
+		m4_ifelse(_lamp_endLabel, `', `', `T'_lamp_endLabel`: End')
+
+		popDir();
+	] with .Start at _lamp_pos;
+
+	# display terminal labels
+	componentDrawTerminalLabel(last [].AO, textTerminalLabel(_lamp_startLabel))
+	componentDrawTerminalLabel(last [].BO,   textTerminalLabel(_lamp_endLabel))
+
+	componentDrawLabels(_lamp_)
+	componentWriteBOM(_lamp_)
+
+	move to last [].End;
+')
+
+
+`
 Battery. Draws in current direction.
 
 Usage: battery([comma-separated key-value parameters])
@@ -317,7 +384,6 @@ m4_define_blind(`battery', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `type', `',
 		 `startLabel', `',
 		 `endLabel', `'), $@)
 	componentHandleRef(_battery_)
