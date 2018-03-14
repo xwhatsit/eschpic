@@ -965,6 +965,7 @@ m4_define_blind(`motor', `
 			line from Here dirToDirection(dirRev(peekDir())) elen*3/32;
 			move to ET2;
 			m4_ifelse(dirIsVertical(peekDir()), 1, `line right elen/4')
+			corner;
 			earth();
 		')
 
