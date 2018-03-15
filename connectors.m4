@@ -11,6 +11,7 @@ Params:
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pin:		Pin number. Defaults to blank.
+	len:		Pin extension length. Defaults to elen.
 '
 m4_define_blind(`connectorMale', `
 	componentParseKVArgs(`_connectorMale_',
@@ -20,13 +21,14 @@ m4_define_blind(`connectorMale', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `pin', `'), $@)
+		 `pin', `',
+		 `len', `elen'), $@)
 	componentHandleRef(_connectorMale_)
 	[
 		pushDir();
 
 		Start: Here;
-		move dirToDirection(peekDir()) elen;
+		move dirToDirection(peekDir()) _connectorMale_len;
 		End: Here;
 
 		m4_ifelse(_connectorMale_flipped, true, `
@@ -37,9 +39,10 @@ m4_define_blind(`connectorMale', `
 			BO: Start;
 		')
 
-		LabelPos: 7/16 between AO and BO;
 
 		angle = angleBetweenPoints(AO, BO);
+
+		LabelPos: polarCoord(AO, elen*7/16, angle);
 		
 		circle rad elen*1/16 at polarCoord(AO, elen/16, angle) shade "black";
 		Sq1: polarCoord(last circle.c, elen/16, angle + 90);
@@ -74,6 +77,7 @@ Params:
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pin:		Pin number. Defaults to blank.
+	len:		Pin extension length. Defaults to elen.
 '
 m4_define_blind(`connectorFemale', `
 	componentParseKVArgs(`_connectorFemale_',
@@ -83,13 +87,14 @@ m4_define_blind(`connectorFemale', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `pin', `'), $@)
+		 `pin', `',
+		 `len', `elen'), $@)
 	componentHandleRef(_connectorFemale_)
 	[
 		pushDir();
 
 		Start: Here;
-		move dirToDirection(peekDir()) elen;
+		move dirToDirection(peekDir()) _connectorFemale_len;
 		End: Here;
 
 		m4_ifelse(_connectorFemale_flipped, true, `
@@ -100,9 +105,10 @@ m4_define_blind(`connectorFemale', `
 			BO: Start;
 		')
 
-		LabelPos: 1/4 between AO and BO;
-
 		angle = angleBetweenPoints(AO, BO);
+
+		LabelPos: polarCoord(AO, elen/4, angle);
+
 		arc ccw from polarCoord(AO, elen/8, angle - 90) to polarCoord(AO, elen/8, angle + 90) with .c at AO;
 		line from polarCoord(AO, elen/8, angle) to BO;
 
@@ -138,6 +144,7 @@ Params:
 	labels:		Pin labels, in syntax "(1, 2, 3, PE)" etc. If not supplied, will auto-number from 1 to pincount.
 	gender:		One of "male", "female", "m", "f", "M", or "F". Defaults to "female".
 	showPinNums:	Whether or not to display pin numbers. Either (default) "true" or false.
+	len:		Pin extension length. Defaults to elen.
 '
 m4_define_blind(`connector', `
 	componentParseKVArgs(`_connector_',
@@ -150,7 +157,8 @@ m4_define_blind(`connector', `
 		 `count', `',
 		 `labels', `',
 		 `gender', `female',
-		 `showPinNums', `true'), $@)
+		 `showPinNums', `true',
+		 `len', `elen'), $@)
 	componentHandleRef(_connector_)
 	
 	# determine gender
@@ -177,7 +185,8 @@ m4_define_blind(`connector', `
 		m4_forloop(`i', 1, _connector_count, `
 			C`'i: m4_indir(connector`'_connector_gender,
 			               pin=m4_ifelse(_connector_showPinNums, true, m4_argn(i, m4_extractargs(_connector_labels))),
-				       flipped=_connector_flipped)
+				       flipped=_connector_flipped,
+				       len=_connector_len)
 			X`'i: last [].AO;
 			T`'i: last [].BO;
 			move to last [].Start;
