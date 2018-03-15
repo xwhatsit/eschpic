@@ -211,7 +211,9 @@ m4_define_blind(`terminal', `
 	componentParseKVArgs(`_terminal_',
 		(`pos', `Here',
 		 `label', `'), $@)
-	circle diam elen/8 with .c at _terminal_pos;
+	
+	_terminalCount := _terminalCount + 1;
+	Terminal___Pos[_terminalCount]: circle diam elen/8 invis with .c at _terminal_pos;
 
 	m4_ifelse(_terminal_label, `', `', `
 		m4_ifelse(dirIsVertical(getDir()), 1, `
@@ -222,6 +224,19 @@ m4_define_blind(`terminal', `
 	')
 
 	move to last circle.c;
+')
+
+
+`
+Support macros for terminal drawing; we need to defer drawing to the end, so terminals don't have wires inside.
+'
+m4_define_blind(`terminalsInit', `
+	_terminalCount = 0;
+')
+m4_define_blind(`terminalsDrawDeferred', `
+	for i = 1 to _terminalCount do {
+		circle diam elen/8 outline "black" shaded "white" with .c at Terminal___Pos[i];
+	}
 ')
 
 
@@ -264,6 +279,9 @@ m4_define_blind(`terminalGroup', `
 
 		m4_forloop(i, 1, _terminalGroup_count, `
 			`T'i: Here;
+			m4_ifelse(_terminalGroup_labels, `', `', `
+				`T'm4_patsubst(m4_argn(i, m4_extractargs(_terminalGroup_labels)), `[^A-Za-z0-9]', `_'): Here;
+			')
 			terminal(m4_ifelse(_terminalGroup_labels, `', `', `label=m4_argn(i, m4_extractargs(_terminalGroup_labels))'));
 			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
 		')
@@ -275,6 +293,11 @@ m4_define_blind(`terminalGroup', `
 
 		popDir();
 	] with .Start at _terminalGroup_pos;
+
+	# Must redefine positions for terminals, as they were enclosed in a scope
+	m4_forloop(i, 1, _terminalGroup_count, `
+		Terminal___Pos[_terminalCount - i + 1]: last [].T`'m4_eval(_terminalGroup_count - i + 1);
+	')
 
 	componentDrawLabels(_terminalGroup_)
 

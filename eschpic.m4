@@ -150,7 +150,12 @@ m4_undivert(8)
 	# set default direction
 	right;
 
+	# Required for deferred drawing of terminals
+	terminalsInit()
+
 	m4_divert(8)
+	# Required for deferred drawing of terminals
+	terminalsDrawDeferred()
 .PE
 \end{figure}
 \end{landscape}
