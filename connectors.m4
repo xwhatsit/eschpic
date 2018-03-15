@@ -223,3 +223,60 @@ m4_define_blind(`terminal', `
 
 	move to last circle.c;
 ')
+
+
+`
+Terminal group.
+
+Positions are defined as .T1, .T2 etc., and also .T[labelname] if those are supplied.
+
+Usage: terminalGroup([comma-separated key-value parameters])
+Params:
+	pos:		Position to place first terminal. Defaults to "Here".
+	ref:
+	val:	
+	description:
+	labels:		Terminal labels/numbers, in syntax (1, 2, 3) etc.
+	count:		Not required if labels parameter is supplied.
+'
+m4_define_blind(`terminalGroup', `
+	componentParseKVArgs(`_terminalGroup_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `labels', `',
+		 `count', `'), $@)
+	
+	m4_ifelse(_terminalGroup_count, `', `
+		m4_define(`_terminalGroup_count', m4_nargs(m4_extractargs(_terminalGroup_labels)))
+		m4_ifelse(_terminalGroup_count, 0, `
+			m4_errprintl(`error: terminalGroup has zero count')
+			m4_m4exit(1)
+		')
+	')
+
+	componentHandleRef(_terminalGroup_)
+	[
+		pushDir();
+
+		Start: Here;
+
+		m4_forloop(i, 1, _terminalGroup_count, `
+			`T'i: Here;
+			terminal(m4_ifelse(_terminalGroup_labels, `', `', `label=m4_argn(i, m4_extractargs(_terminalGroup_labels))'));
+			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+		')
+
+		boxWidth  = _terminalGroup_count * elen/2 m4_ifelse(_terminalGroup_labels, `', `', `+ elen/4');
+		boxHeight = elen/3;
+		box dashed elen/19 m4_ifelse(dirIsVertical(peekDir()), 1, `wid boxWidth ht boxHeight', `wid boxHeight wid boxWidth') \
+			at (1/2 between T1 and `T'_terminalGroup_count) m4_ifelse(_terminalGroup_labels, `', `', `- m4_ifelse(dirIsVertical(peekDir()), 1, (elen/8, 0), (0, -elen/8))');
+
+		popDir();
+	] with .Start at _terminalGroup_pos;
+
+	componentDrawLabels(_terminalGroup_)
+
+	move to last[].Start;
+')
