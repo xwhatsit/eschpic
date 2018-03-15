@@ -138,7 +138,31 @@ m4_define_blind(`_moduleDrawGroup', `
 
 	ModuleGroupTextRef: polarCoord(1/2 between ModuleGroupStart and ModuleGroupEnd,
 		5.5, $3*dirToAngle(peekDir()));
-	"textModuleTerminalLabel($1)" at ModuleGroupTextRef;
+
+	m4_ifelse($1, `', `', `
+		"textModuleTerminalLabel($1)" at ModuleGroupTextRef;
+
+		move to polarCoord(ModuleGroupStart, elen*5/16, $3*dirToAngle(peekDir())) then dirToDirection(dirCCW(peekDir())) elen/4;
+		ModuleGroupLineJoinStart: Here;
+		move to polarCoord(ModuleGroupEnd, elen*5/16, $3*dirToAngle(peekDir())) then dirToDirection(dirCW(peekDir())) elen/4;
+		ModuleGroupLineJoinEnd: Here;
+
+		textWidth = textModuleTerminalLabelLength(($1));
+		if textWidth < distanceBetweenPoints(ModuleGroupLineJoinEnd, ModuleGroupLineJoinStart) then {
+			move to ModuleGroupTextRef then dirToDirection(dirCW(peekDir())) textWidth/2;
+			ModuleTextStart: Here;
+			move to ModuleGroupTextRef then dirToDirection(dirCCW(peekDir())) textWidth/2;
+			ModuleTextEnd: Here;
+
+			m4_ifelse(dirIsVertical(peekDir()), 1, `
+				line left from ModuleTextStart to (ModuleGroupLineJoinStart, ModuleTextStart) then to ModuleGroupLineJoinStart;
+				line right from ModuleTextEnd to (ModuleGroupLineJoinEnd, ModuleTextEnd) then to ModuleGroupLineJoinEnd;
+			', `
+				line up from ModuleTextStart to (ModuleTextStart, ModuleGroupLineJoinStart) then to ModuleGroupLineJoinStart;
+				line down from ModuleTextEnd to (ModuleTextEnd, ModuleGroupLineJoinEnd) then to ModuleGroupLineJoinEnd;
+			')
+		}
+	')
 
 	move to ModuleGroupEnd;
 ')
