@@ -140,6 +140,16 @@ m4_define_blind(`componentWriteBOM', `
 
 
 `
+Allows manually writing out BOM entry to aux file
+
+Usage: componentWriteBOM(ref, val, description, part)
+'
+m4_define_blind(`bomEntry', `
+	print "`_componentBOMEntry'($1,,$2,$3,$4,,,)" >> "eschpic.aux";
+')
+
+
+`
 Support macro writing out BOM entries when triggered from aux file
 
 Usage: _componentBOMEntry(ref, id, val, description, part, sheet, hpos, vpos)
@@ -781,7 +791,7 @@ m4_define_blind(`motorStarter', `
 	line dashed elen/18 from last [].Box.e to last[]. 7th last [].MidContact;
 	componentDrawLabels(_motorStarter_)
 	componentWriteBOM(_motorStarter_)
-	move to last [].End;
+	move to last [].T2;
 ')
 
 
