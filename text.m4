@@ -5,6 +5,12 @@ m4_define_blind(`textOhms', `$1\si{\ohm}')
 
 
 `
+Rotates text
+'
+m4_define_blind(`textRotated', `\rotatebox{90}{$1}')
+
+
+`
 Produces (unquoted) text in component reference style.
 '
 m4_define_blind(`textComponentRef', `{\large\ttfamily\strut{}$1}')
