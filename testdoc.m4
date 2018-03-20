@@ -12,7 +12,7 @@ module(
 	ref=A2,
 	val=XPS-AC5121,
 	description=E-Stop Module,
-	part=004094,
+	part=PN123456,
 	terminals=X1(A1, A2) (Y1) (13, 23, 33, Y43) | (,) (Y2) X8(14, 24, 34, Y44)
 );
 
@@ -38,7 +38,7 @@ contactNO(
 	ref=K3,
 	val=Omron G23A,
 	description=Manual Relay,
-	part=300123,
+	part=9871234,
 	actuation=push
 );
 wire(down then right 2*elen, Foo.Bar, end)
@@ -49,6 +49,8 @@ contactNC(
 	ref=K3,
 	val=Omron G23A,
 	description=Manual Relay,
-	part=300123,
+	part=9871234,
 	actuation=push
 );
+
+# vim: filetype=pic
