@@ -127,13 +127,9 @@ m4_define_blind(`_moduleParseTerminals', `
 			m4_ifelse($2, true, `ljust', `rjust')))
 
 	m4_define(`_module_numGroupTerms', m4_nargs(m4_extractargs(_module_groupTerms)))
-	m4_errprintl(`group name: "'_module_groupName`"')
-	m4_errprintl(`group terms:' _module_groupTerms)
-	m4_errprintl(`num group terms:' _module_numGroupTerms)
 
 	m4_define(`_module_groupRef', m4_ifelse(_module_groupName, `', `LastGroup', m4_patsubst(_module_groupName, `[^A-Za-z0-9]', `_')))
 	m4_ifelse(m4_regexp(_module_groupRef, `^[A-Z]'), -1, `m4_define(`_module_groupRef', `G'_module_groupRef)')
-
 	_module_groupRef: [
 		Start: Here;
 
@@ -177,22 +173,16 @@ m4_define_blind(`_moduleParseTerminals', `
 	')
 
 	move to _module_groupRef.End;
-
-	m4_errprintl()
 ')
 m4_define_blind(`_moduleDrawTerm', `
-	m4_errprintl(`drawing term:' $1)
 	m4_regexp($1, `\([^()]*\)\(.*\)', `
 		m4_define(`_module_termText', \1)
 		m4_define(`_module_termDesc', \2)
 	')
-	m4_errprintl(`term text:' _module_termText)
-	m4_errprintl(`extra text:' _module_termDesc)
 
 	# handle spacers
 	m4_define(`_module_spacerCount', 1)
 	m4_regexp(m4_trim(_module_termText), `^_\([0-9]+\)_$', `m4_define(`_module_spacerCount', \1) m4_define(`_module_termText', `')')
-	m4_errprintl(`spacer count:' _module_spacerCount)
 
 	m4_define(`_module_termBoxDims', m4_dnl
 		m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
@@ -202,7 +192,7 @@ m4_define_blind(`_moduleDrawTerm', `
 		m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse($2, true, `.n', `.s'), m4_ifelse($2, true, `.w', `.e')))
 
 	m4_ifelse(m4_eval(m4_len(_module_termText) == 0 && m4_len(_module_termDesc) == 0), 1, `
-		box _module_termBoxDims dashed outline "green" with _module_terminalBoxRef at Here;
+		box _module_termBoxDims invis with _module_terminalBoxRef at Here;
 		move to last box.c then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
 		line dirToDirection(_module_terminalDir) (_module_terminalPitch)*_module_spacerCount;
 	', `
@@ -229,58 +219,4 @@ m4_define_blind(`_moduleDrawTerm', `
 	m4_define(`_module_termRef', m4_patsubst(_module_termText, `[^A-Za-z0-9]', `_'))
 	m4_ifelse(m4_regexp(_module_termRef, `^[A-Z]'), -1, `m4_define(`_module_termRef', `T'_module_termRef)')
 	_module_termRef: LastTerminal;
-')
-
-m4_define_blind(`_moduleDrawGroup', `
-	ModuleGroupStart: Here;
-	move dirToDirection(dirCCW(peekDir())) elen/8;
-	move to polarCoord(Here, elen/8, $3*dirToAngle(peekDir()));
-	m4_foreach(_term, $2, `
-		m4_define(`_termCount', m4_eval(_termCount + 1))
-		m4_ifelse(_term, `', `
-			box wid elen/2 ht elen/4 invis;
-		', `
-			m4_pushdef(`_term_escaped', `m4_patsubst(_term, `[^A-Za-z0-9]', `_')')
-			TB`'_term_escaped: box wid elen/2 ht elen/4;
-			ModuleGroupTermRef: polarCoord(last box.c, elen/8, $3*dirToAngle(peekDir())-180);
-			G`'m4_patsubst($1, `[^A-Za-z0-9]', `_')T`'_term_escaped: ModuleGroupTermRef;
-			T`'_term_escaped: ModuleGroupTermRef;
-			"textModuleTerminalLabel(_term)" at last box.c;
-			m4_popdef(`term_escaped')
-		')
-		move to last box.c then dirToDirection(dirCCW(peekDir())) elen/4;
-	')
-	move to polarCoord(Here, elen/8, $3*dirToAngle(peekDir())-180);
-	move dirToDirection(dirCCW(peekDir())) elen/8;
-	ModuleGroupEnd: Here;
-
-	ModuleGroupTextRef: polarCoord(1/2 between ModuleGroupStart and ModuleGroupEnd,
-		5.5, $3*dirToAngle(peekDir()));
-
-	m4_ifelse($1, `', `', `
-		"textModuleTerminalLabel($1)" at ModuleGroupTextRef;
-
-		move to polarCoord(ModuleGroupStart, elen*5/16, $3*dirToAngle(peekDir())) then dirToDirection(dirCCW(peekDir())) elen/4;
-		ModuleGroupLineJoinStart: Here;
-		move to polarCoord(ModuleGroupEnd, elen*5/16, $3*dirToAngle(peekDir())) then dirToDirection(dirCW(peekDir())) elen/4;
-		ModuleGroupLineJoinEnd: Here;
-
-		textWidth = textModuleTerminalLabelLength(($1));
-		if textWidth < distanceBetweenPoints(ModuleGroupLineJoinEnd, ModuleGroupLineJoinStart) then {
-			move to ModuleGroupTextRef then dirToDirection(dirCW(peekDir())) textWidth/2;
-			ModuleTextStart: Here;
-			move to ModuleGroupTextRef then dirToDirection(dirCCW(peekDir())) textWidth/2;
-			ModuleTextEnd: Here;
-
-			m4_ifelse(dirIsVertical(peekDir()), 1, `
-				line left from ModuleTextStart to (ModuleGroupLineJoinStart, ModuleTextStart) then to ModuleGroupLineJoinStart;
-				line right from ModuleTextEnd to (ModuleGroupLineJoinEnd, ModuleTextEnd) then to ModuleGroupLineJoinEnd;
-			', `
-				line up from ModuleTextStart to (ModuleTextStart, ModuleGroupLineJoinStart) then to ModuleGroupLineJoinStart;
-				line down from ModuleTextEnd to (ModuleTextEnd, ModuleGroupLineJoinEnd) then to ModuleGroupLineJoinEnd;
-			')
-		}
-	')
-
-	move to ModuleGroupEnd;
 ')
