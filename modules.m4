@@ -44,84 +44,66 @@ m4_define_blind(`module', `
 		m4_define(`_module_topterms', m4_trim(m4_regexp(_module_terminals, `^\([^|]*\)', `\1')))
 		m4_define(`_module_botterms', m4_trim(m4_regexp(_module_terminals, `|\(.*\)', `\1')))
 
-		m4_errprintl(`module top terms:' _module_topterms)
-		m4_errprintl(`module bot terms:' _module_botterms)
-
-		m4_errprintl(`module num top groups:' m4_nargs(m4_extractargs(_module_topterms)))
-		m4_errprintl(`module num bot groups:' m4_nargs(m4_extractargs(_module_botterms)))
-
 		m4_define(`_module_terminalDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
 
 		Start: Here;
 		move dirToDirection(dirRev(_module_terminalDir)) _module_padding then dirToDirection(peekDir()) (_module_terminalDepth)/2;
 		BoxStartT: Here;
 
-		#m4_pushdef(`_groupCount', 0)
-		#m4_pushdef(`_totalTermCount', 0)
-
-
 		move to Start;
 		m4_define(`_module_numTopGroups', m4_nargs(m4_extractargs(_module_topterms)))
 		m4_forloop(i, 1, _module_numTopGroups, `
 			_moduleParseTerminals(m4_argn(i, m4_extractargs(_module_topterms)), true)
 			GroupEnd: Here;
-			move to LastGroup.LastTerminalBox.c then dirToDirection(_module_terminalDir) (_module_terminalPitch)/2;
-			line dirToDirection(_module_terminalDir) m4_ifelse(i, _module_numTopGroups, (_module_padding)/2, _module_terminalPitch);
-			move to GroupEnd then dirToDirection(_module_terminalDir) \
-				m4_ifelse(i, _module_numTopGroups, (_module_padding)/2, _module_terminalPitch);
+			move to _module_groupRef.LastTerminalBox.c then dirToDirection(_module_terminalDir) (_module_terminalPitch)/2;
+			m4_ifelse(i, _module_numTopGroups, `', `
+				  line dirToDirection(_module_terminalDir) _module_terminalPitch;
+				  move to GroupEnd then dirToDirection(_module_terminalDir) _module_terminalPitch;
+			')
 		')
-		BoxEndT: last line.end;
+		BoxEndLastTermT: Here;
+		move dirToDirection(_module_terminalDir) (_module_padding)/2;
+		BoxEndT: Here;
 
 		move to Start then dirToDirection(peekDir()) _module_height;
 		End: Here;
+		move dirToDirection(dirRev(_module_terminalDir)) _module_padding then dirToDirection(dirRev(peekDir())) (_module_terminalDepth)/2;
+		BoxStartB: Here;
+		move to End;
 		m4_define(`_module_numBotGroups', m4_nargs(m4_extractargs(_module_botterms)))
 		m4_forloop(i, 1, _module_numBotGroups, `
 			_moduleParseTerminals(m4_argn(i, m4_extractargs(_module_botterms)), false)
 			GroupEnd: Here;
-			move to LastGroup.LastTerminalBox.c then dirToDirection(_module_terminalDir) (_module_terminalPitch)/2;
-			line dirToDirection(_module_terminalDir) m4_ifelse(i, _module_numTopGroups, (_module_padding)/2, _module_terminalPitch);
-			move to GroupEnd then dirToDirection(_module_terminalDir) \
-				m4_ifelse(i, _module_numTopGroups, (_module_padding)/2, _module_terminalPitch);
+			move to _module_groupRef.LastTerminalBox.c then dirToDirection(_module_terminalDir) (_module_terminalPitch)/2;
+			m4_ifelse(i, _module_numBotGroups, `', `
+				  line dirToDirection(_module_terminalDir) _module_terminalPitch;
+				  move to GroupEnd then dirToDirection(_module_terminalDir) _module_terminalPitch;
+			')
 		')
-		BoxEndB: last line.end;
-		#m4_define(`_module_topGroupCount', _groupCount)
-		#m4_define(`_module_topTermCount', _totalTermCount)
-		#m4_popdef(`_totalTermCount')
-		#m4_popdef(`_groupCount')
+		BoxEndLastTermB: Here;
+		move dirToDirection(_module_terminalDir) (_module_padding)/2;
+		BoxEndB: Here;
 
-		#move to BoxStart;
-		#move dirToDirection(peekDir()) 2*elen;
+		m4_ifelse(dirIsVertical(peekDir()), 1, `
+			if BoxEndT.x > BoxEndB.x then {
+				BoxEndB: (BoxEndT.x, BoxEndB.y);
+			} else {
+				BoxEndT: (BoxEndB.x, BoxEndT.y);
+			}
+		', `
+			if BoxEndT.y > BoxEndB.y then {
+				BoxEndB: (BoxEndB.x, BoxEndT.y);
+			} else {
+				BoxEndT: (BoxEndT.x, BoxEndB.y);
+			}
+		')
 
-		#m4_pushdef(`_groupCount', 0)
-		#m4_pushdef(`_totalTermCount', 0)
-		#move dirToDirection(dirCCW(peekDir())) elen/8;
-		#_moduleParseTerminals(_module_botterms, -1)
-		#m4_define(`_module_botGroupCount', _groupCount)
-		#m4_define(`_module_botTermCount', _totalTermCount)
-		#m4_popdef(`_totalTermCount')
-		#m4_popdef(`_groupCount')
+		move to Start then dirToDirection(peekDir()) (_module_terminalDepth)/2 then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
+		line to BoxStartT \
+			then dirToDirection(peekDir()) _module_height - _module_terminalDepth \
+			then dirToDirection(_module_terminalDir) (_module_padding)/2;
+		line from BoxEndLastTermT to BoxEndT then to BoxEndB then to BoxEndLastTermB;
 
-		#m4_define(`_module_topWidth', m4_eval(_module_topGroupCount + _module_topTermCount*2))
-		#m4_define(`_module_botWidth', m4_eval(_module_botGroupCount + _module_botTermCount*2))
-		#m4_define(`_module_greatestWidth', `m4_ifelse(
-		#	m4_eval(_module_topWidth > _module_botWidth), 1, _module_topWidth, _module_botWidth)')
-
-		#m4_ifelse(dirIsVertical(peekDir()), 1, `
-		#	m4_define(`_module_width', elen*_module_greatestWidth/4 + elen/4)
-		#', `
-		#	m4_define(`_module_height', elen*_module_greatestWidth/4 + elen/4)
-		#')
-
-		#box wid _module_width ht _module_height with \
-		#	m4_ifelse(m4_trim(peekDir()),
-		#		dirDown,  `.nw', 
-		#		dirRight, `.nw',
-		#		dirUp,    `.sw',
-		#		dirLeft,  `.ne') at BoxStart;
-
-		circle rad 0.25 color "green" at Start;
-		circle rad 0.25 color "blue" at BoxStartT;
-		circle rad 0.25 color "purple" at BoxEndT;
 		popDir();
 	] with .Start at _module_pos;
 
@@ -129,35 +111,6 @@ m4_define_blind(`module', `
 	componentWriteBOM(_module_, true)
 ')
 m4_define_blind(`_moduleParseTerminals', `
-	m4_ifelse(`
-		#m4_pushdef(`_regex', `^ *\(\w[^(]*\)? *\(([^)]*)\)')
-		#m4_pushdef(`_index', m4_regexp($1, _regex))
-		#m4_ifelse(_index, -1, `', `
-		#	m4_regexp($1, _regex, `
-		#		m4_pushdef(`_whole', \&)
-		#		m4_pushdef(`_group', \1)
-		#		m4_pushdef(`_terms', \2)
-		#	')
-
-		#	m4_define(`_groupCount', m4_eval(_groupCount + 1))
-
-		#	m4_pushdef(`_termCount', 0)
-		#	_moduleDrawGroup(_group, _terms, $2)
-		#	m4_define(`_totalTermCount', m4_eval(_totalTermCount + _termCount))
-		#	m4_popdef(`_termCount')
-
-		#	m4_popdef(`_terms')
-		#	m4_popdef(`_group')
-
-		#	_moduleParseTerminals(m4_substr($1, m4_eval(_index + m4_len(_whole))), $2)
-		#	m4_popdef(`_whole')
-		#')
-		#m4_popdef(`_index')
-		#m4_popdef(`_regex')
-	')
-
-	m4_errprintl(`module parse:' $1)
-
 	m4_regexp($1, `^\([^()]*\)\(.*\)', `
 		m4_define(`_module_groupName', \1)
 		m4_define(`_module_groupTerms', \2)
@@ -169,10 +122,14 @@ m4_define_blind(`_moduleParseTerminals', `
 			m4_ifelse($2, true, `ljust', `rjust')))
 
 	m4_define(`_module_numGroupTerms', m4_nargs(m4_extractargs(_module_groupTerms)))
-	m4_errprintl(`group name:' _module_groupName)
+	m4_errprintl(`group name: "'_module_groupName`"')
 	m4_errprintl(`group terms:' _module_groupTerms)
 	m4_errprintl(`num group terms:' _module_numGroupTerms)
-	LastGroup: [
+
+	m4_define(`_module_groupRef', m4_ifelse(_module_groupName, `', `LastGroup', m4_patsubst(_module_groupName, `[^A-Za-z0-9]', `_')))
+	m4_ifelse(m4_regexp(_module_groupRef, `^[A-Z]'), -1, `m4_define(`_module_groupRef', `G'_module_groupRef)')
+
+	_module_groupRef: [
 		Start: Here;
 
 		# expand bounding box at start to make it symmetrical
@@ -186,33 +143,35 @@ m4_define_blind(`_moduleParseTerminals', `
 	] with .Start at Here;
 
 	# bounding box for group
-	box invis wid LastGroup.wid ht LastGroup.ht with .c at LastGroup.c;
+	box invis wid _module_groupRef.wid ht _module_groupRef.ht with .c at _module_groupRef.c;
 
 	move to last box m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
 				   m4_ifelse($2, true, `.s then down', `.n then up'), m4_dnl
 				   m4_ifelse($2, true, `.e then right', `.w then left')) elen/8;
-	ModuleGroupTextRef: Here;
-	"textModuleTerminalLabel(_module_groupName)" at ModuleGroupTextRef;
-	textWidth = textModuleTerminalLabelLength((_module_groupName));
-	if textWidth < distanceBetweenPoints(LastGroup.OuterStart, LastGroup.End) - 2*(_module_terminalPitch)*5/8 then {
-		move to ModuleGroupTextRef then dirToDirection(dirCW(peekDir())) textWidth/2;
-		ModuleTextStart: Here;
-		move to ModuleGroupTextRef then dirToDirection(dirCCW(peekDir())) textWidth/2;
-		ModuleTextEnd: Here;
+	m4_ifelse(_module_groupName, `', `', `
+		ModuleGroupTextRef: Here;
+		"textModuleTerminalLabel(_module_groupName)" at ModuleGroupTextRef;
+		textWidth = textModuleTerminalLabelLength((_module_groupName));
+		if textWidth < distanceBetweenPoints(_module_groupRef.OuterStart, _module_groupRef.End) - 2*(_module_terminalPitch)*5/8 then {
+			move to ModuleGroupTextRef then dirToDirection(dirCW(peekDir())) textWidth/2;
+			ModuleTextStart: Here;
+			move to ModuleGroupTextRef then dirToDirection(dirCCW(peekDir())) textWidth/2;
+			ModuleTextEnd: Here;
 
-		groupLineLen = (last box m4_ifelse(dirIsVertical(peekDir()), 1, .wid, .ht) - \
-			distanceBetweenPoints(ModuleTextStart, ModuleTextEnd)) / 2 - (_module_terminalPitch)*5/8;
-		
-		m4_define(`_module_groupLineFlickDir', m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
-			m4_ifelse($2, true, dirUp, dirDown), m4_ifelse($2, true, dirLeft, dirRight)))
+			groupLineLen = (last box m4_ifelse(dirIsVertical(peekDir()), 1, .wid, .ht) - \
+				distanceBetweenPoints(ModuleTextStart, ModuleTextEnd)) / 2 - (_module_terminalPitch)*5/8;
+			
+			m4_define(`_module_groupLineFlickDir', m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
+				m4_ifelse($2, true, dirUp, dirDown), m4_ifelse($2, true, dirLeft, dirRight)))
 
-		line from ModuleTextStart dirToDirection(dirRev(_module_terminalDir)) groupLineLen then \
-			dirToDirection(_module_groupLineFlickDir) elen/16;
-		line from ModuleTextEnd dirToDirection(_module_terminalDir) groupLineLen then \
-			dirToDirection(_module_groupLineFlickDir) elen/16;
-	}
+			line from ModuleTextStart dirToDirection(dirRev(_module_terminalDir)) groupLineLen then \
+				dirToDirection(_module_groupLineFlickDir) elen/16;
+			line from ModuleTextEnd dirToDirection(_module_terminalDir) groupLineLen then \
+				dirToDirection(_module_groupLineFlickDir) elen/16;
+		}
+	')
 
-	move to LastGroup.End;
+	move to _module_groupRef.End;
 
 	m4_errprintl()
 ')
@@ -254,6 +213,10 @@ m4_define_blind(`_moduleDrawTerm', `
 	move to LastTerminal then dirToDirection(_module_terminalDir) _module_terminalPitch;
 	m4_errprintl(`term text:' _module_termText)
 	m4_errprintl(`extra text:' _module_termDesc)
+
+	m4_define(`_module_termRef', m4_patsubst(_module_termText, `[^A-Za-z0-9]', `_'))
+	m4_ifelse(m4_regexp(_module_termRef, `^[A-Z]'), -1, `m4_define(`_module_termRef', `T'_module_termRef)')
+	_module_termRef: LastTerminal;
 ')
 
 m4_define_blind(`_moduleDrawGroup', `
