@@ -343,6 +343,7 @@ Params:
 	ref:		reference to display for the wire, will be prefixed with sheet num if this is enabled
 	val:		value text to display
 	description:	description text
+	part:		part number, will be added to BOM if provided
 	labelPos:	position of labelling, one of "start", "mid", "end" (defaults to "mid")
 '
 m4_define_blind(`bus', `
@@ -391,6 +392,9 @@ m4_define_blind(`bus', `
 
 	m4_popdef(`labelDir')
 	m4_popdef(`haveLabelInfo')
+
+	m4_define(`_bus_pos', Bus___LabelC);
+	componentWriteBOM(_bus_)
 
 	move to Bus___CurrPos;
 ')
@@ -453,7 +457,7 @@ m4_define_blind(`_busParseSegment', `
 
 
 `
-Wire cross-reference, writes out to aux file. Automatically moves down/right for next wire ref depending on direction.
+Wire cross-reference, shows label and writes out to aux file. Automatically moves down/right for next wire ref depending on direction.
 
 Usage: wireRef(name, pos)
 Params:
@@ -485,7 +489,7 @@ m4_define_blind(`wireRef', `
 	')
 	m4_ifelse(haveRef, 0, `
 		m4_errprintl(`warning: no ref found for' $1 `, may need to recompile')
-		"textWireLabel(/?.?)" _wireRefTextAlignment() at pos;
+		"m4_ifelse(dirIsVertical(getDir()), 1, `textRotated(textWireLabel(/?.?))', `textWireLabel(/?.?)')" _wireRefTextAlignment() at pos;
 	')
 	pushDir()
 	move to pos then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
