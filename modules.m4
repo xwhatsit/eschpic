@@ -181,16 +181,25 @@ m4_define_blind(`_moduleDrawTerm', `
 		m4_define(`_module_termText', \1)
 		m4_define(`_module_termDesc', \2)
 	')
+	m4_errprintl(`term text:' _module_termText)
+	m4_errprintl(`extra text:' _module_termDesc)
+
+	# handle spacers
+	m4_define(`_module_spacerCount', 1)
+	m4_regexp(m4_trim(_module_termText), `^_\([0-9]+\)_$', `m4_define(`_module_spacerCount', \1) m4_define(`_module_termText', `')')
+	m4_errprintl(`spacer count:' _module_spacerCount)
 
 	m4_define(`_module_termBoxDims', m4_dnl
-		m4_ifelse(dirIsVertical(peekDir()), 1, wid _module_terminalPitch ht elen/4, wid elen/4 ht _module_terminalPitch))
+		m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
+			wid _module_terminalPitch ht _module_terminalDepth, m4_dnl
+			wid _module_terminalDepth ht _module_terminalPitch))
 	m4_define(`_module_terminalBoxRef', m4_dnl
 		m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse($2, true, `.n', `.s'), m4_ifelse($2, true, `.w', `.e')))
 
 	m4_ifelse(m4_eval(m4_len(_module_termText) == 0 && m4_len(_module_termDesc) == 0), 1, `
-		box _module_termBoxDims invis with _module_terminalBoxRef at Here;
+		box _module_termBoxDims dashed outline "green" with _module_terminalBoxRef at Here;
 		move to last box.c then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
-		line dirToDirection(_module_terminalDir) _module_terminalPitch;
+		line dirToDirection(_module_terminalDir) (_module_terminalPitch)*_module_spacerCount;
 	', `
 		m4_ifelse(_module_termDesc, `', `', `m4_define(`_module_termDesc', m4_trim(m4_extractargs(_module_termDesc)))')
 
@@ -210,9 +219,7 @@ m4_define_blind(`_moduleDrawTerm', `
 			wid _module_terminalPitch ht _module_termDescLen, m4_dnl
 			wid _module_termDescLen ht _module_terminalPitch) with _module_terminalBoxRef at LastTerminalInside;
 	')
-	move to LastTerminal then dirToDirection(_module_terminalDir) _module_terminalPitch;
-	m4_errprintl(`term text:' _module_termText)
-	m4_errprintl(`extra text:' _module_termDesc)
+	move to LastTerminal then dirToDirection(_module_terminalDir) (_module_terminalPitch)*_module_spacerCount;
 
 	m4_define(`_module_termRef', m4_patsubst(_module_termText, `[^A-Za-z0-9]', `_'))
 	m4_ifelse(m4_regexp(_module_termRef, `^[A-Z]'), -1, `m4_define(`_module_termRef', `T'_module_termRef)')
