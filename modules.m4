@@ -2,6 +2,10 @@
 General "module" symbol, with custom terminals and labels. Will draw either vertically or horizontally
 depending on current direction.
 
+Location references are defined in syntax .Group.Terminal. If the group or terminal name starts with a capital letter (i.e. is valid pic reference), then
+the name is used directly. (e.g. Module.X1.L1). Otherwise, it is prefixed with G for groups or T for terminals (e.g. group 1A becomes Module.G1A, terminal 13
+becomes Module.X1.T13 etc.). Invalid pic reference label characters are changed to underscores (e.g. group "X1 - Power Supply" becomes "X1___Power_Supply").
+
 Usage: module([key-value separated parameters])
 Params:
 	pos:		Position to place first terminal at. Defaults to "Here".
@@ -11,9 +15,10 @@ Params:
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	terminals:	Description of the module's terminals, in the syntax:
-			"[Groupname](T1, T2, T3, T4) [[Groupname](T1, T2, T3, T4)... | [Groupname](T1, T2, T3, T4)]".
-			The "|" symbol splits the module into top and bottom (or left and right). Group name is
-			optional. Example: "X1(L1, L2, L3, PE) X13(DIO0, DIO1, DIO02, DCOM, VO24, DGND) | X2(U, V, W, PE)".
+			"([Groupname](T1(desc), T2, T3, T4), [[Groupname](T1, T2, T3, T4)...) | ([Groupname](T1, T2, T3, T4)])".
+			The "|" symbol splits the module into top and bottom (or left and right). Spacer elements can either be blank terminals, or can use the syntax
+			"_N_", where N is an integer specifying how many terminals to skip. Group name is optional.
+			Example: "( X1(L1(Phase 1), L2(Phase 2), L3(Phase 3), PE(Protective Earth)) X13(DIO0, DIO1, _3_, DIO02, DCOM, VO24, DGND) ) | (X2(U, V, W, PE))".
 	height:		Height of module (if in vertical orientation). Defaults to "elen * 2" if currently vertical,
 			otherwise is automatically calculated.
 	width:		Width of module (if in horizontal orientation). Defaults to "elen * 2" if currently horizontal,
