@@ -46,8 +46,6 @@ m4_define_blind(`module', `
 		pushDir();
 		dirToDirection(peekDir());
 
-		m4_errprintl(`terminals: "'_module_terminals`"')
-
 		m4_define(`_module_topterms', m4_trim(m4_substr(_module_terminals, 0, m4_index(_module_terminals, `|'))))
 		m4_define(`_module_botterms', m4_trim(m4_substr(_module_terminals, m4_eval(m4_index(_module_terminals, `|') + 1))))
 
