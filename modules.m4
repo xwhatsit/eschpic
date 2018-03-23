@@ -193,9 +193,14 @@ m4_define_blind(`_moduleDrawTerm', `
 		m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse($2, true, `.n', `.s'), m4_ifelse($2, true, `.w', `.e')))
 
 	m4_ifelse(m4_eval(m4_len(_module_termText) == 0 && m4_len(_module_termDesc) == 0), 1, `
-		box _module_termBoxDims invis with _module_terminalBoxRef at Here;
-		move to last box.c then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
-		line dirToDirection(_module_terminalDir) (_module_terminalPitch)*_module_spacerCount;
+		m4_forloop(spacerN, 1, _module_spacerCount, `
+			box _module_termBoxDims invis with _module_terminalBoxRef at Here;
+			move to last box.c then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
+			line dirToDirection(_module_terminalDir) _module_terminalPitch;
+			m4_ifelse(spacerN, _module_spacerCount, `', `
+				move to last box`'_module_terminalBoxRef then dirToDirection(_module_terminalDir) _module_terminalPitch;
+			')
+		')
 	', `
 		m4_ifelse(_module_termDesc, `', `', `m4_define(`_module_termDesc', m4_trim(m4_extractargs(_module_termDesc)))')
 
@@ -215,7 +220,7 @@ m4_define_blind(`_moduleDrawTerm', `
 			wid _module_terminalPitch ht _module_termDescLen, m4_dnl
 			wid _module_termDescLen ht _module_terminalPitch) with _module_terminalBoxRef at LastTerminalInside;
 	')
-	move to LastTerminal then dirToDirection(_module_terminalDir) (_module_terminalPitch)*_module_spacerCount;
+	move to LastTerminal then dirToDirection(_module_terminalDir) _module_terminalPitch;
 
 	m4_define(`_module_termRef', m4_patsubst(_module_termText, `[^A-Za-z0-9]', `_'))
 	m4_ifelse(m4_regexp(_module_termRef, `^[A-Z]'), -1, `m4_define(`_module_termRef', `T'_module_termRef)')
