@@ -352,6 +352,7 @@ m4_define_blind(`bus', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `part', `',
 		 `labelPos', `mid'), $@)
 	
 	m4_ifelse(_bus_path, `', `
