@@ -72,3 +72,85 @@ m4_define_blind(`sensor', `
 	componentDrawLabels(_sensor_)
 	componentWriteBOM(_sensor_)
 ')
+
+
+`
+Resolver symbol.
+
+Usage: resolver([key-value separated parameters])
+Params:
+	pos:		Position to place first terminal at. Defaults to "Here".
+	ref:		Component reference name.
+	val:		Component value.
+	description:	Component description.
+	part:		Part number.
+	labels:		Terminal labels, in format (1st, 2nd...). Defaults to (R1, R2, S1, S3, S2, S4).
+'
+m4_define_blind(`resolver', `
+	componentParseKVArgs(`_resolver_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `type', `',
+		 `labels', `(R1, R2, S1, S3, S2, S4)'), $@)
+
+	componentHandleRef(_resolver_)
+	[
+		pushDir();
+
+		m4_define(`_resolver_termDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
+		m4_define(`_resolver_termCount', m4_nargs(m4_extractargs(_resolver_labels)))
+
+		Start: Here;
+
+		m4_forloop(i, 1, _resolver_termCount, `
+			N`'i: Here;
+			m4_define(`_resolver_currLabel', m4_argn(i, m4_extractargs(_resolver_labels)))
+			m4_ifelse(m4_regexp(_resolver_currLabel, `[A-Za-z0-9]*$'), 0, `T'_resolver_currLabel: Here);
+			line dirToDirection(peekDir()) elen/4;
+			componentDrawTerminalLabel(N`'i, _resolver_currLabel)
+			move to N`'i then dirToDirection(_resolver_termDir) elen/2;
+		')
+
+		move to Start then dirToDirection(dirRev(_resolver_termDir)) elen/4 then dirToDirection(peekDir()) elen/4;
+		BoxCorner: Here;
+		
+		m4_define(`_resolver_boxLen', `(elen/2 * _resolver_termCount)')
+		m4_define(`_resolver_boxRef', m4_ifelse(m4_eval(peekDir() == dirUp),    1, `.sw',
+							m4_eval(peekDir() == dirDown),  1, `.nw',
+							m4_eval(peekDir() == dirLeft),  1, `.ne',
+							m4_eval(peekDir() == dirRight), 1, `.nw'))
+		box m4_ifelse(dirIsVertical(peekDir()), 1, `wid _resolver_boxLen ht elen*7/8', `wid elen*7/8 ht _resolver_boxLen') with _resolver_boxRef at BoxCorner;
+
+		circle rad elen*5/16 at last box.c;
+		CC: last circle.c;
+		move to CC then left elen*7/32;
+
+		spacing = elen*3/32;
+		amplitude = elen*3/16;
+
+		AC1: Here + (0, 0);
+		AC2: AC1 + (spacing*1, amplitude);
+		AC3: AC1 + (spacing*2, 0);
+		AC4: AC1 + (spacing*3, -amplitude);
+		AC5: AC1 + (spacing*4, 0);
+		spline from AC1 to AC2 to AC3 to AC4 to AC5;
+
+		AC1: AC1 + (spacing*1, 0);
+		AC2: AC1 + (spacing*1, amplitude);
+		AC3: AC1 + (spacing*2, 0);
+		AC4: AC1 + (spacing*3, -amplitude);
+		AC5: AC1 + (spacing*4, 0);
+		spline from AC1 to AC2 to AC3 to AC4 to AC5;
+
+
+		popDir();
+	] with .Start at _resolver_pos;
+
+	componentDrawLabels(_resolver_)
+	componentWriteBOM(_resolver_)
+
+	move to last [].Start;
+')
