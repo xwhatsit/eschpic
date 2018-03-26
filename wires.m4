@@ -465,9 +465,10 @@ m4_define_blind(`_busParseSegment', `
 
 
 `
-Wire cross-reference, shows label and writes out to aux file. Automatically moves down/right for next wire ref depending on direction.
+Wire cross-reference, shows label (and optional description) and writes out to aux file. Automatically moves down/right for
+next wire ref depending on direction.
 
-Usage: wireRef(name, pos)
+Usage: wireRef(name, [pos, description])
 Params:
 	name:		Internal name used to refer to reference.
 	pos:		Position to place reference at. Defaults to "Here".
@@ -491,13 +492,13 @@ m4_define_blind(`wireRef', `
 		m4_forloop(`searchID', 0, m4_defn(`_wireRef_$1.last'), `
 			m4_ifelse(m4_eval(searchID != currID && haveRef != 1), 1, `
 				m4_define(`haveRef', 1)
-				_wireRefDrawText($1, currID, searchID, pos)
+				_wireRefDrawText($1, currID, searchID, $3)
 			')
 		')
 	')
 	m4_ifelse(haveRef, 0, `
 		m4_errprintl(`warning: no ref found for' $1 `, may need to recompile')
-		"m4_ifelse(dirIsVertical(getDir()), 1, `textRotated(textWireLabel(/?.?))', `textWireLabel(/?.?)')" _wireRefTextAlignment() at pos;
+		_wireRefDraw(`/?.?', $3)
 	')
 	pushDir()
 	move to pos then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
@@ -512,13 +513,13 @@ m4_define_blind(`wireRef', `
 `
 Support macro to draw rotated/shifted wire reference.
 
-Usage: _wireRefDrawText(label, currID, referencedID, pos)
+Usage: _wireRefDrawText(label, currID, referencedID, description)
 '
 m4_define_blind(`_wireRefDrawText', `
 	m4_pushdef(`text', _wireRefText($1, $3))
 	m4_pushdef(`visibleText', m4_ifelse(dirIsVertical(getDir()), 1, `\rotatebox{90}{textWireLabel(text)}', `textWireLabel(text)'))
 
-	"\hypertarget{$1:$2}{\hyperlink{$1:$3}{visibleText}}" _wireRefTextAlignment() at pos;
+	_wireRefDraw(`\hypertarget{$1:$2}{\hyperlink{$1:$3}{visibleText}}', $4)
 
 	m4_popdef(`visibleText')
 	m4_popdef(`text')
@@ -529,6 +530,18 @@ m4_define_blind(`_wireRefDrawText', `
 Support macro to calculate text alignment for wire reference. Uses current dir.
 '
 m4_define_blind(`_wireRefTextAlignment', `m4_ifelse(getDir(), dirUp, `above', getDir(), dirDown, `below', getDir(), dirLeft,  `rjust', getDir(), dirRight, `ljust')')
+
+`
+Support macro to draw wire ref text in correct orientation. Uses current dir.
+Usage: _wireRefDraw(label, [description])
+'
+m4_define_blind(`_wireRefDraw', `
+	m4_ifelse(getDir(), dirDown,  `"textRotated(m4_ifelse($2, `', `', `textComponentDescription($2) -- ')textWireLabel($1))" _wireRefTextAlignment() at pos;',
+		  getDir(), dirUp,    `"textRotated(textWireLabel($1)m4_ifelse($2, `', `', ` -- textComponentDescription($2)'))" _wireRefTextAlignment() at pos;',
+		  getDir(), dirLeft,  `"textComponentDescription($2) textWireLabel($1)" _wireRefTextAlignment() at pos;',
+		  getDir(), dirRight, `"textWireLabel($1) textComponentDescription($2)" _wireRefTextAlignment() at pos;'
+	)
+')
 
 
 `
