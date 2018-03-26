@@ -261,13 +261,15 @@ Params:
 	type:		Either "entry" or "exit".
 	count:		Number of wires. If not specified, figures this out from the "labels" parameter.
 	labels:		Labels for each wire, in form "(L1, L2, L3, PE)".
+	screened:	Either "true" or "false" (default).
 '
 m4_define_blind(`busFan', `
 	componentParseKVArgs(`_busFan_',
 		(`pos', `Here',
 		 `type', `',
 		 `count', `',
-		 `labels', `'), $@)
+		 `labels', `',
+		 `screened', `false'), $@)
 	
 	m4_ifelse(_busFan_count, `', `m4_define(`_busFan_count', m4_nargs(m4_extractargs(_busFan_labels)))')
 	m4_ifelse(_busFan_count, 0, `
@@ -320,6 +322,11 @@ m4_define_blind(`busFan', `
 
 			move to last spline.start;
 			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+		')
+
+		m4_ifelse(_busFan_screened, `true', `
+			Screen: ellipse dashed elen/18 m4_ifelse(dirIsVertical(peekDir()), 1, `wid elen/2 ht elen/6', `wid elen/6 ht elen/2') \
+				at 5/8 between C and B;
 		')
 
 		m4_popdef(`wireDir')
