@@ -50,6 +50,9 @@ m4_define_blind(`module', `
 		m4_define(`_module_topterms', m4_trim(m4_substr(_module_terminals, 0, m4_index(_module_terminals, `|'))))
 		m4_define(`_module_botterms', m4_trim(m4_substr(_module_terminals, m4_eval(m4_index(_module_terminals, `|') + 1))))
 
+		m4_ifelse(_module_topterms, `', `m4_define(`_module_topterms', `(())')')
+		m4_ifelse(_module_botterms, `', `m4_define(`_module_botterms', `(())')')
+
 		m4_define(`_module_terminalDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
 
 		Start: Here;
