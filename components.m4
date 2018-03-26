@@ -170,6 +170,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
+	type:		Resistor type. Only "thermistor" supported for now. Defaults to blank.
 '
 m4_define_blind(`resistor', `
 	componentParseKVArgs(`_resistor_',
@@ -177,7 +178,8 @@ m4_define_blind(`resistor', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
-		 `part', `'), $@)
+		 `part', `',
+		 `type', `'), $@)
 	componentHandleRef(_resistor_)
 	[
 		pushDir();
@@ -193,6 +195,17 @@ m4_define_blind(`resistor', `
 
 		line dirToDirection(peekDir()) elen/4;
 		End: last line.end;
+
+		m4_ifelse(_resistor_type, `thermistor', `
+			C: 1/2 between Start and End;
+			Th1: C + (elen*5/32, elen*5/32);
+			Th2: C - (elen*5/32, elen*5/32);
+			m4_ifelse(dirIsVertical(peekDir()), 1, `
+				line from Th1 to Th2 then to Th2 - (elen/16, 0);
+			', `
+				line from Th2 to Th1 then to Th1 + (0, elen/16);
+			')
+		')
 
 		popDir();
 	] with .Start at _resistor_pos;
