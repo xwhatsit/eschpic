@@ -595,8 +595,10 @@ m4_define_blind(`contactCO', `
 
 		line from NC to NCCorner to NCJoin;
 
-		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T13") (already present for NO contact)
+		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".T13")
+		m4_ifelse(_contactCO_fullCMLabel, `', `', `T'_contactCO_fullCMLabel`: CM')
 		m4_ifelse(_contactCO_fullNCLabel, `', `', `T'_contactCO_fullNCLabel`: NC')
+		m4_ifelse(_contactCO_fullNOLabel, `', `', `T'_contactCO_fullNOLabel`: NO')
 
 		popDir();
 	] with .Start at _contactCO_pos;
