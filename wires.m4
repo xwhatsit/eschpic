@@ -492,7 +492,7 @@ m4_define_blind(`wireRef', `
 		m4_forloop(`searchID', 0, m4_defn(`_wireRef_$1.last'), `
 			m4_ifelse(m4_eval(searchID != currID && haveRef != 1), 1, `
 				m4_define(`haveRef', 1)
-				_wireRefDrawText($1, currID, searchID, $3)
+				_wireRefDraw(`\hypertarget{$1:'currID`}{\hyperlink{$1:'searchID`}{_wireRefText($1, 'searchID`)}}', $3)
 			')
 		')
 	')
@@ -507,22 +507,6 @@ m4_define_blind(`wireRef', `
 
 	m4_popdef(`currID')
 	m4_popdef(`pos')
-')
-
-
-`
-Support macro to draw rotated/shifted wire reference.
-
-Usage: _wireRefDrawText(label, currID, referencedID, description)
-'
-m4_define_blind(`_wireRefDrawText', `
-	m4_pushdef(`text', _wireRefText($1, $3))
-	m4_pushdef(`visibleText', m4_ifelse(dirIsVertical(getDir()), 1, `\rotatebox{90}{textWireLabel(text)}', `textWireLabel(text)'))
-
-	_wireRefDraw(`\hypertarget{$1:$2}{\hyperlink{$1:$3}{visibleText}}', $4)
-
-	m4_popdef(`visibleText')
-	m4_popdef(`text')
 ')
 
 
