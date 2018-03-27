@@ -142,10 +142,10 @@ m4_define_blind(`componentWriteBOM', `
 `
 Allows manually writing out BOM entry to aux file
 
-Usage: componentWriteBOM(ref, val, description, part)
+Usage: componentWriteBOM(ref, val, description, part, [sheet])
 '
 m4_define_blind(`bomEntry', `
-	print "`_componentBOMEntry'($1,,$2,$3,$4,,,)" >> "eschpic.aux";
+	print "`_componentBOMEntry'($1,,$2,$3,$4,m4_ifelse(m4_eval($# < 5), 1, a3SheetNum, $5),,)" >> "eschpic.aux";
 ')
 
 
@@ -155,7 +155,20 @@ Support macro writing out BOM entries when triggered from aux file
 Usage: _componentBOMEntry(ref, id, val, description, part, sheet, hpos, vpos)
 '
 m4_define_blind(`_componentBOMEntry', `
-	m4_ifelse($5, `', `', `print "$1,$3,$4,$6.$7`'a3VPosLetter($8),$5,$1_$2" >> "bom.csv"')
+	m4_ifelse($5, `', `', `
+		m4_ifelse(m4_eval(m4_len($7) == 0 && m4_len($8) == 0), 1, `
+			m4_pushdef(`target', sheet_$6)
+			m4_pushdef(`location', $6)
+		', `
+			m4_pushdef(`target', $1_$2)
+			m4_pushdef(`location', $6.$7`'a3VPosLetter($8))
+		')
+
+		print "$1,$3,$4,location,$5,target" >> "bom.csv"
+
+		m4_popdef(`location')
+		m4_popdef(`target')
+	')
 ')
 
 

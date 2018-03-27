@@ -262,6 +262,8 @@ m4_undivert(8)
                 `"'_a3_ref`"' at Ref;
                 `"'_a3_rev`"' at Rev;
                 `"\Huge '_a3_sheet`"' at SheetNum;
+
+		"\hypertarget{`sheet_'_a3_sheet}{}" at Inside.c;
         ] with .Inside.sw at 0,0;
 ')
 
