@@ -93,7 +93,6 @@ m4_define_blind(`resolver', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
-		 `type', `',
 		 `labels', `(R1, R2, S1, S3, S2, S4)'), $@)
 
 	componentHandleRef(_resolver_)
@@ -151,6 +150,91 @@ m4_define_blind(`resolver', `
 
 	componentDrawLabels(_resolver_)
 	componentWriteBOM(_resolver_)
+
+	move to last [].Start;
+')
+
+
+`
+Encoder symbol.
+
+Usage: encoder([key-value separated parameters])
+Params:
+	pos:		Position to place first terminal at. Defaults to "Here".
+	ref:		Component reference name.
+	val:		Component value.
+	description:	Component description.
+	part:		Part number.
+	labels:		Terminal labels, in format (1st, 2nd...). Defaults to (V+, V-, A, B).
+'
+m4_define_blind(`encoder', `
+	componentParseKVArgs(`_encoder_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `type', `',
+		 `labels', `(V+, V-, A, B)'), $@)
+
+	componentHandleRef(_encoder_)
+	[
+		pushDir();
+
+		m4_define(`_encoder_termDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
+		m4_define(`_encoder_termCount', m4_nargs(m4_extractargs(_encoder_labels)))
+
+		Start: Here;
+
+		m4_forloop(i, 1, _encoder_termCount, `
+			N`'i: Here;
+			m4_define(`_encoder_currLabel', m4_argn(i, m4_extractargs(_encoder_labels)))
+			m4_ifelse(m4_regexp(_encoder_currLabel, `[A-Za-z0-9]*$'), 0, `T'_encoder_currLabel: Here);
+			line dirToDirection(peekDir()) elen/4;
+			componentDrawTerminalLabel(N`'i, _encoder_currLabel)
+			move to N`'i then dirToDirection(_encoder_termDir) elen/2;
+		')
+
+		move to Start then dirToDirection(dirRev(_encoder_termDir)) elen/4 then dirToDirection(peekDir()) elen/4;
+		BoxCorner: Here;
+		
+		m4_define(`_encoder_boxLen', `(elen/2 * _encoder_termCount)')
+		m4_define(`_encoder_boxRef', m4_ifelse(m4_eval(peekDir() == dirUp),    1, `.sw',
+							m4_eval(peekDir() == dirDown),  1, `.nw',
+							m4_eval(peekDir() == dirLeft),  1, `.ne',
+							m4_eval(peekDir() == dirRight), 1, `.nw'))
+		box m4_ifelse(dirIsVertical(peekDir()), 1, `wid _encoder_boxLen ht elen*7/8', `wid elen*7/8 ht _encoder_boxLen') with _encoder_boxRef at BoxCorner;
+
+		circle rad elen*5/16 at last box.c;
+		CC: last circle.c;
+		move to CC then left elen*7/32;
+
+		spacing = elen*1/8;
+		amplitude = elen*1/8;
+
+		SW1: Here + (0, 0);
+		SW2: SW1 + (0, amplitude);
+		SW3: SW1 + (spacing*1, amplitude);
+		SW4: SW1 + (spacing*1, 0);
+		SW5: SW1 + (spacing*2, 0);
+		SW6: SW1 + (spacing*2, amplitude);
+		SW7: SW1 + (spacing*3, amplitude);
+		line from SW1 to SW2 to SW3 to SW4 to SW5 to SW6 to SW7;
+
+		SW1: SW1 + (spacing/2, -(amplitude + elen/32));
+		SW2: SW1 + (0, amplitude);
+		SW3: SW1 + (spacing*1, amplitude);
+		SW4: SW1 + (spacing*1, 0);
+		SW5: SW1 + (spacing*2, 0);
+		SW6: SW1 + (spacing*2, amplitude);
+		SW7: SW1 + (spacing*3, amplitude);
+		line from SW1 to SW2 to SW3 to SW4 to SW5 to SW6 to SW7;
+
+		popDir();
+	] with .Start at _encoder_pos;
+
+	componentDrawLabels(_encoder_)
+	componentWriteBOM(_encoder_)
 
 	move to last [].Start;
 ')
