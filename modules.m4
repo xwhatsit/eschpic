@@ -27,6 +27,7 @@ Params:
 	padding:	Padding of box along terminal axis. Defaults to elen/2.
 	terminalPitch:	Spacing of terminals. Defaults to elen/2.
 	terminalDepth:	Depth of terminal boxes. Defaults to elen/4.
+	internalLabels: Whether or not to place ref/val/description labels inside module box. Either true (default) or false.
 '
 m4_define_blind(`module', `
 	componentParseKVArgs(`_module_',
@@ -40,7 +41,8 @@ m4_define_blind(`module', `
 		 `width', `2 * elen',
 		 `padding', `elen/2',
 		 `terminalPitch', `elen/2',
-		 `terminalDepth', `elen/4'), $@)
+		 `terminalDepth', `elen/4',
+		 `internalLabels', `true'), $@)
 	componentHandleRef(_module_)
 
 	[
@@ -116,8 +118,8 @@ m4_define_blind(`module', `
 		popDir();
 	] with .Start at _module_pos;
 
-	componentDrawLabels(_module_, true)
-	componentWriteBOM(_module_, true)
+	componentDrawLabels(_module_, _module_internalLabels)
+	componentWriteBOM(_module_)
 ')
 m4_define_blind(`_moduleParseTerminals', `
 	m4_regexp($1, `^\([^()]*\)\(.*\)', `

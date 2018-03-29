@@ -52,6 +52,7 @@ m4_include(components.m4)
 m4_include(contacts.m4)
 m4_include(connectors.m4)
 m4_include(modules.m4)
+m4_include(psu.m4)
 m4_include(sensors.m4)
 m4_include(wires.m4)
 
