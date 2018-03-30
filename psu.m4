@@ -50,7 +50,7 @@ m4_define_blind(`psu', `
 	m4_ifelse(_psu_inputType, `ac', `
 		"textComponentDescription($\sim$)" at InputC;
 	', _psu_inputType, `dc', `
-		move to InputC then left elen*5/32;
+		move to InputC then left elen*5/64 then up elen/16;
 		line right elen*15/64;
 		move from last line.c down elen/16 then left elen*15/128;
 		line dashed elen*3/64 right elen*15/64;
@@ -64,5 +64,4 @@ m4_define_blind(`psu', `
 		move from last line.c down elen/16 then left elen*15/128;
 		line dashed elen*3/64 right elen*15/64;
 	')
-
 ')
