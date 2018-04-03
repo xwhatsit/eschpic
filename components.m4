@@ -895,10 +895,11 @@ Params:
 	ref:		Component reference name.
 	val:		Component value.
 	description:	Additional text describing component purpose etc.
+	refPos:		Position of component ref/val/description labelling. Either "default" for standard positioning, or "underneath".
 	part:		Part number. If this is supplied, it is added to BOM.
 	phase:		Either 2 or 3 (default), meaning 2-phase or 3-phase.
 	type:		Either AC (default) or DC.
-	labels:		Terminal labels. In format (U1, V1, W1). Defaults to (U1, V1, W1) for 3-phase, and "(1, 2)" for 2-phase.
+	labels:		Terminal labels. In format (U1, V1, W1). Defaults to (U1, V1, W1) for 3-phase, and (1, 2) for 2-phase.
 	showPE:		Whether to show PE terminal. Either true or false (default).
 	showEarth:	Whether or not to show earthing. Either true or false (default).
 '
@@ -908,6 +909,7 @@ m4_define_blind(`motor', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `default',
 		 `part', `',
 		 `phase', `3',
 		 `type', `AC',
@@ -1008,7 +1010,14 @@ m4_define_blind(`motor', `
 		popDir();
 	] with .Start at _motor_pos;
 
-	componentDrawLabels(_motor_)
+	m4_errprintl(`motor ref pos: "'_motor_refPos`"')
+	m4_ifelse(_motor_refPos, `default', `
+		componentDrawLabels(_motor_)
+	', _motor_refPos, `underneath', `
+		componentCombineLabels(_motor_)
+		"textMultiLine(m4_indir(_motor_`labels'))" at last [].s - (0, elen/8) below;
+		m4_popdef(_motor_`labels')
+	')
 	componentWriteBOM(_motor_)
 
 	move to last [].Start;
