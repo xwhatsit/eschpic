@@ -1010,7 +1010,6 @@ m4_define_blind(`motor', `
 		popDir();
 	] with .Start at _motor_pos;
 
-	m4_errprintl(`motor ref pos: "'_motor_refPos`"')
 	m4_ifelse(_motor_refPos, `default', `
 		componentDrawLabels(_motor_)
 	', _motor_refPos, `underneath', `
