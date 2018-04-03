@@ -5,11 +5,11 @@ places a pic label if it's valid.
 Usage: componentHandleRef(prefix)
 '
 m4_define_blind(`componentHandleRef', `
-	# if a ref was defined and we have enabled it, and it does not already start with a number, prefix it with the sheet number
-	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(a3PrefixRefs, `true', m4_ifelse(m4_regexp($1ref, `^[^0-9]'), 0, a3SheetNum, `'), `')`'$1ref))
+	# if a ref was defined and we have enabled it, and it does not already start with a number (or underscore, which is stripped), prefix it with the sheet number
+	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(a3PrefixRefs, `true', m4_ifelse(m4_regexp($1ref, `^[^_0-9]'), 0, a3SheetNum, `'), `')`'m4_patsubst($1ref, `^_')))
 
 	# if ref was defined and is a valid pic label, then add a label
-	m4_ifelse($1ref, `', `', `m4_ifelse(m4_regexp($1ref, `^[A-Z][A-Za-z0-9]*$'), 0, $1ref`:')')
+	m4_ifelse($1ref, `', `', `m4_ifelse(m4_regexp($1ref, `^[A-Z][A-Za-z0-9]*$'), 0, m4_patsubst($1ref, `^_')`:')')
 ')
 
 
