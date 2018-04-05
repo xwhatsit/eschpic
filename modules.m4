@@ -182,8 +182,8 @@ m4_define_blind(`_moduleParseTerminals', `
 ')
 m4_define_blind(`_moduleDrawTerm', `
 	m4_regexp($1, `\([^()]*\)\(.*\)', `
-		m4_define(`_module_termText', \1)
-		m4_define(`_module_termDesc', \2)
+		m4_define(`_module_termText', m4_trim(\1))
+		m4_define(`_module_termDesc', m4_trim(\2))
 	')
 
 	# handle spacers
