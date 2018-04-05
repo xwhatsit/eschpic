@@ -391,9 +391,9 @@ m4_define_blind(`diode', `
 		A: AO;
 		K: BO;
 
-		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TA")
-		m4_ifelse(_diode_startLabel, `', `', `T'_diode_startLabel`: A')
-		m4_ifelse(_diode_endLabel, `', `', `T'_diode_endLabel`: K')
+		# if terminal labels are defined and valid, add positional labels as "T" + name (e.g. ".TA")
+		m4_ifelse(m4_regexp(_diode_startLabel, `[A-Za-z0-9]*$'), 0, `T'_diode_startLabel`: A')
+		m4_ifelse(m4_regexp(_diode_endLabel, `[A-Za-z0-9]*$'), 0, `T'_diode_endLabel`: K')
 
 		popDir();
 	] with .Start at _diode_pos;
