@@ -5,7 +5,8 @@ depending on current direction.
 Location references are defined in syntax .Group.Terminal. If the group or terminal name starts with a capital letter (i.e. is valid pic reference), then
 the name is used directly. (e.g. Module.X1.L1). Otherwise, it is prefixed with G for groups or T for terminals (e.g. group 1A becomes Module.G1A, terminal 13
 becomes Module.X1.T13 etc.). Invalid pic reference label characters are changed to underscores (e.g. group "X1 - Power Supply" becomes "X1___Power_Supply").
-Terminal locations are also defined as .Group.N1 etc., numbering up to the terminal count.
+Terminal locations are also defined as .Group.N1 etc., numbering up to the terminal count. Groups are numbered in the same way (.GN1, .GN2 etc.) if a group
+name is not supplied.
 
 Usage: module([key-value separated parameters])
 Params:
@@ -56,6 +57,7 @@ m4_define_blind(`module', `
 		m4_ifelse(_module_botterms, `', `m4_define(`_module_botterms', `(())')')
 
 		m4_define(`_module_terminalDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
+		m4_define(`_module_groupCount', 0)
 
 		Start: Here;
 		move dirToDirection(dirRev(_module_terminalDir)) _module_padding then dirToDirection(peekDir()) (_module_terminalDepth)/2;
@@ -127,6 +129,8 @@ m4_define_blind(`_moduleParseTerminals', `
 		m4_define(`_module_groupTerms', \2)
 	')
 
+	m4_define(`_module_groupCount', m4_eval(_module_groupCount + 1))
+
 	m4_define(`_module_termDescTextAlignment', m4_dnl
 		m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
 			m4_ifelse($2, true, `below', `above'), m4_dnl
@@ -134,7 +138,7 @@ m4_define_blind(`_moduleParseTerminals', `
 
 	m4_define(`_module_numGroupTerms', m4_nargs(m4_extractargs(_module_groupTerms)))
 
-	m4_define(`_module_groupRef', m4_ifelse(_module_groupName, `', `LastGroup', m4_patsubst(_module_groupName, `[^A-Za-z0-9]', `_')))
+	m4_define(`_module_groupRef', m4_ifelse(_module_groupName, `', `GN'_module_groupCount, m4_patsubst(_module_groupName, `[^A-Za-z0-9]', `_')))
 	m4_ifelse(m4_regexp(_module_groupRef, `^[A-Z]'), -1, `m4_define(`_module_groupRef', `G'_module_groupRef)')
 	_module_groupRef: [
 		Start: Here;
