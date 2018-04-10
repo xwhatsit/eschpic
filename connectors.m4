@@ -322,7 +322,6 @@ m4_define_blind(`terminalGroup', `
 		popDir();
 	] with .Start at _terminalGroup_pos;
 
-	m4_errprintl(`total terminals:' _terminalGroup_totalTerminals);
 	# Must redefine positions for terminals, as they were enclosed in a scope
 	m4_forloop(i, 1, _terminalGroup_totalTerminals, `
 		Terminal___Pos[_terminalCount - i + 1]: last [].T`'m4_eval(_terminalGroup_totalTerminals - i + 1);
