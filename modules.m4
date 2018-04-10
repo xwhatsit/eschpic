@@ -6,7 +6,7 @@ Location references are defined in syntax .Group.Terminal. If the group or termi
 the name is used directly. (e.g. Module.X1.L1). Otherwise, it is prefixed with G for groups or T for terminals (e.g. group 1A becomes Module.G1A, terminal 13
 becomes Module.X1.T13 etc.). Invalid pic reference label characters are changed to underscores (e.g. group "X1 - Power Supply" becomes "X1___Power_Supply").
 Terminal locations are also defined as .Group.N1 etc., numbering up to the terminal count. Groups are numbered in the same way (.GN1, .GN2 etc.) if a group
-name is not supplied.
+name is not supplied. Terminal refs can be referred to directly (e.g. .A2, .T13 etc.), although clashes will occur between groups.
 
 Usage: module([key-value separated parameters])
 Params:
@@ -153,6 +153,10 @@ m4_define_blind(`_moduleParseTerminals', `
 		End: Here;
 	] with .Start at Here;
 
+	m4_forloop(j, 1, _module_numGroupTerms, `
+		m4_indir(`_module_lastGroupTermRef['j`]'): _module_groupRef`.N'j;
+	')
+
 	# bounding box for group
 	box invis wid _module_groupRef.wid ht _module_groupRef.ht with .c at _module_groupRef.c;
 
@@ -235,4 +239,5 @@ m4_define_blind(`_moduleDrawTerm', `
 	m4_ifelse(m4_regexp(_module_termRef, `^[A-Z]'), -1, `m4_define(`_module_termRef', `T'_module_termRef)')
 	_module_termRef: LastTerminal;
 	N$3: LastTerminal;
+	m4_define(`_module_lastGroupTermRef['$3`]', _module_termRef)
 ')
