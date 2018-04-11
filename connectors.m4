@@ -191,7 +191,7 @@ m4_define_blind(`connector', `
 			T`'i: last [].BO;
 			move to last [].Start;
 			m4_ifelse(i, _connector_count, `', `
-				m4_ifelse(dirIsVertical(peekDir()), 1, `
+				m4_ifelse(dirIsVertical(getDir()), 1, `
 					move `right' elen/2;
 				', `
 					move `down' elen/2;
