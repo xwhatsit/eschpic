@@ -164,7 +164,7 @@ m4_define_blind(`_componentBOMEntry', `
 			m4_pushdef(`location', $6.$7`'a3VPosLetter($8))
 		')
 
-		print "$1,$3,$4,location,$5,target" >> "bom.csv"
+		print "\"$1\",\"$3\",\"$4\",\"location\",\"$5\",\"target\"" >> "bom.csv"
 
 		m4_popdef(`location')
 		m4_popdef(`target')
