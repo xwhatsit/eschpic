@@ -623,6 +623,8 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	part:		Part number. If this is supplied, it is added to the BOM.
+	type:		Coil type. For now, either left blank (default), or "valve".
+	flipped:	Whether to draw coil type additions flipped. Either "true" or "false" (default).
 	startLabel:	Starting terminal label. Defaults to "A1".
 	endLabel:	Ending terminal label. Defaults to "A2".
 '
@@ -633,6 +635,8 @@ m4_define_blind(`coil', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
+		 `type', `',
+		 `flipped', `false',
 		 `startLabel', `A1',
 		 `endLabel', `A2'), $@)
 	componentHandleRef(_coil_)
@@ -662,6 +666,18 @@ m4_define_blind(`coil', `
 		} else {
 			box wid elen/4 ht elen*(3/8) with .c at Centre;
 		}
+
+		m4_ifelse(_coil_type, `valve', `
+			m4_define(`_coil_valveDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirUp))
+			m4_ifelse(_coil_flipped, `true', `m4_define(`_coil_valveDir', dirRev(_coil_valveDir))')
+			line dashed elen/18 from last box m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse(_coil_flipped, `true', `.w', `.e'), m4_ifelse(_coil_flipped, `true', `.s', `.n')) \
+				dirToDirection(_coil_valveDir) elen*9/64;
+			line dirToDirection(_coil_valveDir) elen*3/64 dirToDirection(dirCW(_coil_valveDir)) elen*3/32 \
+				then dirToDirection(dirRev(_coil_valveDir)) elen*3/32 \
+				then dirToDirection(_coil_valveDir) elen*3/32 dirToDirection(dirCCW(_coil_valveDir)) elen*3/16 \
+				then dirToDirection(dirRev(_coil_valveDir)) elen*3/32 \
+				then to last line.end;
+		')
 
 		# if terminal labels are defined, add positional labels as "T" + name (e.g. ".TA1")
 		m4_ifelse(_coil_startLabel, `', `', `T'_coil_startLabel`: AO')
