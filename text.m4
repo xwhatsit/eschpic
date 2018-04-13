@@ -67,3 +67,12 @@ m4_define_blind(`textMultiLine',
 	`m4_forloop(`m4_argNum', 1, $#,
 		`m4_ifelse(m4_argNum, 1, `',
 			` \\')' \normalsize{}`m4_argn(m4_argNum, $@)')' m4_newline()`\end{tabular}}')
+
+`
+As per textMultiLine, but centred.
+'
+m4_define_blind(`textMultiLineCentred',
+	`{\footnotesize \begin{tabular}[t]{@{}c@{}}'
+	`m4_forloop(`m4_argNum', 1, $#,
+		`m4_ifelse(m4_argNum, 1, `',
+			` \\')' \normalsize{}`m4_argn(m4_argNum, $@)')' m4_newline()`\end{tabular}}')
