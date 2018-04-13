@@ -9,6 +9,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pin:		Pin number. Defaults to blank.
 	len:		Pin extension length. Defaults to elen.
@@ -20,6 +21,7 @@ m4_define_blind(`connectorMale', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `pin', `',
 		 `len', `elen'), $@)
@@ -75,6 +77,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pin:		Pin number. Defaults to blank.
 	len:		Pin extension length. Defaults to elen.
@@ -86,6 +89,7 @@ m4_define_blind(`connectorFemale', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `pin', `',
 		 `len', `elen'), $@)
@@ -139,6 +143,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	count:		Pin count. Defaults to 1, or the count of labels in "labels" if those are supplied.
 	labels:		Pin labels, in syntax "(1, 2, 3, PE)" etc. If not supplied, will auto-number from 1 to pincount.
@@ -153,6 +158,7 @@ m4_define_blind(`connector', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `count', `',
 		 `labels', `',
@@ -260,6 +266,7 @@ Params:
 	ref:
 	val:	
 	description:
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	labels:		Terminal labels/numbers, in syntax (1, 2, 3) etc.
 	count:		Not required if labels parameter is supplied.
 '
@@ -269,6 +276,7 @@ m4_define_blind(`terminalGroup', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `labels', `',
 		 `count', `'), $@)
 	

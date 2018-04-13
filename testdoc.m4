@@ -6,51 +6,150 @@ a3Sheet(
 	ref=ABC123,
 	rev=0.1,
 );
+
+move to a3Pos(2, A);
+down;
+coil(
+	ref=V1,
+	val=D NF,
+	description=Solenoid Valve,
+	type=valve,
+);
+
+move to a3Pos(3, A);
+down;
+coil(
+	ref=V1,
+	val=D F,
+	description=Solenoid Valve,
+	type=valve,
+	flipped=true
+);
+
+move to a3Pos(4, A);
+up;
+coil(
+	ref=V1,
+	val=U NF,
+	description=Solenoid Valve,
+	type=valve,
+);
+
+move to a3Pos(5, A);
+up;
+coil(
+	ref=V1,
+	val=U F,
+	description=Solenoid Valve,
+	type=valve,
+	flipped=true
+);
+
+
+move to a3Pos(2, B);
+right;
+coil(
+	ref=V1,
+	val=R NF,
+	description=Solenoid Valve,
+	type=valve,
+);
+
+move to a3Pos(3, B);
+right;
+coil(
+	ref=V1,
+	val=R F,
+	description=Solenoid Valve,
+	type=valve,
+	flipped=true
+);
+
+move to a3Pos(4, B);
+left;
+coil(
+	ref=V1,
+	val=L NF,
+	description=Solenoid Valve,
+	type=valve,
+);
+
+move to a3Pos(5, B);
+left;
+coil(
+	ref=V1,
+	val=L F,
+	description=Solenoid Valve,
+	type=valve,
+	flipped=true
+);
+
+
+
+
+
+
+move to a3Pos(2, C);
+down;
+coil(
+	ref=V1,
+	val=D NF reversed,
+	description=Solenoid Valve,
+	refPos=reversed,
+	type=valve,
+);
+
 move to a3Pos(3, C);
 down;
-module(
-	ref=A2,
-	val=XPS-AC5121,
-	description=E-Stop Module,
-	part=PN123456,
-	terminals=X1(A1, A2) (Y1) (13, 23, 33, Y43) | (,) (Y2) X8(14, 24, 34, Y44)
+coil(
+	ref=V1,
+	val=D NF reversed,
+	description=Solenoid Valve,
+	refPos=reversed,
+	type=valve,
 );
 
-wire(down elen*2 from last [].T34 then right elen*7, 1A2.34, end)
-wireRef(A2T34)
 
-wire(down elen*5 from last [].TY2, 1A2.Y2, mid)
-contactor3ph()
+move to a3Pos(4, C);
+right;
+coil(
+	ref=V1,
+	val=R NF reversed,
+	description=Solenoid Valve,
+	refPos=reversed,
+	type=valve,
+);
 
-line up from A2.TY1;
-line down from A2.GX8T14 then right elen/2 then up;
+move to a3Pos(5, C);
+right;
+coil(
+	ref=V1,
+	val=R NF reversed,
+	description=Solenoid Valve,
+	refPos=reversed,
+	type=valve,
+);
 
-a3Sheet(
-	sheet=2,
-	title=Next Sheet,
-	ref=ABC123,
-	rev=0.1,
+
+wireGroup(path=down elen*3 from a3Pos(4, D), labels=(L1, L2, L3, PE));
+motor(
+	ref=M1,
+	val=4kW,
+	description=Induction Motor,
+	type=AC,
+	phase=3,
+	showPE=true,
 );
 
 down;
-contactNO(
-	pos=a3Pos(7, E),
-	ref=K3,
-	val=Omron G23A,
-	description=Manual Relay,
-	part=9871234,
-	actuation=push
-);
-wire(down then right 2*elen, Foo.Bar, end)
-wireRef(A2T34)
-
-contactNC(
-	pos=a3Pos(6, B),
-	ref=K3,
-	val=Omron G23A,
-	description=Manual Relay,
-	part=9871234,
-	actuation=push
+contactGroup(
+	pos=a3Pos(7, C),
+	ref=Q1,
+	val=12345,
+	description=Isolator,
+	actuation=twist,
+	type=disconnector switch,
+	contacts=NO(1, 2) NO(3, 4) NO(5, 6)
 );
 
 # vim: filetype=pic

@@ -61,6 +61,8 @@ Usage: componentDrawLabels(prefix, [internal=false])
 '
 m4_define_blind(`componentDrawLabels', `
 	m4_ifelse($1, `', `', `
+		m4_ifdef($1`refPos', `', `m4_define($1`'refPos, `')')
+		
 		componentCombineLabels($1)
 		m4_ifelse(m4_trim(m4_indir($1`labels')), `', `', `
 			m4_ifelse($2, `true', `
@@ -70,11 +72,38 @@ m4_define_blind(`componentDrawLabels', `
 					"textMultiLine(m4_indir($1`labels'))" at last [].n - (0, elen/2) below;
 				}
 			', `
-				if dirIsVertical(getDir()) then {
-					"textMultiLine(m4_indir($1`labels'))" at last [].w - (elen/16, 0) rjust;
-				} else {
-					"textMultiLine(m4_indir($1`labels'))" at last [].n + (0, elen/8) above;
-				}
+				m4_ifelse(m4_indir($1`refPos'), `', `m4_define($1`refPos', m4_ifelse(dirIsVertical(getDir()), 1, `rjust', `above'))')
+				m4_ifelse(m4_indir($1`refPos'), `reversed', `m4_define($1`refPos', m4_ifelse(dirIsVertical(getDir()), 1, `ljust', `below'))')
+
+				m4_ifdef($1`refPosXRef', `', `m4_define($1`refPosXRef', `')')
+				m4_ifelse(m4_indir($1`refPosXRef'), `', `m4_define($1`refPosXRef', `last [].c.x')')
+
+				m4_ifdef($1`refPosYRef', `', `m4_define($1`refPosYRef', `')')
+				m4_ifelse(m4_indir($1`refPosYRef'), `', `m4_define($1`refPosYRef', `last [].c.y')')
+
+				m4_ifelse(m4_indir($1`refPos'), rjust, `
+					m4_pushdef(`position', `(last [].w.x, m4_indir($1`refPosYRef'))')
+					m4_pushdef(`positionTweak', `(-elen/16, 0)')
+					m4_pushdef(`textMacro', `textMultiLine')
+				', m4_indir($1`refPos'), above, `
+					m4_pushdef(`position', `(m4_indir($1`refPosXRef'), last [].n.y)')
+					m4_pushdef(`positionTweak', `(0, elen/8)')
+					m4_pushdef(`textMacro', `textMultiLineCentred')
+				', m4_indir($1`refPos'), ljust, `
+					m4_pushdef(`position', `(last [].e.x, m4_indir($1`refPosYRef'))')
+					m4_pushdef(`positionTweak', `(elen/16, 0)')
+					m4_pushdef(`textMacro', `textMultiLine')
+				', m4_indir($1`refPos'), below, `
+					m4_pushdef(`position', `(m4_indir($1`refPosXRef'), last [].s.y)')
+					m4_pushdef(`positionTweak', `(0, -elen/8)')
+					m4_pushdef(`textMacro', `textMultiLineCentred')
+				')
+
+				"m4_indir(textMacro, m4_indir($1`labels'))" at position + positionTweak m4_indir($1`refPos');
+
+				m4_popdef(`textMacro')
+				m4_popdef(`positionTweak')
+				m4_popdef(`position')
 			')
 		')
 
@@ -182,6 +211,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		Resistor type. Only "thermistor" supported for now. Defaults to blank.
 '
@@ -192,6 +222,7 @@ m4_define_blind(`resistor', `
 		 `val', `',
 		 `description', `',
 		 `part', `',
+		 `refPos', `',
 		 `type', `'), $@)
 	componentHandleRef(_resistor_)
 	[
@@ -241,6 +272,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	flipped:	Either true or false (default). Normally, drawn in conventional direction (sliding
 			terminal down or right).
@@ -251,6 +283,7 @@ m4_define_blind(`potentiometer', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `flipped', `false'), $@)
 	componentHandleRef(_potentiometer_)
@@ -318,6 +351,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	flipped:	Either true or false (default). Diode normally draws anode to cathode.
 	type:		Diode type. Either left blank, or "LED". Defaults to blank.
@@ -330,6 +364,7 @@ m4_define_blind(`diode', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `flipped', `false',
 		 `type', `',
@@ -420,6 +455,7 @@ Params:
 	        	letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	startLabel:	Starting terminal label. Defaults to X1.
 	endLabel:	Ending terminal label. Defaults to X2.
@@ -430,6 +466,7 @@ m4_define_blind(`lamp', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `startLabel', `X1',
 		 `endLabel', `X2'), $@)
@@ -487,6 +524,7 @@ Params:
 	        	letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	startLabel:	Starting terminal label. Defaults to blank.
 	endLabel:	Ending terminal label. Defaults to blank.
@@ -497,6 +535,7 @@ m4_define_blind(`battery', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `startLabel', `',
 		 `endLabel', `'), $@)
@@ -622,6 +661,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		Coil type. For now, either left blank (default), or "valve".
 	flipped:	Whether to draw coil type additions flipped. Either "true" or "false" (default).
@@ -634,6 +674,7 @@ m4_define_blind(`coil', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `type', `',
 		 `flipped', `false',
@@ -707,6 +748,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	coil:		Whether or not to draw the coil. Either "true" or "false". Defaults to "false".
 	aux:		Description of auxiliary contact(s). In same syntax as "contacts" parameter in contactGroup
@@ -718,6 +760,7 @@ m4_define_blind(`contactor3ph', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `coil', `false',
 		 `aux', `'), $@)
@@ -765,6 +808,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	actuation:	Type of mechanical control to turn on/off. See componentDrawActuator for options.
 			Defaults to "manual".
@@ -777,6 +821,7 @@ m4_define_blind(`motorStarter', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `actuation', `manual',
 		 `aux', `'), $@)
@@ -846,6 +891,7 @@ Params:
 	ref:		Component reference name.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 '
 m4_define_blind(`transformer', `
@@ -854,6 +900,7 @@ m4_define_blind(`transformer', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `'), $@)
 	componentHandleRef(_transformer_)
 
@@ -911,7 +958,7 @@ Params:
 	ref:		Component reference name.
 	val:		Component value.
 	description:	Additional text describing component purpose etc.
-	refPos:		Position of component ref/val/description labelling. Either "default" for standard positioning, or "underneath".
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to BOM.
 	phase:		Either 2 or 3 (default), meaning 2-phase or 3-phase.
 	type:		Either AC (default) or DC.
@@ -925,7 +972,7 @@ m4_define_blind(`motor', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
-		 `refPos', `default',
+		 `refPos', `',
 		 `part', `',
 		 `phase', `3',
 		 `type', `AC',
@@ -1026,13 +1073,9 @@ m4_define_blind(`motor', `
 		popDir();
 	] with .Start at _motor_pos;
 
-	m4_ifelse(_motor_refPos, `default', `
-		componentDrawLabels(_motor_)
-	', _motor_refPos, `underneath', `
-		componentCombineLabels(_motor_)
-		"textMultiLine(m4_indir(_motor_`labels'))" at last [].s - (0, elen/8) below;
-		m4_popdef(_motor_`labels')
-	')
+	m4_define(`_motor_refPosXRef', last []. last circle.c.x)
+	m4_define(`_motor_refPosYRef', last []. last circle.c.y)
+	componentDrawLabels(_motor_)
 	componentWriteBOM(_motor_)
 
 	move to last [].Start;
@@ -1047,6 +1090,7 @@ Params:
 	ref:		Component reference name.
 	val:		Component value.
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to BOM.
 	startLabel:	Label of start terminal; defaults to A1.
 	endLabel:	Label of end terminal; defaults to A2.
@@ -1057,6 +1101,7 @@ m4_define_blind(`brake', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `startLabel', `A1',
 		 `endLabel', `A2'), $@)

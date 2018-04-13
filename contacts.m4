@@ -354,6 +354,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	startLabel:	Starting terminal label. Defaults to "3".
@@ -370,6 +371,7 @@ m4_define_blind(`contactNO', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `set', `1',
 		 `startLabel', `3',
@@ -445,6 +447,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	startLabel:	Starting terminal label. Defaults to "1".
@@ -461,6 +464,7 @@ m4_define_blind(`contactNC', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `set', `1',
 		 `startLabel', `1',
@@ -538,6 +542,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	cmLabel:	Common terminal label. Defaults to "1".
@@ -551,6 +556,7 @@ m4_define_blind(`contactCO', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `set', `1',
 		 `cmLabel', `1',
@@ -624,6 +630,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		See contactNO, contactNC.
 	actuation:	See contactNO, contactNC.
@@ -642,6 +649,7 @@ m4_define_blind(`contactGroup', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `type', `',
 		 `actuation', `',

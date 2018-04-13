@@ -8,6 +8,7 @@ Params:
 			letter). Will prefix reference name with the current sheet number.
 	val:		Component value
 	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		Sensor type. One of "proximity", "prox", "distance" (all same thing for now).
 	positiveLabel:	Label of positive terminal. Defaults to "BN".
@@ -20,6 +21,7 @@ m4_define_blind(`sensor', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `type', `',
 		 `positiveLabel', `BN',
@@ -83,6 +85,7 @@ Params:
 	ref:		Component reference name.
 	val:		Component value.
 	description:	Component description.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number.
 	labels:		Terminal labels, in format (1st, 2nd...). Defaults to (R1, R2, S1, S3, S2, S4).
 '
@@ -92,6 +95,7 @@ m4_define_blind(`resolver', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `labels', `(R1, R2, S1, S3, S2, S4)'), $@)
 
@@ -164,6 +168,7 @@ Params:
 	ref:		Component reference name.
 	val:		Component value.
 	description:	Component description.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number.
 	labels:		Terminal labels, in format (1st, 2nd...). Defaults to (V+, V-, A, B).
 '
@@ -173,6 +178,7 @@ m4_define_blind(`encoder', `
 		 `ref', `',
 		 `val', `',
 		 `description', `',
+		 `refPos', `',
 		 `part', `',
 		 `type', `',
 		 `labels', `(V+, V-, A, B)'), $@)
