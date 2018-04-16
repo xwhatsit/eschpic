@@ -11,6 +11,7 @@ Params:
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
 	type:		Sensor type. One of "proximity", "prox", "distance" (all same thing for now).
+	flipped:	Whether to draw output in standard orientation ("false", default).
 	positiveLabel:	Label of positive terminal. Defaults to "BN".
 	negativeLabel:	Label of negative terminal. Defaults to "BU".
 	outputLabel:	Label of output terminal. Defaults to "BK".
@@ -24,6 +25,7 @@ m4_define_blind(`sensor', `
 		 `refPos', `',
 		 `part', `',
 		 `type', `',
+		 `flipped', `false',
 		 `positiveLabel', `BN',
 		 `negativeLabel', `BU',
 		 `outputLabel', `BK'), $@)
@@ -50,7 +52,7 @@ m4_define_blind(`sensor', `
 		line from AO to AM;
 		line from BO to BM;
 
-		line from last box m4_ifelse(dirIsVertical(peekDir()), 1, `.e right', `.s down') elen/4;
+		line from last box m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse(_sensor_flipped, `false', `.e right', `.w left'), m4_ifelse(_sensor_flipped, `false', `.s down', `.n up')) elen/4;
 		CO: Here;
 
 		componentDrawActuator(_sensor_type, last box.c, m4_ifelse(dirIsVertical(peekDir()), 1, `180, 1', `90, -1'));
@@ -152,6 +154,9 @@ m4_define_blind(`resolver', `
 		popDir();
 	] with .Start at _resolver_pos;
 
+	m4_define(`_resolver_refPosXRef', last []. last circle.c.x)
+	m4_define(`_resolver_refPosYRef', last []. last circle.c.y)
+
 	componentDrawLabels(_resolver_)
 	componentWriteBOM(_resolver_)
 
@@ -238,6 +243,9 @@ m4_define_blind(`encoder', `
 
 		popDir();
 	] with .Start at _encoder_pos;
+
+	m4_define(`_encoder_refPosXRef', last []. last circle.c.x)
+	m4_define(`_encoder_refPosYRef', last []. last circle.c.y)
 
 	componentDrawLabels(_encoder_)
 	componentWriteBOM(_encoder_)
