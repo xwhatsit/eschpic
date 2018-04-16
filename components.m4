@@ -711,7 +711,7 @@ m4_define_blind(`coil', `
 		m4_ifelse(_coil_type, `valve', `
 			m4_define(`_coil_valveDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirUp))
 			m4_ifelse(_coil_flipped, `true', `m4_define(`_coil_valveDir', dirRev(_coil_valveDir))')
-			line dashed elen/18 from last box m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse(_coil_flipped, `true', `.w', `.e'), m4_ifelse(_coil_flipped, `true', `.s', `.n')) \
+			line dashed elen/32 from last box m4_ifelse(dirIsVertical(peekDir()), 1, m4_ifelse(_coil_flipped, `true', `.w', `.e'), m4_ifelse(_coil_flipped, `true', `.s', `.n')) \
 				dirToDirection(_coil_valveDir) elen*9/64;
 			line dirToDirection(_coil_valveDir) elen*3/64 dirToDirection(dirCW(_coil_valveDir)) elen*3/32 \
 				then dirToDirection(dirRev(_coil_valveDir)) elen*3/32 \
