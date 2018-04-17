@@ -73,6 +73,8 @@ m4_define_blind(`sensor', `
 
 	move to last [].End
 
+	m4_define(`_sensor_refPosXRef', last []. last box.c.x)
+	m4_define(`_sensor_refPosYRef', last []. last box.c.y)
 	componentDrawLabels(_sensor_)
 	componentWriteBOM(_sensor_)
 ')
