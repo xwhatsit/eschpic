@@ -271,7 +271,15 @@ m4_define_blind(`busFan', `
 		 `labels', `',
 		 `screened', `false'), $@)
 	
-	m4_ifelse(_busFan_count, `', `m4_define(`_busFan_count', m4_nargs(m4_extractargs(_busFan_labels)))')
+	m4_ifelse(_busFan_count, `', `
+		m4_define(`_busFan_count', 0)
+		m4_define(`_busFan_numLabelArgs', m4_nargs(m4_extractargs(_busFan_labels)))
+		m4_forloop(i, 1, _busFan_numLabelArgs, `
+			m4_define(`_busFan_spacerCount', 1)
+			m4_regexp(m4_argn(i, m4_extractargs(_busFan_labels)), `^_\([0-9]+\)_$', `m4_define(`_busFan_spacerCount', \1)')
+			m4_define(`_busFan_count', m4_eval(_busFan_count + _busFan_spacerCount))
+		')
+	')
 	m4_ifelse(_busFan_count, 0, `
 		m4_errprintl(`error: busFan has zero count')
 		m4_m4exit(1)
@@ -315,13 +323,26 @@ m4_define_blind(`busFan', `
 		m4_forloop(i, 1, _busFan_count, `
 			`T'i: Here;
 
-			m4_ifelse(_busFan_labels, `', `', `"textTerminalLabel(m4_argn(i, m4_extractargs(_busFan_labels)))" \
-				m4_ifelse(dirIsVertical(peekDir()), 1, `rjust', `above') at `T'i');
+			m4_define(`_busFan_spacerCount', 0)
+			m4_ifelse(_busFan_labels, `', `', `
+				m4_define(`_busFan_labelText', m4_argn(i, m4_extractargs(_busFan_labels)))
+				m4_ifelse(_busFan_labelText, `', `
+					m4_define(`_busFan_spacerCount', 1)
+				', `
+					m4_regexp(_busFan_labelText, `^_\([0-9]+\)_$', `m4_define(`_busFan_spacerCount', \1)')
+				')
 
-			spline from `T'i dirToDirection(wireDir) elen/2 then to C then to Bus;
+				m4_ifelse(_busFan_spacerCount, 0, `"textTerminalLabel(_busFan_labelText)" m4_ifelse(dirIsVertical(peekDir()), 1, `rjust', `above') at `T'i');
+			')
 
-			move to last spline.start;
-			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+			m4_ifelse(_busFan_spacerCount, 0, `
+				spline from `T'i dirToDirection(wireDir) elen/2 then to C then to Bus;
+
+				move to last spline.start;
+				move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2;
+			', `
+				move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') (elen/2 * _busFan_spacerCount);
+			')
 		')
 
 		m4_ifelse(_busFan_screened, `true', `
