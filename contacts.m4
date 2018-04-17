@@ -409,6 +409,7 @@ m4_define_blind(`contactNO', `
 
 		AM: 5/16 of the way between AO and BO;
 		BM: 5/16 of the way between BO and AO;
+		C: 1/2 between AO and BO;
 
 		if dirIsVertical(peekDir()) then {
 			contactAngle = 108;
@@ -435,6 +436,8 @@ m4_define_blind(`contactNO', `
 	componentDrawTerminalLabel(last [].AO, _contactNO_fullStartLabel);
 	componentDrawTerminalLabel(last [].BO, _contactNO_fullEndLabel);
 
+	m4_define(`_contactNO_refPosXRef', last [].C.x)
+	m4_define(`_contactNO_refPosYRef', last [].C.y)
 	componentDrawLabels(_contactNO_)
 	componentWriteBOM(_contactNO_)
 
@@ -501,6 +504,7 @@ m4_define_blind(`contactNC', `
 
 		AM: 1/2.9 of the way between AO and BO;
 		BM: 5/16 of the way between BO and AO;
+		C: 1/2 between AO and BO;
 
 		if dirIsVertical(peekDir()) then {
 			topAngle = 0;
@@ -529,6 +533,8 @@ m4_define_blind(`contactNC', `
 	componentDrawTerminalLabel(last [].AO, _contactNC_fullStartLabel);
 	componentDrawTerminalLabel(last [].BO, _contactNC_fullEndLabel);
 
+	m4_define(`_contactNC_refPosXRef', last [].C.x)
+	m4_define(`_contactNC_refPosYRef', last [].C.y)
 	componentDrawLabels(_contactNC_)
 	componentWriteBOM(_contactNC_)
 
