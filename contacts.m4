@@ -50,7 +50,7 @@ m4_define_blind(`componentDrawActuator', `
 		ActuatorProxC: 1/2 between $2 and ActuatorProxL;
 		ActuatorProxT: polarCoord(ActuatorProxC, 1.2, $3 - ($4*90));
 		ActuatorProxB: polarCoord(ActuatorProxC, 1.2, $3 + ($4*90));
-		line from $2 to ActuatorProxT to ActuatorProxL to ActuatorProxB to $2;
+		line from $2 to ActuatorProxT to ActuatorProxL to ActuatorProxB to $2 to ActuatorProxT;
 		line from ActuatorProxB+(-0.4, ($4*0.4)) to ActuatorProxT+(-($4*0.4), -0.4);
 		line from ActuatorProxB+(($4*0.4), 0.4) to ActuatorProxT+(0.4, -($4*0.4));
 	', $1, `key', `
@@ -66,6 +66,10 @@ m4_define_blind(`componentDrawActuator', `
 			to ActuatorKeyBR \
 			to polarCoord(ActuatorKeyBR, 0.5, $3 - ($4*90)) \
 			to polarCoord(ActuatorKeyTT, 1.0, $3 - ($4*256));
+	', $1, `pressure', `
+		ActuatorPressureC: polarCoord($2, elen*7/64, $3);
+		box wid elen*7/32 ht elen*7/32 with .c at ActuatorPressureC;
+		"textWireLabel(P)" at ActuatorPressureC;
 	', $1, `turn',     `componentDrawActuator(selector, $2, $3, $4)
 	', $1, `twist',    `componentDrawActuator(selector, $2, $3, $4)
 	', $1, `estop',    `componentDrawActuator(mushroom, $2, $3, $4)
@@ -181,6 +185,8 @@ m4_define_blind(`componentAddContactActuators', `
 		m4_define(`actuatorHead', proximity)
 	', m4_eval(m4_index(actuatorString, ` key ') != -1), 1, `
 		m4_define(`actuatorHead', key)
+	', m4_eval(m4_index(actuatorString, ` pressure ') != -1), 1, `
+		m4_define(`actuatorHead', pressure)
 	')
 
 	# draw action

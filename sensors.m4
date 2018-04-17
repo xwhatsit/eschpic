@@ -10,7 +10,7 @@ Params:
 	description:	Additional text describing component purpose etc.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
-	type:		Sensor type. One of "proximity", "prox", "distance" (all same thing for now).
+	type:		Sensor type. One of "proximity", "prox", "distance", or "pressure".
 	flipped:	Whether to draw output in standard orientation ("false", default).
 	positiveLabel:	Label of positive terminal. Defaults to "BN".
 	negativeLabel:	Label of negative terminal. Defaults to "BU".
