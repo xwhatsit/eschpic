@@ -234,7 +234,7 @@ m4_define_blind(`terminal', `
 		m4_ifelse(dirIsVertical(getDir()), 1, `
 			  "textTerminalLabel(_terminal_label)" at last circle.w + (elen/32,0) rjust
 		', `
-			  "textTerminalLabel(_terminal_label)" at last circle.n - (0, elen/16) rjust
+			  "textTerminalLabel(_terminal_label)" at last circle.n - (0, elen/16) above
 		')
 	')
 
@@ -310,29 +310,32 @@ m4_define_blind(`terminalGroup', `
 				m4_define(`_terminalGroup_totalTerminals', m4_eval(_terminalGroup_totalTerminals + 1))
 				m4_define(`_terminalGroup_totalPositions', m4_eval(_terminalGroup_totalPositions + 1))
 
-				`T'_terminalGroup_totalTerminals: Here;
+				`N'_terminalGroup_totalTerminals: Here;
 				m4_ifelse(_terminalGroup_labels, `', `', `
 					`T'm4_patsubst(_terminal_termText, `[^A-Za-z0-9]', `_'): Here;
 				')
+				dirToDirection(peekDir());
 				terminal(m4_ifelse(_terminalGroup_labels, `', `', `label=_terminal_termText'));
 			', `
 				m4_define(`_terminalGroup_totalPositions', m4_eval(_terminalGroup_totalPositions + _terminalGroup_spacerCount))
 			')
 
-			move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') m4_ifelse(_terminalGroup_spacerCount, 0, `elen/2', `elen/2 * _terminalGroup_spacerCount');
+			m4_ifelse(i, _terminalGroup_count, `', `
+				  move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') m4_ifelse(_terminalGroup_spacerCount, 0, `elen/2', `elen/2 * _terminalGroup_spacerCount');
+			')
 		')
 
 		boxWidth  = _terminalGroup_totalPositions * elen/2 m4_ifelse(_terminalGroup_labels, `', `', `+ elen/4');
 		boxHeight = elen/3;
-		box dashed elen/19 m4_ifelse(dirIsVertical(peekDir()), 1, `wid boxWidth ht boxHeight', `wid boxHeight wid boxWidth') \
-			at (1/2 between T1 and `T'_terminalGroup_totalTerminals) m4_ifelse(_terminalGroup_labels, `', `', `- m4_ifelse(dirIsVertical(peekDir()), 1, (elen/8, 0), (0, -elen/8))');
+		box dashed elen/19 m4_ifelse(dirIsVertical(peekDir()), 1, `wid boxWidth ht boxHeight', `wid boxHeight ht boxWidth') \
+			at (1/2 between N1 and `N'_terminalGroup_totalTerminals) m4_ifelse(_terminalGroup_labels, `', `', `- m4_ifelse(dirIsVertical(peekDir()), 1, (elen/8, 0), (0, -elen/8))');
 
 		popDir();
 	] with .Start at _terminalGroup_pos;
 
 	# Must redefine positions for terminals, as they were enclosed in a scope
 	m4_forloop(i, 1, _terminalGroup_totalTerminals, `
-		Terminal___Pos[_terminalCount - i + 1]: last [].T`'m4_eval(_terminalGroup_totalTerminals - i + 1);
+		Terminal___Pos[_terminalCount - i + 1]: last [].N`'m4_eval(_terminalGroup_totalTerminals - i + 1);
 	')
 
 	componentDrawLabels(_terminalGroup_)
