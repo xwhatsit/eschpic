@@ -126,7 +126,7 @@ m4_define_blind(`componentDrawTerminalLabel', `
 Macro to assist writing BOM file's header (column names)
 '
 m4_define_blind(`componentStartBOMFile', `
-	print "Reference,Value,Description,Location,Part Number,UID" > "bom.csv"
+	print "Reference,Value,Description,Location,Part Number,Sub-BOM,UID" > "bom.csv"
 ')
 
 
@@ -193,8 +193,14 @@ m4_define_blind(`_componentBOMEntry', `
 			m4_pushdef(`location', $6.$7`'a3VPosLetter($8))
 		')
 
-		print "\"$1\",\"$3\",\"$4\",\"location\",\"$5\",\"target\"" >> "bom.csv"
+		m4_pushdef(`part', $5)
+		m4_pushdef(`parentpart', `')
+		m4_regexp(part, `\([^/]*\)/\(.*\)', `m4_define(`parentpart', \1) m4_define(`part', \2)')
 
+		print "$1,\"$3\",\"$4\",\"location\",\"part\",\"parentpart\",\"target\"" >> "bom.csv"
+
+		m4_popdef(`parentpart')
+		m4_popdef(`part')
 		m4_popdef(`location')
 		m4_popdef(`target')
 	')

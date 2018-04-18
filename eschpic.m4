@@ -5,6 +5,7 @@
 \usepackage{datetime2}
 \usepackage{float}
 \usepackage[a3paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
+\usepackage{longtable}
 \usepackage{pdflscape}
 \usepackage[hidelinks]{hyperref}
 \usepackage{siunitx}
@@ -15,17 +16,17 @@
 \DTLsetseparator{,}
 
 \IfFileExists{bom.csv.sorted}{
-\DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom.csv.sorted}
+\DTLloaddb[noheader,keys={ref,val,description,location,part,parentpart,uid}]{bom}{bom.csv.sorted}
 
 \begin{document}
 m4_divert(9)
 \pagebreak
 
+\setcounter{LTchunksize}{1000}
+
 \DTLifdbempty{bom}{}{
-\begin{figure}
-\centering
 \section*{Component List}
-\begin{tabular}{l l l r r}
+\begin{longtable}{l l l r r}
 \toprule
 Reference & Value & Description & Location & Part Number \\ \midrule
 \DTLforeach*{bom}
@@ -35,8 +36,7 @@ Reference & Value & Description & Location & Part Number \\ \midrule
 	\ref & \val & \description & \hyperlink{\uid}{\location} & \part
 } \\
 \bottomrule
-\end{tabular}
-\end{figure}
+\end{longtable}
 }
 }{}
 
