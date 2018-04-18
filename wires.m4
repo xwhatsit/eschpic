@@ -260,7 +260,7 @@ Params:
 	pos:		Start position. Defaults to "Here".
 	type:		Either "entry" or "exit".
 	count:		Number of wires. If not specified, figures this out from the "labels" parameter.
-	labels:		Labels for each wire, in form "(L1, L2, L3, PE)".
+	labels:		Labels for each wire, in form "(L1, L2, L3, PE)". Spacers are either blank arguments, or _2_ etc.
 	screened:	Either "true" or "false" (default).
 '
 m4_define_blind(`busFan', `

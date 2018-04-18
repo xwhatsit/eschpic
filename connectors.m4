@@ -258,7 +258,7 @@ m4_define_blind(`terminalsDrawDeferred', `
 `
 Terminal group.
 
-Positions are defined as .T1, .T2 etc., and also .T[labelname] if those are supplied.
+Positions are defined as .Start1, .End1 etc.
 
 Usage: terminalGroup([comma-separated key-value parameters])
 Params:
@@ -267,7 +267,7 @@ Params:
 	val:	
 	description:
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
-	labels:		Terminal labels/numbers, in syntax (1, 2, 3) etc.
+	labels:		Terminal labels/numbers, in syntax (1, 2, 3) etc. Spacers are either blank arguments, or _2_ etc.
 	count:		Not required if labels parameter is supplied.
 '
 m4_define_blind(`terminalGroup', `
@@ -341,4 +341,100 @@ m4_define_blind(`terminalGroup', `
 	componentDrawLabels(_terminalGroup_)
 
 	move to last[].Start;
+')
+
+
+`
+Terminal rail.
+
+Positions are defined as .N1, .N2 etc., and also .T[labelname] if those are supplied.
+
+Usage: terminalRail([comma-separated key-value parameters])
+Params:
+	pos:		Position to place first terminal. Defaults to "Here".
+	ref:
+	val:	
+	description:
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	box:		Whether or not to put dashed box around terminal rail. Either true or false (default).
+	labels:		Terminal labels/numbers, in syntax (1, 2, 3) etc. Spacers are either blank arguments, or _2_ etc.
+	count:		Not required if labels parameter is supplied.
+	wires:		Wire labels in syntax (1S1:12, 5Q1:4) etc. Not required; can add later using position references.
+	wireLength:	Length of wires. Defaults to elen*1.5.
+'
+m4_define_blind(`terminalRail', `
+	componentParseKVArgs(`_terminalRail_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `refPos', `',
+		 `box', `false',
+		 `labels', `',
+		 `count', `',
+		 `wires', `',
+		 `wireLength', `elen*1.5'), $@)
+	m4_ifelse(_terminalRail_count, `', `
+		m4_define(`_terminalRail_count', m4_nargs(m4_extractargs(_terminalRail_labels)))
+		m4_ifelse(_terminalRail_count, 0, `
+			m4_errprintl(`error: terminalRail has zero count')
+			m4_m4exit(1)
+		')
+	')
+
+	componentHandleRef(_terminalRail_)
+	[
+		pushDir();
+
+		Start: Here;
+		move dirToDirection(peekDir());
+		End: Here;
+
+		m4_define(`_terminalRail_totalTerminals', 0)
+		move to Start;
+		m4_forloop(i, 1, _terminalRail_count, `
+			m4_define(`_terminal_termText', `')
+			m4_ifelse(terminalRail_labels, `', `', `m4_define(`_terminal_termText', m4_argn(i, m4_extractargs(_terminalRail_labels)))')
+
+			m4_define(`_terminalRail_spacerCount', 0)
+			m4_ifelse(_terminalRail_labels, `', `', `
+				m4_ifelse(_terminal_termText, `', `m4_define(`_terminalRail_spacerCount', 1)')
+				m4_regexp(_terminal_termText, `^_\([0-9]+\)_$', `m4_define(`_terminalRail_spacerCount', \1)')
+			')
+
+			m4_ifelse(_terminalRail_spacerCount, 0, `
+				m4_define(`_terminalRail_totalTerminals', m4_eval(_terminalRail_totalTerminals + 1))
+
+				`Start'_terminalRail_totalTerminals: Here;
+				line dirToDirection(peekDir()) elen/8;
+				box m4_ifelse(dirIsVertical(peekDir()), 1, `wid elen/2 ht elen/4', `wid elen/4 ht elen/2') with dirToCompass(dirRev(peekDir())) at last line.end;
+				`End'_terminalRail_totalTerminals: last box`'dirToCompass(peekDir());
+				`N'_terminalRail_totalTerminals: `End'_terminalRail_totalTerminals;
+				m4_ifelse(_terminalRail_labels, `', `', `
+					`T'm4_patsubst(_terminal_termText, `[^A-Za-z0-9]', `_'): `N'_terminalRail_totalTerminals;
+					"textTerminalLabel(_terminal_termText)" at last box.c;
+				')
+
+				m4_ifelse(_terminalRail_wires, `', `', `
+					m4_define(`_terminal_wireText', m4_argn(i, m4_extractargs(_terminalRail_wires)))
+					m4_ifelse(_terminal_wireText, `', `', `
+						wire(dirToDirection(peekDir()) _terminalRail_wireLength from `N'_terminalRail_totalTerminals, _terminal_wireText, end)
+					')
+				')
+
+				m4_ifelse(i, _terminalRail_count, `', `move to `Start'_terminalRail_totalTerminals then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/2');
+			', `
+				move m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') (elen/2 * _terminalRail_spacerCount);
+			')
+		')
+
+		popDir();
+	] with .Start at _terminalRail_pos;
+
+
+	componentDrawLabels(_terminalRail_)
+
+	m4_ifelse(_terminalRail_box, `true', `box dashed elen/18 wid last [].wid + elen/4 ht last [].ht + elen/4 with .c at last [].c');
+
+	move to last [].End;
 ')

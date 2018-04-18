@@ -118,3 +118,16 @@ m4_define_blind(`dirRev',
 	`m4_ifelse(m4_trim(`$1'), dirRight, dirLeft,
 	`m4_errprint(`error: dirRev: invalid direction parameter:' m4_trim(`$1')
 		) m4_m4exit(1)')')')')')
+
+
+`
+Converts direction to compass point
+'
+m4_define_blind(`dirToCompass',
+	`m4_ifelse(m4_trim(`$1'), dirUp,    `.n',
+	`m4_ifelse(m4_trim(`$1'), dirDown,  `.s',
+	`m4_ifelse(m4_trim(`$1'), dirLeft,  `.w',
+	`m4_ifelse(m4_trim(`$1'), dirRight, `.e',
+	`m4_errprint(`error: dirToCompass: invalid direction parameter:' m4_trim(`$1')
+		) m4_m4exit(1)')')')')')
+	
