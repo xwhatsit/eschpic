@@ -434,7 +434,7 @@ m4_define_blind(`terminalRail', `
 
 	componentDrawLabels(_terminalRail_)
 
-	m4_ifelse(_terminalRail_box, `true', `box dashed elen/18 wid last [].wid + elen/4 ht last [].ht + elen/4 with .c at last [].c');
+	m4_ifelse(_terminalRail_box, `true', `box dashed elen/19 wid last [].wid + elen/4 ht last [].ht + elen/4 with .c at last [].c');
 
 	move to last [].End;
 ')
