@@ -5,10 +5,10 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-echo "Item, Part, Qty, Value, Description"
+echo -e "Item\tPart    \tQty\tValue    \tDescription"
 tail +2 $1 | awk '
 	BEGIN {
-		FS = ",";
+		FPAT = "([^,]*)|(\"[^\"]+\")"
 		PROCINFO["sorted_in"] = "@ind_str_asc";
 	}
 
