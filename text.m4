@@ -76,3 +76,11 @@ m4_define_blind(`textMultiLineCentred',
 	`m4_forloop(`m4_argNum', 1, $#,
 		`m4_ifelse(m4_argNum, 1, `',
 			` \\')' \normalsize{}`m4_argn(m4_argNum, $@)')' m4_newline()`\end{tabular}}')
+`
+As per textMultiLine, but right-aligned.
+'
+m4_define_blind(`textMultiLineRAligned',
+	`{\footnotesize \begin{tabular}[t]{@{}r@{}}'
+	`m4_forloop(`m4_argNum', 1, $#,
+		`m4_ifelse(m4_argNum, 1, `',
+			` \\')' \normalsize{}`m4_argn(m4_argNum, $@)')' m4_newline()`\end{tabular}}')
