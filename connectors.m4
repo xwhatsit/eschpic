@@ -347,7 +347,7 @@ m4_define_blind(`terminalGroup', `
 `
 Terminal rail.
 
-Positions are defined as .N1, .N2 etc., and also .T[labelname] if those are supplied.
+Positions are defined as .N1, .N2 etc., and also .T[labelname] if those are supplied. If wire labels (and wires) are drawn, their ends are given as .WN1, .WN2 etc.
 
 Usage: terminalRail([comma-separated key-value parameters])
 Params:
@@ -419,6 +419,7 @@ m4_define_blind(`terminalRail', `
 					m4_define(`_terminal_wireText', m4_argn(i, m4_extractargs(_terminalRail_wires)))
 					m4_ifelse(_terminal_wireText, `', `', `
 						wire(dirToDirection(peekDir()) _terminalRail_wireLength from `N'_terminalRail_totalTerminals, _terminal_wireText, end)
+						`WN'_terminalRail_totalTerminals: Here;
 					')
 				')
 
