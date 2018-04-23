@@ -56,7 +56,8 @@ tail +2 $1 | awk '
 	}
 
 	{
-		registerItem($5, $6, $2, $3);
+		if (substr($5, 2, 1) != "*")
+			registerItem($5, $6, $2, $3);
 	}
 
 	END {
