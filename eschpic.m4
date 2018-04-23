@@ -15,7 +15,7 @@
 
 \DTLsetseparator{,}
 
-\IfFileExists{bom.csv.sorted}{
+\IfFileExists{bom_table.csv}{
 \DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom_table.csv}
 
 \begin{document}
