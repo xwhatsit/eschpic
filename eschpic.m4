@@ -16,7 +16,7 @@
 \DTLsetseparator{,}
 
 \IfFileExists{bom.csv.sorted}{
-\DTLloaddb[noheader,keys={ref,val,description,location,part,parentpart,uid}]{bom}{bom.csv.sorted}
+\DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom_table.csv}
 
 \begin{document}
 m4_divert(9)
