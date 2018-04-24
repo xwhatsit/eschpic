@@ -63,7 +63,7 @@ tail +2 $1 | awk '
 	END {
 		currLevel = 0;
 		id[currLevel] = 0;
-		if (length(part) > 0)
+		if (length(children) > 0)
 			for (part in children["\"\""])
 				printItem(part, "\"\"");
 	}
