@@ -17,6 +17,7 @@
 
 \IfFileExists{bom_table.csv}{
 \DTLloaddb[noheader,keys={ref,val,description,location,part,uid}]{bom}{bom_table.csv}
+}
 
 \begin{document}
 m4_divert(9)
@@ -24,6 +25,7 @@ m4_divert(9)
 
 \setcounter{LTchunksize}{1000}
 
+\IfFileExists{bom_table.csv}{
 \DTLifdbempty{bom}{}{
 \section*{Component List}
 \begin{longtable}{l l l r r}
@@ -38,7 +40,7 @@ Reference & Value & Description & Location & Part Number \\ \midrule
 \bottomrule
 \end{longtable}
 }
-}{}
+}
 
 \end{document}
 % eschpic document end (divert=9)
