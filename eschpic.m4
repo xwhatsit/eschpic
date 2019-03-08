@@ -209,13 +209,11 @@ m4_undivert(8)
 
                 # horizontal tick marks
                 for x = 1 to (a3NumHTics - 1) do {
-                        line up   a3InnerMargin from (x * hstep + Inside.l.x),Outside.b.y;
                         line down a3InnerMargin from (x * hstep + Inside.l.x),Outside.t.y;
                 }
 
                 # horizontal tick labels
                 for x = 0 to (a3NumHTics - 1) do {
-                        sprintf(`"{\Large %g}"', x + 1) at (x * hstep + Inside.l.x + (hstep / 2)),(Outside.b.y + labeloffs);
                         sprintf(`"{\Large %g}"', x + 1) at (x * hstep + Inside.l.x + (hstep / 2)),(Outside.t.y - labeloffs);
                 }
 
@@ -232,31 +230,32 @@ m4_undivert(8)
                      ')
 
                 # title block
-                tbheight = Inside.height / 14;
-                detailswidth = Inside.width/7;
+                tbheight = a3InnerMargin;
+                detailswidth = Inside.width/8;
 
                 # we avoid double lines when certain PDF viewers are zoomed out by
                 # making boxes invisible and just drawing the lines we need
 
-                SheetNum: box wid tbheight ht tbheight with .se at Inside.se invis;
-                line from SheetNum.ne to SheetNum.nw to SheetNum.sw;
+                SheetNum: box wid tbheight*3 ht tbheight with .ne at Inside.se invis;
+                line from SheetNum.nw to SheetNum.sw;
                 `"\small \textit{Sheet:}"' ljust below at SheetNum.nw;
 
-                Title: box wid Inside.width/3.5 ht tbheight with .ne at SheetNum.nw invis;
-                line from Title.ne to Title.nw to Title.sw;
-                `"\small \textit{Title:}"' ljust below at Title.nw;
-
-                Ref: box wid detailswidth ht tbheight/3 with .ne at Title.nw invis;
-                line from Ref.ne to Ref.nw to Ref.sw;
+                Ref: box wid detailswidth ht tbheight with .nw at Inside.sw invis;
                 `"\small \textit{Ref:}"' ljust below at Ref.nw;
 
-                Rev: box wid detailswidth ht tbheight/3 with .t at Ref.b invis;
-                line from Rev.ne to Rev.nw to Rev.sw;
+                Rev: box wid detailswidth ht tbheight with .nw at Ref.ne invis;
+                line from Rev.nw to Rev.sw;
                 `"\small \textit{Rev:}"' ljust below at Rev.nw;
 
-                Date: box wid detailswidth ht tbheight/3 with .t at Rev.b invis;
-                line from Date.ne to Date.nw to Date.sw;
+                Date: box wid detailswidth ht tbheight with .nw at Rev.ne invis;
+                line from Date.nw to Date.sw;
                 `"\small \textit{Date:}"' ljust below at Date.nw;
+
+                Title: box wid SheetNum.w.x - Date.e.x ht tbheight with .nw at Date.ne invis;
+                line from Title.nw to Title.sw;
+                `"\small \textit{Title:}"' ljust below at Title.nw;
+
+		line down from Ref.nw to Ref.sw then right to SheetNum.se then up to SheetNum.ne;
 
                 `"\Huge '_a3_title`"' at Title;
                 `"'_a3_date`"' at Date;
