@@ -69,7 +69,7 @@ m4_define_blind(`componentDrawLabels', `
 				if dirIsVertical(getDir()) then {
 					"textMultiLine(m4_indir($1`labels'))" at last [].w + (elen/16, 0) ljust;
 				} else {
-					"textMultiLine(m4_indir($1`labels'))" at last [].n - (0, elen/2) below;
+					"textMultiLine(m4_indir($1`labels'))" at last [].c;
 				}
 			', `
 				m4_ifelse(m4_indir($1`refPos'), `', `m4_define($1`refPos', m4_ifelse(dirIsVertical(getDir()), 1, `rjust', `above'))')

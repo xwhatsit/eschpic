@@ -57,16 +57,19 @@ m4_define_blind(`module', `
 		m4_ifelse(_module_botterms, `', `m4_define(`_module_botterms', `(())')')
 
 		m4_define(`_module_terminalDir', m4_ifelse(dirIsVertical(peekDir()), 1, dirRight, dirDown));
+		m4_define(`_module_dirConventional', dirIsConventional(peekDir()));
 		m4_define(`_module_groupCount', 0)
 
+		circle rad 0.5 colored "purple" with .c at Here;
 		Start: Here;
 		move dirToDirection(dirRev(_module_terminalDir)) _module_padding then dirToDirection(peekDir()) (_module_terminalDepth)/2;
 		BoxStartT: Here;
+		circle rad 0.5 colored "green" with .c at Here;
 
 		move to Start;
 		m4_define(`_module_numTopGroups', m4_nargs(m4_extractargs(_module_topterms)))
 		m4_forloop(i, 1, _module_numTopGroups, `
-			_moduleParseTerminals(m4_argn(i, m4_extractargs(_module_topterms)), true)
+			_moduleParseTerminals(m4_argn(i, m4_extractargs(_module_topterms)), m4_ifelse(_module_dirConventional, 1, true, false))
 			GroupEnd: Here;
 			move to _module_groupRef.LastTerminalBox.c then dirToDirection(_module_terminalDir) (_module_terminalPitch)/2;
 			m4_ifelse(i, _module_numTopGroups, `', `
@@ -77,6 +80,7 @@ m4_define_blind(`module', `
 		BoxEndLastTermT: Here;
 		move dirToDirection(_module_terminalDir) (_module_padding)/2;
 		BoxEndT: Here;
+		circle rad 0.5 colored "blue" with .c at Here;
 
 		move to Start then dirToDirection(peekDir()) _module_height;
 		End: Here;
@@ -85,7 +89,7 @@ m4_define_blind(`module', `
 		move to End;
 		m4_define(`_module_numBotGroups', m4_nargs(m4_extractargs(_module_botterms)))
 		m4_forloop(i, 1, _module_numBotGroups, `
-			_moduleParseTerminals(m4_argn(i, m4_extractargs(_module_botterms)), false)
+			_moduleParseTerminals(m4_argn(i, m4_extractargs(_module_botterms)), m4_ifelse(_module_dirConventional, 1, false, true))
 			GroupEnd: Here;
 			move to _module_groupRef.LastTerminalBox.c then dirToDirection(_module_terminalDir) (_module_terminalPitch)/2;
 			m4_ifelse(i, _module_numBotGroups, `', `
@@ -96,6 +100,7 @@ m4_define_blind(`module', `
 		BoxEndLastTermB: Here;
 		move dirToDirection(_module_terminalDir) (_module_padding)/2;
 		BoxEndB: Here;
+		circle rad 0.5 colored "red" with .c at Here;
 
 		m4_ifelse(dirIsVertical(peekDir()), 1, `
 			if BoxEndT.x > BoxEndB.x then {
@@ -104,12 +109,15 @@ m4_define_blind(`module', `
 				BoxEndT: (BoxEndB.x, BoxEndT.y);
 			}
 		', `
-			if BoxEndT.y > BoxEndB.y then {
+			if BoxEndT.y < BoxEndB.y then {
 				BoxEndB: (BoxEndB.x, BoxEndT.y);
 			} else {
 				BoxEndT: (BoxEndT.x, BoxEndB.y);
 			}
 		')
+		circle rad 0.75 outlined "orange" with .c at BoxEndT;
+		circle rad 0.75 outlined "black" with .c at BoxEndB;
+
 
 		move to Start then dirToDirection(peekDir()) (_module_terminalDepth)/2 then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
 		line to BoxStartT \
@@ -165,12 +173,14 @@ m4_define_blind(`_moduleParseTerminals', `
 				   m4_ifelse($2, true, `.e then right', `.w then left')) elen/8;
 	m4_ifelse(_module_groupName, `', `', `
 		ModuleGroupTextRef: Here;
-		"textModuleTerminalLabel(_module_groupName)" at ModuleGroupTextRef;
+		m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
+			  "textModuleTerminalLabel(_module_groupName)", m4_dnl
+			  "textRotated(textModuleTerminalLabel(_module_groupName))") at ModuleGroupTextRef;
 		textWidth = textModuleTerminalLabelLength((_module_groupName));
 		if textWidth < distanceBetweenPoints(_module_groupRef.OuterStart, _module_groupRef.End) - 2*(_module_terminalPitch)*5/8 then {
-			move to ModuleGroupTextRef then dirToDirection(dirCW(peekDir())) textWidth/2;
+			move to ModuleGroupTextRef then dirToDirection(dirRev(_module_terminalDir)) textWidth/2;
 			ModuleTextStart: Here;
-			move to ModuleGroupTextRef then dirToDirection(dirCCW(peekDir())) textWidth/2;
+			move to ModuleGroupTextRef then dirToDirection(_module_terminalDir) textWidth/2;
 			ModuleTextEnd: Here;
 
 			groupLineLen = (last box m4_ifelse(dirIsVertical(peekDir()), 1, .wid, .ht) - \
@@ -218,12 +228,16 @@ m4_define_blind(`_moduleDrawTerm', `
 		m4_ifelse(_module_termDesc, `', `', `m4_define(`_module_termDesc', m4_trim(m4_extractargs(_module_termDesc)))')
 
 		box _module_termBoxDims with _module_terminalBoxRef at Here;
-		"textModuleTerminalLabel(_module_termText)" at last box.c;
+		m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
+			  "textModuleTerminalLabel(_module_termText)", m4_dnl
+			  "textRotated(textModuleTerminalLabel(_module_termText))") at last box.c;
 	')
 	LastTerminalBox: last box;
 	LastTerminal: last box`'_module_terminalBoxRef;
 	m4_ifelse(_module_termDesc, `', `', `
-		move dirToDirection(m4_ifelse($2, true, peekDir(), dirRev(peekDir()))) elen/8;
+		move dirToDirection(m4_ifelse(dirIsVertical(peekDir()), 1,
+			m4_ifelse($2, true, dirCW(_module_terminalDir),  dirRev(dirCW(_module_terminalDir))),
+			m4_ifelse($2, true, dirCCW(_module_terminalDir), dirRev(dirCCW(_module_terminalDir))))) elen/8;
 		LastTerminalInside: Here;
 		m4_ifelse(dirIsVertical(peekDir()), 1, m4_dnl
 			"textRotated(textModuleTerminalLabel(_module_termDesc))", m4_dnl
