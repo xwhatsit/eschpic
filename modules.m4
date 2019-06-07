@@ -60,11 +60,9 @@ m4_define_blind(`module', `
 		m4_define(`_module_dirConventional', dirIsConventional(peekDir()));
 		m4_define(`_module_groupCount', 0)
 
-		circle rad 0.5 colored "purple" with .c at Here;
 		Start: Here;
 		move dirToDirection(dirRev(_module_terminalDir)) _module_padding then dirToDirection(peekDir()) (_module_terminalDepth)/2;
 		BoxStartT: Here;
-		circle rad 0.5 colored "green" with .c at Here;
 
 		move to Start;
 		m4_define(`_module_numTopGroups', m4_nargs(m4_extractargs(_module_topterms)))
@@ -80,7 +78,6 @@ m4_define_blind(`module', `
 		BoxEndLastTermT: Here;
 		move dirToDirection(_module_terminalDir) (_module_padding)/2;
 		BoxEndT: Here;
-		circle rad 0.5 colored "blue" with .c at Here;
 
 		move to Start then dirToDirection(peekDir()) _module_height;
 		End: Here;
@@ -100,7 +97,6 @@ m4_define_blind(`module', `
 		BoxEndLastTermB: Here;
 		move dirToDirection(_module_terminalDir) (_module_padding)/2;
 		BoxEndB: Here;
-		circle rad 0.5 colored "red" with .c at Here;
 
 		m4_ifelse(dirIsVertical(peekDir()), 1, `
 			if BoxEndT.x > BoxEndB.x then {
@@ -115,9 +111,6 @@ m4_define_blind(`module', `
 				BoxEndT: (BoxEndT.x, BoxEndB.y);
 			}
 		')
-		circle rad 0.75 outlined "orange" with .c at BoxEndT;
-		circle rad 0.75 outlined "black" with .c at BoxEndB;
-
 
 		move to Start then dirToDirection(peekDir()) (_module_terminalDepth)/2 then dirToDirection(dirRev(_module_terminalDir)) (_module_terminalPitch)/2;
 		line to BoxStartT \
