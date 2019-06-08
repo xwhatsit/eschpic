@@ -60,6 +60,8 @@ m4_define_blind(`module', `
 		m4_define(`_module_dirConventional', dirIsConventional(peekDir()));
 		m4_define(`_module_groupCount', 0)
 
+		m4_define(`_module_height', m4_ifelse(dirIsVertical(peekDir()), 1, _module_height, _module_width));
+
 		Start: Here;
 		move dirToDirection(dirRev(_module_terminalDir)) _module_padding then dirToDirection(peekDir()) (_module_terminalDepth)/2;
 		BoxStartT: Here;
