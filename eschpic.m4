@@ -9,6 +9,7 @@
 \usepackage{pdflscape}
 \usepackage[hidelinks]{hyperref}
 \usepackage{siunitx}
+\usepackage{textcomp}
 \usepackage{tikz}
 \usepackage{varwidth}
 \pagestyle{empty}
