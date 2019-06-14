@@ -297,20 +297,38 @@ m4_define_blind(`componentAddContactModifiers', `
 			`arc cw from AM-(1.2+_contactorLineAdjust,0) to AM-(_contactorLineAdjust,0) with .c at AM-(0.6+_contactorLineAdjust,0)')
 	')
 	m4_ifelse(m4_index($1, `thermal'), -1, `', `
-		m4_ifelse(dirIsVertical(peekDir()), 1, `
-			Thermal1: polarCoord(MidContact, 0.63, 108);
-			Thermal2: polarCoord(Thermal1,   0.94, 198);
-			Thermal3: polarCoord(Thermal2,   0.94, 108);
-			Thermal4: polarCoord(Thermal3,   0.94, 198);
-			Thermal5: polarCoord(Thermal4,   0.94, 288);
-			Thermal6: polarCoord(Thermal5,   0.63, 198);
+		m4_ifelse($2, true, `
+			m4_ifelse(dirIsVertical(peekDir()), 1, `
+				Thermal1: MidContact;
+				Thermal2: polarCoord(Thermal1, elen/8,  180);
+				Thermal3: polarCoord(Thermal2, elen/8,   90);
+				Thermal4: polarCoord(Thermal3, elen/8,  180);
+				Thermal5: polarCoord(Thermal4, elen/8,  270);
+				Thermal6: polarCoord(Thermal5, elen/16, 180);
 			', `
-			Thermal1: polarCoord(MidContact, 0.63, 162);
-			Thermal2: polarCoord(Thermal1,   0.94,  72);
-			Thermal3: polarCoord(Thermal2,   0.94, 162);
-			Thermal4: polarCoord(Thermal3,   0.94,  72);
-			Thermal5: polarCoord(Thermal4,   0.94, 342);
-			Thermal6: polarCoord(Thermal5,   0.63,  72);
+				Thermal1: MidContact;
+				Thermal2: polarCoord(Thermal1, elen/8,   90);
+				Thermal3: polarCoord(Thermal2, elen/8,  180);
+				Thermal4: polarCoord(Thermal3, elen/8,   90);
+				Thermal5: polarCoord(Thermal4, elen/8,    0);
+				Thermal6: polarCoord(Thermal5, elen/16,  90);
+			')
+		', `
+			m4_ifelse(dirIsVertical(peekDir()), 1, `
+				Thermal1: polarCoord(MidContact, 0.63, 108);
+				Thermal2: polarCoord(Thermal1,   0.94, 198);
+				Thermal3: polarCoord(Thermal2,   0.94, 108);
+				Thermal4: polarCoord(Thermal3,   0.94, 198);
+				Thermal5: polarCoord(Thermal4,   0.94, 288);
+				Thermal6: polarCoord(Thermal5,   0.63, 198);
+				', `
+				Thermal1: polarCoord(MidContact, 0.63, 162);
+				Thermal2: polarCoord(Thermal1,   0.94,  72);
+				Thermal3: polarCoord(Thermal2,   0.94, 162);
+				Thermal4: polarCoord(Thermal3,   0.94,  72);
+				Thermal5: polarCoord(Thermal4,   0.94, 342);
+				Thermal6: polarCoord(Thermal5,   0.63,  72);
+			')
 		')
 		line from Thermal1 to Thermal2 then to Thermal3 then to Thermal4 then to Thermal5 then to Thermal6;
 	')
