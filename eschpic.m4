@@ -198,8 +198,8 @@ m4_undivert(8)
         m4_define(`a3NumVTics', _a3_numVTics)
 	m4_define(`a3PrefixRefs', _a3_prefixRefs)
 
-        maxpswid = a3W / 25.4
-        maxpsht  = a3H / 25.4
+        maxpswid = a3W / 25.4 * 2
+        maxpsht  = a3H / 25.4 * 2
 
         [
                 labeloffs = a3InnerMargin / 2;
