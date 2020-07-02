@@ -6,7 +6,7 @@ Usage: componentHandleRef(prefix)
 '
 m4_define_blind(`componentHandleRef', `
 	# if a ref was defined and we have enabled it, and it does not already start with a number (or underscore, which is stripped), prefix it with the sheet number
-	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(a3PrefixRefs, `true', m4_ifelse(m4_regexp($1ref, `^[^_0-9]'), 0, a3SheetNum, `'), `')`'m4_patsubst($1ref, `^_')))
+	m4_ifelse($1ref, `', `', m4_define(`$1ref_prefixed', m4_ifelse(eschPrefixRefs, `true', m4_ifelse(m4_regexp($1ref, `^[^_0-9]'), 0, eschSheetNum, `'), `')`'m4_patsubst($1ref, `^_')))
 
 	# if ref was defined and is a valid pic label, then add a label
 	m4_ifelse($1ref, `', `', `m4_ifelse(m4_regexp($1ref, `^[_A-Z][A-Za-z0-9]*$'), 0, m4_patsubst($1ref, `^_')`:')')
@@ -140,9 +140,9 @@ m4_define_blind(`componentWriteBOM', `
 	m4_pushdef(`val', m4_indir($1`val'))
 	m4_pushdef(`description', m4_indir($1`description'))
 	m4_pushdef(`part', m4_indir($1`part'))
-	m4_pushdef(`sheet', a3SheetNum)
-	m4_pushdef(`hpos', a3HPosOf((m4_indir($1`pos')).x))
-	m4_pushdef(`vpos', a3VPosOf((m4_indir($1`pos')).y))
+	m4_pushdef(`sheet', eschSheetNum)
+	m4_pushdef(`hpos', eschHPosOf((m4_indir($1`pos')).x))
+	m4_pushdef(`vpos', eschVPosOf((m4_indir($1`pos')).y))
 
 	m4_ifelse(m4_indir($1`ref'), `', `', `
 		m4_ifdef(`_componentBOM_'ref`.last', `
@@ -174,7 +174,7 @@ Allows manually writing out BOM entry to aux file
 Usage: componentWriteBOM(ref, val, description, part, [sheet])
 '
 m4_define_blind(`bomEntry', `
-	print "`_componentBOMEntry'($1,,$2,$3,$4,m4_ifelse(m4_eval($# < 5), 1, a3SheetNum, $5),,)" >> "eschpic.aux";
+	print "`_componentBOMEntry'($1,,$2,$3,$4,m4_ifelse(m4_eval($# < 5), 1, eschSheetNum, $5),,)" >> "eschpic.aux";
 ')
 
 
@@ -190,7 +190,7 @@ m4_define_blind(`_componentBOMEntry', `
 			m4_pushdef(`location', $6)
 		', `
 			m4_pushdef(`target', $1_$2)
-			m4_pushdef(`location', $6.$7`'a3VPosLetter($8))
+			m4_pushdef(`location', $6.$7`'eschVPosLetter($8))
 		')
 
 		m4_pushdef(`part', $5)
