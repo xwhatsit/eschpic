@@ -1,10 +1,13 @@
 % eschpic document start, for processing with dpic -g
+
+m4_ifdef(`eschSheetSize', `', `m4_define(`eschSheetSize', `a3')')
+
 \documentclass{article}
 \usepackage{booktabs}
 \usepackage{datatool}
 \usepackage{datetime2}
 \usepackage{float}
-\usepackage[a3paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
+\usepackage[eschSheetSize`'paper,left=10mm,top=10mm,right=10mm,bottom=10mm]{geometry}
 \usepackage{longtable}
 \usepackage{pdflscape}
 \usepackage[hidelinks]{hyperref}
@@ -64,26 +67,28 @@ The following macros need to be here up the top, as they are used early on.
 '
 
 `
-Gives a letter used for vertical-tic marks used on a3TitleBlock() below.
+Gives a letter used for vertical-tic marks used on sheetTitleBlock() below.
 
-Usage: a3VPosLetter(num)
+Usage: eschVPosLetter(num)
 Params:
         num:    Number between 0 and 9, which will produce a letter between A and J.
 
 Notes:
         Numbers over 9 will produce strange double-letters, like "BA" for 10.
 '
-m4_define_blind(`a3VPosLetter', `m4_translit(`$1', `0-9', `A-J')')
+m4_define_blind(`eschVPosLetter', `m4_translit(`$1', `0-9', `A-J')')
+m4_define_blind(`a3VPosLetter', `eschVPosLetter($@)') % for backwards compatibility
 
 
 `
-Does the reverse of a3VPosLetter.
+Does the reverse of eschVPosLetter.
 
-Usage: a3VPosNumber(letter)
+Usage: eschVPosNumber(letter)
 Params:
 	letter:	Letter between A and J
 '
-m4_define_blind(`a3VPosNumber', `m4_translit(`$1', `A-J', `0-9')')
+m4_define_blind(`eschVPosNumber', `m4_translit(`$1', `A-J', `0-9')')
+m4_define_blind(`a3VPosNumber', `eschVPosNumber($@)') % for backwards compatibility
 
 
 
@@ -104,9 +109,9 @@ m4_divert(-1)
 
 
 `
-A3 sheet (landscape). South-west corner of inside (drawable area) will be aligned with (0, 0).
+Creates sheet with titleblock. South-west corner of inside (drawable area) will be aligned with (0, 0).
 
-Usage: a3Sheet([comma-separated key-value parameters])
+Usage: eschSheet([comma-separated key-value parameters])
 Params:
         sheet:		Number for "Sheet:" box in titleblock. Font size is Latex \Huge. Required.
         title:          String for "Title:" box in titleblock. Font size is Latex \Huge.
@@ -124,22 +129,22 @@ Sets these pic variables:
         maxpsht:        As per maxpswid.
 
 Defines the following macros:
-	a3SheetNum:	The sheet number specified in the "sheet" parameter
-        a3OW:           Overall width of A3 landscape paper (420mm)
-        a3OH:           Overall height of A3 landscape paper, minus 1mm between pages (296mm)
-        a3OuterMargin:  Gets set to whatever outerMargin was in a3TitleBlock() call
-        a3InnerMargin:  Gets set to whatever innerMargin was in a3TitleBlock() call
-        a3W:            Width of titleblock in mm
-        a3H:            Height of titleblock in mm
-        a3IW:           Actual drawable area width inside titleblock
-        a3IH:           Actual drawable area height inside titleblock
-        a3NumHTics:     Gets set to whatever numHTics was in a3TitleBlock() call
-        a3NumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
-	a3PrefixRefs:	Gets set to whatever prefixRefs was in a3TitleBlock() call
+	eschSheetNum:	  The sheet number specified in the "sheet" parameter
+        eschOW:           Overall width of A3 landscape paper (420mm)
+        eschOH:           Overall height of A3 landscape paper, minus 1mm between pages (296mm)
+        eschOuterMargin:  Gets set to whatever outerMargin was in a3TitleBlock() call
+        eschInnerMargin:  Gets set to whatever innerMargin was in a3TitleBlock() call
+        eschW:            Width of titleblock in mm
+        eschH:            Height of titleblock in mm
+        eschIW:           Actual drawable area width inside titleblock
+        eschIH:           Actual drawable area height inside titleblock
+        eschNumHTics:     Gets set to whatever numHTics was in a3TitleBlock() call
+        eschNumVTics:     Gets set to whatever nuMVTics was in a3TitleBlock() call
+	eschPrefixRefs:   Gets set to whatever prefixRefs was in a3TitleBlock() call
 '
-m4_define_blind(`a3Sheet', `
+m4_define_blind(`eschSheet', `
 m4_undivert(8)
-% eschpic A3 sheet start
+% eschpic sheet start
 \begin{landscape}
 \begin{figure}[H]
 	\centering
@@ -164,76 +169,88 @@ m4_undivert(8)
 \end{figure}
 \end{landscape}
 \pagebreak
-% eschpic A3 sheet end (divert=8)
+% eschpic sheet end (divert=8)
 	m4_divert(0)
 
 	# set default args
-	m4_define(`_a3_sheet', `')
-	m4_define(`_a3_title', `')
-	m4_define(`_a3_ref', `')
-	m4_define(`_a3_rev', `')
-	m4_define(`_a3_date', `\today')
-	m4_define(`_a3_numHTics', 8)
-	m4_define(`_a3_numVTics', 6)
-	m4_define(`_a3_outerMargin', 10)
-	m4_define(`_a3_innerMargin', 10)
-	m4_define(`_a3_prefixRefs', true)
+	m4_define(`_sheet_sheet', `')
+	m4_define(`_sheet_title', `')
+	m4_define(`_sheet_ref', `')
+	m4_define(`_sheet_rev', `')
+	m4_define(`_sheet_date', `\today')
+	m4_ifelse(eschSheetSize, `a3', `
+		m4_define(`_sheet_numHTics', 8)
+		m4_define(`_sheet_numVTics', 6)
+	', eschSheetSize, `a2', `
+		m4_define(`_sheet_numHTics', 11)
+		m4_define(`_sheet_numVTics', 8)
+	')
+	m4_define(`_sheet_outerMargin', 10)
+	m4_define(`_sheet_innerMargin', 10)
+	m4_define(`_sheet_prefixRefs', true)
 
 	# parse key-value arguments
-	m4_prefixKVArgs(`_a3_', $@)
+	m4_prefixKVArgs(`_sheet_', $@)
 
-	m4_ifelse(_a3_sheet, `', `m4_errprint(`error: a3TitleBlock: "sheet" parameter required'
+	m4_ifelse(_sheet_sheet, `', `m4_errprint(`error: eschSheet: "sheet" parameter required'
 		) m4_m4exit(1)')
 
-	m4_define(`a3SheetNum', _a3_sheet)
-        m4_define(`a3OW', `420')
-        m4_define(`a3OH', `296')
-        m4_define(`a3OuterMargin', _a3_outerMargin)
-        m4_define(`a3InnerMargin', _a3_innerMargin)
-        m4_define(`a3W', `m4_eval(a3OW - (a3OuterMargin * 2))')
-        m4_define(`a3H', `m4_eval(a3OH  - (a3OuterMargin * 2))')
-        m4_define(`a3IW', `m4_eval(a3W - (2 * a3InnerMargin))')
-        m4_define(`a3IH', `m4_eval(a3H - (2 * a3InnerMargin))')
-        m4_define(`a3NumHTics', _a3_numHTics)
-        m4_define(`a3NumVTics', _a3_numVTics)
-	m4_define(`a3PrefixRefs', _a3_prefixRefs)
+	m4_define(`eschSheetNum', _sheet_sheet)
+	m4_define(`a3SheetNum', eschSheetNum)
+	m4_ifelse(eschSheetSize, `a3', `
+		m4_define(`eschOW', `420')
+		m4_define(`eschOH', `296')
+	', eschSheetSize, `a2', `
+		m4_define(`eschOW', `594')
+		m4_define(`eschOH', `419')
+	')
 
-        maxpswid = a3W / 25.4 * 2
-        maxpsht  = a3H / 25.4 * 2
+        m4_define(`eschOuterMargin', _sheet_outerMargin)
+        m4_define(`eschInnerMargin', _sheet_innerMargin)
+        m4_define(`eschW', `m4_eval(eschOW - (eschOuterMargin * 2))')
+        m4_define(`eschH', `m4_eval(eschOH  - (eschOuterMargin * 2))')
+        m4_define(`eschIW', `m4_eval(eschW - (2 * eschInnerMargin))')
+        m4_define(`eschIH', `m4_eval(eschH - (2 * eschInnerMargin))')
+        m4_define(`eschNumHTics', _sheet_numHTics)
+        m4_define(`eschNumVTics', _sheet_numVTics)
+	m4_define(`eschPrefixRefs', _sheet_prefixRefs)
+
+        maxpswid = eschW / 25.4 * 2
+        maxpsht  = eschH / 25.4 * 2
 
         [
-                labeloffs = a3InnerMargin / 2;
+                labeloffs = eschInnerMargin / 2;
 
-                Outside: box wid a3W ht a3H invis;
-                Inside:  box wid a3IW ht a3IH with .c at Outside.c;
+                Outside: box wid eschW ht eschH invis;
+                Inside:  box wid eschIW ht eschIH with .c at Outside.c;
 
-                hstep = Inside.width / a3NumHTics;
-                vstep = Inside.height / a3NumVTics
+                hstep = Inside.width / eschNumHTics;
+                vstep = Inside.height / eschNumVTics
 
                 # horizontal tick marks
-                for x = 1 to (a3NumHTics - 1) do {
-                        line down a3InnerMargin from (x * hstep + Inside.l.x),Outside.t.y;
+                for x = 1 to (eschNumHTics - 1) do {
+                        line down eschInnerMargin from (x * hstep + Inside.l.x),Outside.t.y;
                 }
 
                 # horizontal tick labels
-                for x = 0 to (a3NumHTics - 1) do {
+                for x = 0 to (eschNumHTics - 1) do {
                         sprintf(`"{\Large %g}"', x + 1) at (x * hstep + Inside.l.x + (hstep / 2)),(Outside.t.y - labeloffs);
                 }
 
                 # vertical tick marks
-                for y = 1 to (a3NumVTics - 1) do {
-                        line right a3InnerMargin from Outside.l.x,(y * vstep + Inside.b.y);
-                        line left  a3InnerMargin from Outside.r.x,(y * vstep + Inside.b.y);
+                for y = 1 to (eschNumVTics - 1) do {
+                        line right eschInnerMargin from Outside.l.x,(y * vstep + Inside.b.y);
+                        line left  eschInnerMargin from Outside.r.x,(y * vstep + Inside.b.y);
                 }
 
                 # vertical tick labels
-                m4_forloop(`count', 0, m4_eval(a3NumVTics - 1), `
-                     `"{\Large 'a3VPosLetter(count)`}"' at (Outside.l.x + labeloffs),((m4_eval(a3NumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
-                     `"{\Large 'a3VPosLetter(count)`}"' at (Outside.r.x - labeloffs),((m4_eval(a3NumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
+                m4_forloop(`count', 0, m4_eval(eschNumVTics - 1), `
+                     `"{\Large 'eschVPosLetter(count)`}"' at (Outside.l.x + labeloffs),((m4_eval(eschNumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
+                     `"{\Large 'eschVPosLetter(count)`}"' at (Outside.r.x - labeloffs),((m4_eval(eschNumVTics - 1) - count) * vstep + Inside.b.y + (vstep / 2))
                      ')
 
                 # title block
-                tbheight = a3InnerMargin;
+                tbheight = eschInnerMargin;
                 detailswidth = Inside.width/8;
 
                 # we avoid double lines when certain PDF viewers are zoomed out by
@@ -260,66 +277,72 @@ m4_undivert(8)
 
 		line down from Ref.nw to Ref.sw then right to SheetNum.se then up to SheetNum.ne;
 
-                `"\Huge '_a3_title`"' at Title;
-                `"'_a3_date`"' at Date;
-                `"'_a3_ref`"' at Ref;
-                `"'_a3_rev`"' at Rev;
-                `"\Huge '_a3_sheet`"' at SheetNum;
+                `"\Huge '_sheet_title`"' at Title;
+                `"'_sheet_date`"' at Date;
+                `"'_sheet_ref`"' at Ref;
+                `"'_sheet_rev`"' at Rev;
+                `"\Huge '_sheet_sheet`"' at SheetNum;
 
-		"\hypertarget{`sheet_'_a3_sheet}{}" at Inside.c;
+		"\hypertarget{`sheet_'_sheet_sheet}{}" at Inside.c;
         ] with .Inside.sw at 0,0;
 ')
+m4_define_blind(`a3Sheet', `eschSheet($@)')
 
 
 `
-Gives tic-number of horizontal position in millimetres. Only works if using A3 title block.
+Gives tic-number of horizontal position in millimetres.
 
-Usage: a3HPosOf(hpos)
+Usage: eschHPosOf(hpos)
 Params:
         hpos:   horizontal position in millimetres
 '
-m4_define_blind(`a3HPosOf', `(floor($1 / (a3IW / a3NumHTics)) + 1)')
+m4_define_blind(`eschHPosOf', `(floor($1 / (eschIW / eschNumHTics)) + 1)')
+m4_define_blind(`a3HPosOf', `eschHPosOf($@)') % for backwards compatibility
 
 
 `
 Converts horizontal tic number to millimetres.
 
-Usage: a3HPos(htic)
+Usage: eschHPos(htic)
 Params:
-	htic:	Tic-number (1 through a3NumHTics)
+	htic:	Tic-number (1 through eschNumHTics)
 '
-m4_define_blind(`a3HPos', `($1 * (a3IW / a3NumHTics) - ((a3IW / a3NumHTics) / 2))')
+m4_define_blind(`eschHPos', `($1 * (eschIW / eschNumHTics) - ((eschIW / eschNumHTics) / 2))')
+m4_define_blind(`a3HPos', `eschHPos($@)') % for backwards compatibility
 
 
 `
 Converts vertical tic letter to millimetres.
 
-Usage: a3VPos(vtic)
+Usage: eschVPos(vtic)
 Params:
-	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
+	vtic:	Tic letter (A through eschVPosLetter(a3NumVTics))
 '
-m4_define_blind(`a3VPos', `(a3NumVTics - a3VPosNumber($1)) * (a3IH / a3NumVTics) - ((a3IH / a3NumVTics) / 2)')
+m4_define_blind(`eschVPos', `(eschNumVTics - eschVPosNumber($1)) * (eschIH / eschNumVTics) - ((eschIH / eschNumVTics) / 2)')
+m4_define_blind(`a3VPos', `eschVPos($@)') % for backwards compatibility
 
 
 `
-Gives tic-number (not letter!) of vertical position in millimetres. Only works if using A3 title block.
+Gives tic-number (not letter!) of vertical position in millimetres.
 
-Usage: a3VPosOf(vpos)
+Usage: eschVPosOf(vpos)
 Params:
 	vpos:	vertical position in millimetres
 '
-m4_define_blind(`a3VPosOf', `floor(a3NumVTics - ($1 / (a3IH / a3NumVTics)))')
+m4_define_blind(`eschVPosOf', `floor(eschNumVTics - ($1 / (eschIH / eschNumVTics)))')
+m4_define_blind(`a3VPosOf', `eschVPosOf($@)') % for backwards compatibility
 
 
 `
 Converts htic/vtic letter/number pair to coordinates in millimetres.
 
-Usage: a3Pos(htic, vtic)
+Usage: eschPos(htic, vtic)
 Params:
-	htic:	Tic number (1 through a3NumHTics)
-	vtic:	Tic letter (A through a3VPosLetter(a3NumVTics))
-Example: a3Pos(4, E)
+	htic:	Tic number (1 through eschNumHTics)
+	vtic:	Tic letter (A through eschVPosLetter(eschNumVTics))
+Example: eschPos(4, E)
 '
-m4_define_blind(`a3Pos', `(a3HPos($1), a3VPos($2))')
+m4_define_blind(`eschPos', `(eschHPos($1), eschVPos($2))')
+m4_define_blind(`a3Pos', `(a3HPos($1), a3VPos($2))') % for backwards compatibility
 
 m4_divert(0)
