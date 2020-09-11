@@ -255,6 +255,15 @@ m4_define_blind(`resistor', `
 			', `
 				line from Th2 to Th1 then to Th1 + (0, elen/16);
 			')
+		', _resistor_type, `varistor', `
+			C: 1/2 between Start and End;
+			V1: C + (elen*5/32, elen*5/32);
+			V2: C - (elen*5/32, elen*5/32);
+			m4_ifelse(dirIsVertical(peekDir()), 1, `
+				line from V1 + (0, elen*5/32) to V1 to V2 then to V2 - (0, elen*5/32);
+			', `
+				line from V2 - (elen*5/32, 0) to V2 to V1 then to V1 + (elen*5/32, 0);
+			')
 		')
 
 		popDir();
