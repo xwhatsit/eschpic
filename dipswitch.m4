@@ -102,7 +102,7 @@ m4_define_blind(`rotarySwitch', `
 
 			m4_ifelse(m4_argn(n, m4_extractargs(_rotarySwitch_labels)), _rotarySwitch_setting, `
 				arrowHalfLen = (_rotarySwitch_diameter - textModuleTerminalLabelHeight() * 8/3 - linethick)/2;
-				line thickness linethick*3 from polarCoord(Start, arrowHalfLen, -angle) \
+				line thickness linethick*3 from polarCoord(Start, arrowHalfLen, angle - 180) \
 					to polarCoord(Start, arrowHalfLen*2/3, angle);
 				Pointer: polarCoord(Start, arrowHalfLen, angle);
 				PL: polarCoord(Pointer, arrowHalfLen, angle + 150);
