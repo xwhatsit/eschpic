@@ -177,6 +177,7 @@ Params:
 	description:	Component description.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number.
+	type:		Either incremental (default) or absolute
 	labels:		Terminal labels, in format (1st, 2nd...). Defaults to (V+, V-, A, B).
 '
 m4_define_blind(`encoder', `
@@ -187,7 +188,7 @@ m4_define_blind(`encoder', `
 		 `description', `',
 		 `refPos', `',
 		 `part', `',
-		 `type', `',
+		 `type', `incremental',
 		 `labels', `(V+, V-, A, B)'), $@)
 
 	componentHandleRef(_encoder_)
@@ -218,36 +219,49 @@ m4_define_blind(`encoder', `
 							m4_eval(peekDir() == dirRight), 1, `.nw'))
 		box m4_ifelse(dirIsVertical(peekDir()), 1, `wid _encoder_boxLen ht elen*7/8', `wid elen*7/8 ht _encoder_boxLen') with _encoder_boxRef at BoxCorner;
 
-		circle rad elen*5/16 at last box.c;
+		TypeCircle: circle rad elen*5/16 at last box.c;
 		CC: last circle.c;
-		move to CC then left elen*7/32;
+		m4_ifelse(_encoder_type, `incremental', `
+			move to CC then left elen*7/32;
 
-		spacing = elen*1/8;
-		amplitude = elen*1/8;
+			spacing = elen*1/8;
+			amplitude = elen*1/8;
 
-		SW1: Here + (0, 0);
-		SW2: SW1 + (0, amplitude);
-		SW3: SW1 + (spacing*1, amplitude);
-		SW4: SW1 + (spacing*1, 0);
-		SW5: SW1 + (spacing*2, 0);
-		SW6: SW1 + (spacing*2, amplitude);
-		SW7: SW1 + (spacing*3, amplitude);
-		line from SW1 to SW2 to SW3 to SW4 to SW5 to SW6 to SW7;
+			SW1: Here + (0, 0);
+			SW2: SW1 + (0, amplitude);
+			SW3: SW1 + (spacing*1, amplitude);
+			SW4: SW1 + (spacing*1, 0);
+			SW5: SW1 + (spacing*2, 0);
+			SW6: SW1 + (spacing*2, amplitude);
+			SW7: SW1 + (spacing*3, amplitude);
+			line from SW1 to SW2 to SW3 to SW4 to SW5 to SW6 to SW7;
 
-		SW1: SW1 + (spacing/2, -(amplitude + elen/32));
-		SW2: SW1 + (0, amplitude);
-		SW3: SW1 + (spacing*1, amplitude);
-		SW4: SW1 + (spacing*1, 0);
-		SW5: SW1 + (spacing*2, 0);
-		SW6: SW1 + (spacing*2, amplitude);
-		SW7: SW1 + (spacing*3, amplitude);
-		line from SW1 to SW2 to SW3 to SW4 to SW5 to SW6 to SW7;
+			SW1: SW1 + (spacing/2, -(amplitude + elen/32));
+			SW2: SW1 + (0, amplitude);
+			SW3: SW1 + (spacing*1, amplitude);
+			SW4: SW1 + (spacing*1, 0);
+			SW5: SW1 + (spacing*2, 0);
+			SW6: SW1 + (spacing*2, amplitude);
+			SW7: SW1 + (spacing*3, amplitude);
+			line from SW1 to SW2 to SW3 to SW4 to SW5 to SW6 to SW7;
+		', _encoder_type, `absolute', `
+			C1: circle invis rad elen*17/64 at CC;
+			circle rad elen*14/64 at CC;
+			C2: circle invis rad elen*11/64 at CC;
+			circle rad elen*8/64 at CC;
+			C3: circle invis rad elen*5/64 at CC;
+			circle rad elen*2/64 at CC;
+			arc thickness elen*5/16 cw from C1.nw to C1.ne with .c at CC;
+			arc thickness elen*5/16 cw from C1.se to C1.sw with .c at CC;
+			arc thickness elen*5/16 cw from C2.s to C2.n with .c at CC;
+			arc thickness elen*5/16 cw from C3.e to C3.w with .c at CC;
+		')
 
 		popDir();
 	] with .Start at _encoder_pos;
 
-	m4_define(`_encoder_refPosXRef', last []. last circle.c.x)
-	m4_define(`_encoder_refPosYRef', last []. last circle.c.y)
+	m4_define(`_encoder_refPosXRef', last [].TypeCircle.c.x)
+	m4_define(`_encoder_refPosYRef', last [].TypeCircle.c.y)
 
 	componentDrawLabels(_encoder_)
 	componentWriteBOM(_encoder_)
