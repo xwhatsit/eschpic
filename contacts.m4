@@ -717,12 +717,12 @@ m4_define_blind(`contactGroup', `
 ')
 m4_define_blind(`_contactGroupParseContacts', `
 	m4_pushdef(`_regexp', `\(NO\|NC\|no\|nc\)\( *(\w* *, *\w* *)\)?')
-
-	m4_pushdef(`_index', m4_regexp($1, _regexp))
+	m4_pushdef(`_groupargs', $1)
+	m4_pushdef(`_index', m4_regexp(_groupargs, _regexp))
 	m4_ifelse(_index, -1, `', `
-		m4_pushdef(`length', m4_regexp($1, _regexp, `m4_len(\&)'))
+		m4_pushdef(`_length', m4_regexp(_groupargs, _regexp, `m4_len(\&)'))
 
-		m4_regexp($1, _regexp, `m4_pushdef(`_type', `\1') m4_pushdef(`_args', `\2')')
+		m4_regexp(_groupargs, _regexp, `m4_pushdef(`_type', `\1') m4_pushdef(`_args', `\2')')
 
 		m4_regexp(_args, `( *\(\w*\) *, *\(\w*\) *)', `m4_pushdef(`_firstArg', `\1') m4_pushdef(`_secondArg', `\2')')
 
@@ -738,15 +738,17 @@ m4_define_blind(`_contactGroupParseContacts', `
 		m4_pushdef(`_actuation', m4_ifelse(_contactGroup_contactNum, 0, _contactGroup_actuation, `'))
 		m4_define(`_contactGroup_contactNum', m4_eval(_contactGroup_contactNum + 1))
 
+
 		m4_pushdef(`_contactType', _contactGroup_type)
 		m4_ifelse(_type, `no', `
-			m4_define(_type, NO)
-			m4_define(_contactType, `')
+			m4_define(`_type', `NO')
+			m4_define(`_contactType', `')
 		')
 		m4_ifelse(_type, `nc', `
-			m4_define(_type, NC)
-			m4_define(_contactType, `')
+			m4_define(`_type', NC)
+			m4_define(`_contactType', `')
 		')
+
 
 		m4_ifelse(_type, `NO', `contactNO', _type, `NC', `contactNC')(
 			set=_set,
@@ -774,9 +776,12 @@ m4_define_blind(`_contactGroupParseContacts', `
 		m4_popdef(`_type')
 		m4_popdef(`_args')
 
-		_contactGroupParseContacts(m4_substr($1, m4_eval(_index + length)))
+		_contactGroupParseContacts(m4_substr(_groupargs, m4_eval(_index + _length)))
+
+		m4_popdef(`_length')
 	')
 	m4_popdef(`_index')
+	m4_popdef(`_groupargs')
 	m4_popdef(`_regexp')
 ')
 
