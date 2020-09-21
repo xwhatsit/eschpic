@@ -1145,7 +1145,7 @@ m4_define_blind(`brake', `
 		line from AO to AM;
 		line from BO to BM;
 		box m4_ifelse(dirIsVertical(peekDir()), 1, wid elen*3/8 ht elen/4, wid elen/4 ht elen*3/8) at Centre;
-		line from m4_ifelse(dirIsVertical(peekDir()), 1, `last box.e') dirToDirection(_brake_brakeDir) elen/8;
+		line from m4_ifelse(dirIsVertical(peekDir()), 1, `last box.e', `last box.s') dirToDirection(_brake_brakeDir) elen/8;
 		BC1: Here;
 		move from BC1 dirToDirection(peekDir()) elen*3/32;
 		BB1: Here;
