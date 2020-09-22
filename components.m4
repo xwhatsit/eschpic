@@ -62,6 +62,7 @@ Usage: componentDrawLabels(prefix, [internal=false])
 m4_define_blind(`componentDrawLabels', `
 	m4_ifelse($1, `', `', `
 		m4_ifdef($1`refPos', `', `m4_define($1`'refPos, `')')
+		m4_ifdef($1`refPosAdj', `', `m4_define($1`'refPosAdj, `(0, 0)')')
 		
 		componentCombineLabels($1)
 		m4_ifelse(m4_trim(m4_indir($1`labels')), `', `', `
@@ -99,7 +100,7 @@ m4_define_blind(`componentDrawLabels', `
 					m4_pushdef(`textMacro', `textMultiLineCentred')
 				')
 
-				"m4_indir(textMacro, m4_indir($1`labels'))" at position + positionTweak m4_indir($1`refPos');
+				"m4_indir(textMacro, m4_indir($1`labels'))" at position + positionTweak + m4_indir($1`refPosAdj') m4_indir($1`refPos');
 
 				m4_popdef(`textMacro')
 				m4_popdef(`positionTweak')

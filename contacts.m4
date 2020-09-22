@@ -379,6 +379,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	refPosAdj:	Distance to move the reference label position from the default. In format (x, y).
 	part:		Part number. If this is supplied, it is added to the BOM.
 	set:		Contact set number, used for automatic start/end terminal labels. Defaults to "1".
 	startLabel:	Starting terminal label. Defaults to "3".
@@ -396,6 +397,7 @@ m4_define_blind(`contactNO', `
 		 `val', `',
 		 `description', `',
 		 `refPos', `',
+		 `refPosAdj', `(0, 0)',
 		 `part', `',
 		 `set', `1',
 		 `startLabel', `3',
