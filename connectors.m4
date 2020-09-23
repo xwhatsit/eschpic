@@ -10,6 +10,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	refPosAdj:	Distance to move the reference label position from the default. In format (x, y).
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pin:		Pin number. Defaults to blank.
 	len:		Pin extension length. Defaults to elen.
@@ -22,6 +23,7 @@ m4_define_blind(`connectorMale', `
 		 `val', `',
 		 `description', `',
 		 `refPos', `',
+		 `refPosAdj', `(0, 0)',
 		 `part', `',
 		 `pin', `',
 		 `len', `elen'), $@)
@@ -78,6 +80,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	refPosAdj:	Distance to move the reference label position from the default. In format (x, y).
 	part:		Part number. If this is supplied, it is added to the BOM.
 	pin:		Pin number. Defaults to blank.
 	len:		Pin extension length. Defaults to elen.
@@ -90,6 +93,7 @@ m4_define_blind(`connectorFemale', `
 		 `val', `',
 		 `description', `',
 		 `refPos', `',
+		 `refPosAdj', `(0, 0)',
 		 `part', `',
 		 `pin', `',
 		 `len', `elen'), $@)
@@ -144,6 +148,7 @@ Params:
 	val:		Component value
 	description:	Additional text describing component purpose etc.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	refPosAdj:	Distance to move the reference label position from the default. In format (x, y).
 	part:		Part number. If this is supplied, it is added to the BOM.
 	count:		Pin count. Defaults to 1, or the count of labels in "labels" if those are supplied.
 	labels:		Pin labels, in syntax "(1, 2, 3, PE)" etc. If not supplied, will auto-number from 1 to pincount.
@@ -159,6 +164,7 @@ m4_define_blind(`connector', `
 		 `val', `',
 		 `description', `',
 		 `refPos', `',
+		 `refPosAdj', `(0, 0)',
 		 `part', `',
 		 `count', `',
 		 `labels', `',
