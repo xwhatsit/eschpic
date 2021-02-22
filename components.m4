@@ -220,7 +220,9 @@ Params:
 	description:	Additional text describing component purpose etc.
 	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
 	part:		Part number. If this is supplied, it is added to the BOM.
-	type:		Resistor type. Only "thermistor" supported for now. Defaults to blank.
+	type:		Resistor type. Only "thermistor" and "varistor" supported for now. Defaults to blank.
+	startLabel:	Starting terminal label. Defaults to blank.
+	endLabel:	Ending terminal label. Defaults to blank.
 '
 m4_define_blind(`resistor', `
 	componentParseKVArgs(`_resistor_',
@@ -230,7 +232,9 @@ m4_define_blind(`resistor', `
 		 `description', `',
 		 `part', `',
 		 `refPos', `',
-		 `type', `'), $@)
+		 `type', `',
+		 `startLabel', `',
+		 `endLabel', `'), $@)
 	componentHandleRef(_resistor_)
 	[
 		pushDir();
@@ -266,12 +270,175 @@ m4_define_blind(`resistor', `
 				line from V2 - (elen*5/32, 0) to V2 to V1 then to V1 + (elen*5/32, 0);
 			')
 		')
+		
+		# if terminal labels are defined and valid, add positional labels as "T" + name (e.g. ".TA")
+		m4_ifelse(m4_regexp(_resistor_startLabel, `[A-Za-z0-9]*$'), 0, `T'_resistor_startLabel`: Start')
+		m4_ifelse(m4_regexp(_resistor_endLabel, `[A-Za-z0-9]*$'), 0, `T'_resistor_endLabel`: End')
 
 		popDir();
 	] with .Start at _resistor_pos;
+	
+	# display terminal labels
+	componentDrawTerminalLabel(last [].Start, textTerminalLabel(_resistor_startLabel))
+	componentDrawTerminalLabel(last [].End, textTerminalLabel(_resistor_endLabel))
 
 	componentDrawLabels(_resistor_)
 	componentWriteBOM(_resistor_)
+
+	move to last [].End;
+')
+
+
+`
+Capacitor. Draws in current direction.
+
+Usage: capacitor([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	polarised:	Either "true" or "false" (default).
+	flipped:	Either true or false (default). Only applies if polarised; capacitor normally draws positive to negative.
+	startLabel:	Starting terminal label. Defaults to blank.
+	endLabel:	Ending terminal label. Defaults to blank.
+'
+m4_define_blind(`capacitor', `
+	componentParseKVArgs(`_capacitor_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `refPos', `',
+		 `polarised', `false',
+		 `flipped', `false',
+		 `startLabel', `',
+		 `endLabel', `'), $@)
+	componentHandleRef(_capacitor_)
+	[
+		pushDir();
+
+		line dirToDirection(peekDir()) elen*25/64;
+		Start: last line.start;
+		AI: last line.end;
+		move dirToDirection(peekDir()) elen*7/32;
+		BI: Here;
+		line dirToDirection(peekDir()) elen*25/64 from BI;
+		End: last line.end;
+
+		move to m4_ifelse(_capacitor_flipped, `true', `BI', `AI');
+		m4_ifelse(_capacitor_flipped, `true', `dirToDirection(dirRev(peekDir()))');
+		box m4_ifelse(_capacitor_polarised, `true', `', `filled 0') \
+			m4_ifelse(dirIsVertical(peekDir()), 1, `wid elen*13/40 ht elen/15', `ht elen*13/40 wid elen/15');
+
+		m4_ifelse(_capacitor_polarised, `true', `
+			move to 1/4 between m4_ifelse(_capacitor_flipped, `true', `BI and End', `AI and Start') \
+				then m4_ifelse(dirIsVertical(peekDir()), 1, `left elen/8', `up elen/8');
+			"textComponentVal(+)";
+		')
+
+		move to m4_ifelse(_capacitor_flipped, `true', `AI', `BI');
+		m4_ifelse(_capacitor_flipped, `true', `', `dirToDirection(dirRev(peekDir()))');
+		box filled 0 m4_ifelse(dirIsVertical(peekDir()), 1, `wid elen*13/40 ht elen/15', `ht elen*13/40 wid elen/15');
+		
+		#move dirToDirection(dirCW(peekDir())) elen/10 from m4_ifelse(_capacitor_flipped, `true', `BI', `AI');
+		#line dirToDirection(dirCCW(peekDir())) elen/5;
+
+		#m4_ifelse(_capacitor_polarised, `true', `
+		#	move to 2/23 between m4_ifelse(_capacitor_flipped, `true', `AI and Start', `BI and End');
+		#	move dirToDirection(dirCW(peekDir())) elen/10;
+		#	PB: Here;
+		#	move dirToDirection(dirCCW(peekDir())) elen/5;
+		#	PA: Here;
+		#	move to 15/46 between m4_ifelse(_capacitor_flipped, `true', `AI and Start', `BI and End');
+		#	PC: Here;
+		#	arc m4_ifelse(_capacitor_flipped, `true', `cw', `ccw') from PA to PB with .c at PC;
+		#', `
+		#	move dirToDirection(dirCW(peekDir())) elen/10 from m4_ifelse(_capacitor_flipped, `true', `AI', `BI');
+		#	line dirToDirection(dirCCW(peekDir())) elen/5;
+		#')
+		
+		# if terminal labels are defined and valid, add positional labels as "T" + name (e.g. ".TA")
+		m4_ifelse(m4_regexp(_capacitor_startLabel, `[A-Za-z0-9]*$'), 0, `T'_capacitor_startLabel`: Start')
+		m4_ifelse(m4_regexp(_capacitor_endLabel, `[A-Za-z0-9]*$'), 0, `T'_capacitor_endLabel`: End')
+
+		popDir();
+	] with .Start at _capacitor_pos;
+
+	# display terminal labels
+	componentDrawTerminalLabel(last [].Start, textTerminalLabel(_capacitor_startLabel))
+	componentDrawTerminalLabel(last [].End, textTerminalLabel(_capacitor_endLabel))
+
+	componentDrawLabels(_capacitor_)
+	componentWriteBOM(_capacitor_)
+
+	move to last [].End;
+')
+
+
+`
+Inductor. Draws in current direction.
+
+Usage: inductor([comma-separated key-value parameters])
+Params:
+	pos:		Position to place ".Start" at. Defaults to "Here".
+	ref:		Component reference name. Must be a valid pic label (no spaces, starts with capital
+			letter). Will prefix reference name with the current sheet number.
+	val:		Component value
+	description:	Additional text describing component purpose etc.
+	refPos:		Reference labelling position. One of blank (default), reverse, below, above, ljust, rjust.
+	part:		Part number. If this is supplied, it is added to the BOM.
+	startLabel:	Starting terminal label. Defaults to blank.
+	endLabel:	Ending terminal label. Defaults to blank.
+'
+m4_define_blind(`inductor', `
+	componentParseKVArgs(`_inductor_',
+		(`pos', `Here',
+		 `ref', `',
+		 `val', `',
+		 `description', `',
+		 `part', `',
+		 `refPos', `',
+		 `startLabel', `',
+		 `endLabel', `'), $@)
+	componentHandleRef(_inductor_)
+	[
+		pushDir();
+
+		line dirToDirection(peekDir()) elen*3/10;
+		Start: last line.start;
+		AI: last line.end;
+		move dirToDirection(peekDir()) elen*4/10;
+		BI: Here;
+		line dirToDirection(peekDir()) elen*3/10 from BI;
+		End: last line.end;
+
+		move to AI;
+		corner;
+		m4_forloop(i, 1, 4, `
+			spline 2/3 m4_ifelse(dirIsVertical(peekDir()), 1, `left', `up') elen/10 \
+				then dirToDirection(peekDir()) elen/10 \
+				then m4_ifelse(dirIsVertical(peekDir()), 1, `right', `down') elen/10;
+			corner;
+		')
+		
+		# if terminal labels are defined and valid, add positional labels as "T" + name (e.g. ".TA")
+		m4_ifelse(m4_regexp(_inductor_startLabel, `[A-Za-z0-9]*$'), 0, `T'_inductor_startLabel`: Start')
+		m4_ifelse(m4_regexp(_inductor_endLabel, `[A-Za-z0-9]*$'), 0, `T'_inductor_endLabel`: End')
+
+		popDir();
+	] with .Start at _inductor_pos;
+
+	# display terminal labels
+	componentDrawTerminalLabel(last [].Start, textTerminalLabel(_inductor_startLabel))
+	componentDrawTerminalLabel(last [].End, textTerminalLabel(_inductor_endLabel))
+
+	componentDrawLabels(_inductor_)
+	componentWriteBOM(_inductor_)
 
 	move to last [].End;
 ')
