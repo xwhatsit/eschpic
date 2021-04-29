@@ -117,6 +117,7 @@ m4_define_blind(`_wireDrawLabel', `
 		"textWireLabel(($2))" at Wire___TextCentre;
 	}
 	line from polarCoord(Wire___TextCentre, (_wire___textLength / 2), _wire___angle) to Wire___CurrPos;
+	componentWriteLabel($2, wire)
 ')
 
 
@@ -416,6 +417,7 @@ m4_define_blind(`bus', `
 		', `
 			"textMultiLine(_bus_labels)" above at last line.end;
 		')
+		componentWriteLabel(_bus_ref_prefixed, cable)
 		m4_popdef(_bus_labels)
 	')
 

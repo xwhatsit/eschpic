@@ -64,6 +64,7 @@ m4_define_blind(`componentDrawLabels', `
 		m4_ifdef($1`refPos', `', `m4_define($1`'refPos, `')')
 		m4_ifdef($1`refPosAdj', `', `m4_define($1`'refPosAdj, `(0, 0)')')
 		
+		m4_ifelse(m4_trim(m4_indir($1`ref')), `', `', `componentWriteLabel(m4_indir($1`ref_prefixed'), component)')
 		componentCombineLabels($1)
 		m4_ifelse(m4_trim(m4_indir($1`labels')), `', `', `
 			m4_ifelse($2, `true', `
@@ -172,7 +173,7 @@ m4_define_blind(`componentWriteBOM', `
 `
 Allows manually writing out BOM entry to aux file
 
-Usage: componentWriteBOM(ref, val, description, part, [sheet])
+Usage: bomEntry(ref, val, description, part, [sheet])
 '
 m4_define_blind(`bomEntry', `
 	print "`_componentBOMEntry'($1,,$2,$3,$4,m4_ifelse(m4_eval($# < 5), 1, eschSheetNum, $5),,)" >> "eschpic.aux";
@@ -205,6 +206,23 @@ m4_define_blind(`_componentBOMEntry', `
 		m4_popdef(`location')
 		m4_popdef(`target')
 	')
+')
+
+
+`
+Macro to assist writing label file's header (column names)
+'
+m4_define_blind(`componentStartLabelFile', `
+	print "Sheet,Type,Label" > "labels.csv"
+')
+
+`
+Macro to write label (e.g. wire label, equipment label) to CSV file
+
+Usage: componentWriteLabel(label, type, [sheet])
+'
+m4_define_blind(`componentWriteLabel', `
+	print "m4_ifelse(m4_eval($# < 3), 1, eschSheetNum, $3),\"$2\",\"$1\"" >> "labels.csv"
 ')
 
 

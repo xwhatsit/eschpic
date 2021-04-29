@@ -97,8 +97,9 @@ m4_define_blind(`a3VPosNumber', `eschVPosNumber($@)') % for backwards compatibil
 
 % diversion 7 is run once within the first pic environment
 m4_divert(7)
-# start new BOM file with header
+# start new BOM and label files with headers
 componentStartBOMFile()
+componentStartLabelFile()
 
 # include aux file, then clear it
 m4_sinclude(eschpic.aux)

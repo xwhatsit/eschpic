@@ -225,13 +225,15 @@ Single terminal, with optional label.
 
 Usage: terminal([comma-separated key-value parameters])
 Params:
-	pos:	Position to place centre at. Defaults to "Here".
-	label:	Terminal label/number
+	pos:		Position to place centre at. Defaults to "Here".
+	label:		Terminal label/number
+	exportLabel:	Either true (default) or false; normally only needed when this is called by terminalGroup() to prevent duplicate labels
 '
 m4_define_blind(`terminal', `
 	componentParseKVArgs(`_terminal_',
 		(`pos', `Here',
-		 `label', `'), $@)
+		 `label', `',
+		 `exportLabel', `true'), $@)
 	
 	_terminalCount := _terminalCount + 1;
 	Terminal___Pos[_terminalCount]: circle diam elen/8 invis with .c at _terminal_pos;
@@ -242,6 +244,7 @@ m4_define_blind(`terminal', `
 		', `
 			  "textTerminalLabel(_terminal_label)" at last circle.n - (0, elen/16) above
 		')
+		m4_ifelse(_terminal_exportLabel, `true', `componentWriteLabel(_terminal_label, terminal)')
 	')
 
 	move to last circle.c;
@@ -321,7 +324,10 @@ m4_define_blind(`terminalGroup', `
 					`T'm4_patsubst(_terminal_termText, `[^A-Za-z0-9]', `_'): Here;
 				')
 				dirToDirection(peekDir());
-				terminal(m4_ifelse(_terminalGroup_labels, `', `', `label=_terminal_termText'));
+				terminal(m4_ifelse(_terminalGroup_labels, `', `', `label=_terminal_termText'), exportLabel=false);
+				m4_ifelse(_terminalGroup_labels, `', `', `
+					componentWriteLabel(m4_ifelse(_terminalGroup_ref, `', `', _terminalGroup_ref_prefixed`:')`'_terminal_termText, terminal)
+				')
 			', `
 				m4_define(`_terminalGroup_totalPositions', m4_eval(_terminalGroup_totalPositions + _terminalGroup_spacerCount))
 			')
@@ -419,6 +425,7 @@ m4_define_blind(`terminalRail', `
 				m4_ifelse(_terminalRail_labels, `', `', `
 					`T'm4_patsubst(_terminal_termText, `[^A-Za-z0-9]', `_'): `N'_terminalRail_totalTerminals;
 					"textTerminalLabel(_terminal_termText)" at last box.c;
+					componentWriteLabel(m4_ifelse(_terminalRail_ref, `', `', _terminalRail_ref_prefixed`:')_terminal_termText, terminal)
 				')
 
 				m4_ifelse(_terminalRail_wires, `', `', `
